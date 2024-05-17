@@ -1,43 +1,53 @@
 from google.cloud import bigquery
 import re
 from collections import OrderedDict
-from tqdm import tqdm
 
-def split_bigquery_table_into_chunks(dataset_id, table_id, chunk_size=1000):
-    
+def retrieve_most_recent_pdt_capacity(dataset_id, table_id):
+
     client = bigquery.Client()
 
-    table_ref = client.dataset(dataset_id).table(table_id)
-    table = client.get_table(table_ref)
-    total_rows = client.query(f"SELECT COUNT(*) FROM `{table.project}.{dataset_id}.{table_id}`").to_dataframe().iloc[0, 0]
-    num_chunks = (total_rows + chunk_size - 1) // chunk_size
+    query = f"""
+        CREATE OR REPLACE TABLE `preprocessed.{table_id}` AS
+        WITH ranked_table AS (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (PARTITION BY product_code ORDER BY updated_at DESC) AS row_num
+            FROM
+                `{dataset_id}.{table_id}`
+        )
+        SELECT
+            product_code,
+            tour_grade_code,
+            availability_status,
+            capacity,
+            consumed_by_adult,
+            consumed_by_senior,
+            consumed_by_youth,
+            consumed_by_child,
+            consumed_by_infant,
+            start_time,
+            availability_date,
+            booking_cutoff,
+            booking_cutoff_utc,
+            updated_at,
+            updated_at_utc
+        FROM
+            ranked_table
+        WHERE
+            row_num = 1
+    """
 
-    for chunk_index in tqdm(range(num_chunks)):
-        
-        offset = chunk_index * chunk_size
-        chunk_table_name = f"{table_id}_chunk_{chunk_index + 1}"
+    client.query(query).result()
 
-        query = f"""
-            CREATE OR REPLACE TABLE `chunked.{chunk_table_name}` AS
-            SELECT *
-            FROM `{dataset_id}.{table_id}`
-            LIMIT {chunk_size}
-            OFFSET {offset}
-        """
+def aggregate_and_get_set(df, key_field):
 
-        client.query(query).result()
-
-def aggregate(df, agg_field):
-
-    columns_to_aggregate = [col for col in df.columns if col != agg_field]
+    columns_to_aggregate = [col for col in df.columns if col != key_field]
     agg_dict = {col: list for col in columns_to_aggregate}
-    df = df.groupby(agg_field).agg(agg_dict).reset_index()
+    df = df.groupby(key_field).agg(agg_dict).reset_index()
 
-    return df
+    for column in columns_to_aggregate:
 
-def get_ordered_set_dict(df, field):
-
-    df[field] = [list(OrderedDict.fromkeys(el).keys()) for el in list(df[field])]
+        df[column] = [list(OrderedDict.fromkeys(el).keys()) for el in list(df[column])]
 
     return df
 
@@ -60,6 +70,8 @@ def read_bigquery_table(dataset_id, table_id, key_field):
 
     df.columns = [prefix + re.sub(r'[^A-Za-z0-9]+', '', col.upper()) for col in df.columns]
     df.rename(columns={prefix + key_field: key_field}, inplace=True)
+
+    df = aggregate_and_get_set(df, key_field)
 
     return df
 
