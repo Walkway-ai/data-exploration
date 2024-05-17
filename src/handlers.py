@@ -1,8 +1,17 @@
 from google.cloud import bigquery
 import re
 from collections import OrderedDict
+import pandas as pd
 
 def retrieve_most_recent_pdt_capacity(dataset_id, table_id):
+    """
+    Retrieve the most recent records for each product from the specified BigQuery table
+    and create or replace a new table with these records.
+
+    Parameters:
+    dataset_id (str): The dataset ID in BigQuery.
+    table_id (str): The table ID in BigQuery.
+    """
 
     client = bigquery.Client()
 
@@ -40,6 +49,16 @@ def retrieve_most_recent_pdt_capacity(dataset_id, table_id):
     client.query(query).result()
 
 def aggregate_and_get_set(df, key_field):
+    """
+    Aggregate and deduplicate values in each column of the DataFrame based on the key field.
+
+    Parameters:
+    df (pd.DataFrame): The DataFrame to aggregate.
+    key_field (str): The column name to group by.
+
+    Returns:
+    pd.DataFrame: The aggregated DataFrame with unique lists of values for each column.
+    """
 
     columns_to_aggregate = [col for col in df.columns if col != key_field]
     agg_dict = {col: list for col in columns_to_aggregate}
@@ -52,6 +71,17 @@ def aggregate_and_get_set(df, key_field):
     return df
 
 def read_bigquery_table(dataset_id, table_id, key_field):
+    """
+    Read a BigQuery table into a DataFrame and aggregate its values.
+
+    Parameters:
+    dataset_id (str): The dataset ID in BigQuery.
+    table_id (str): The table ID in BigQuery.
+    key_field (str): The column name to group by.
+
+    Returns:
+    pd.DataFrame: The aggregated DataFrame with cleaned column names.
+    """
 
     client = bigquery.Client()
 
@@ -75,14 +105,36 @@ def read_bigquery_table(dataset_id, table_id, key_field):
 
     return df
 
-def list_bigquery_tables(dataset_id):
+def upload_bigquery_table(df, dataset_id, table_id):
+    """
+    Upload a DataFrame to a specified BigQuery table.
+
+    Parameters:
+    df (pd.DataFrame): The DataFrame to upload.
+    dataset_id (str): The dataset ID in BigQuery.
+    table_id (str): The table ID in BigQuery.
+    """
 
     client = bigquery.Client()
 
-    dataset_ref = client.dataset(dataset_id)
-    
-    tables = list(client.list_tables(dataset_ref))
-    
-    table_names = [table.table_id for table in tables]
-    
-    return table_names
+    table_ref = client.dataset(dataset_id).table(table_id)
+
+    job = client.load_table_from_dataframe(df, table_ref)
+
+    job.result()
+
+    print(f"Loaded {job.output_rows} rows into {dataset_id}:{table_id}.")
+
+def merge_dfs(left, right):
+    """
+    Merge two DataFrames on the 'PRODUCTCODE' column with an outer join.
+
+    Parameters:
+    left (pd.DataFrame): The left DataFrame to merge.
+    right (pd.DataFrame): The right DataFrame to merge.
+
+    Returns:
+    pd.DataFrame: The merged DataFrame.
+    """
+
+    return pd.merge(left, right, on='PRODUCTCODE', how='outer')
