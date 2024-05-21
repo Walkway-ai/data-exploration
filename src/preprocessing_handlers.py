@@ -98,6 +98,8 @@ class DataFrameProcessor:
         self.create_text_dataframe()
         self.aggregate_text_fields()
         self.explode_text_dataframe()
+        self.astypestr()
+        self.normalize_product_type()
 
     def read_data(self):
         self.df = pd.read_pickle(self.data_path)
@@ -202,3 +204,11 @@ class DataFrameProcessor:
 
         for col in tqdm(self.df_text.columns):
             self.df_text = self.df_text.explode(col)
+
+    def astypestr(self):
+        self.df = self.df.astype(str)
+        self.df_text = self.df_text.astype(str)
+
+    def normalize_product_type(self):
+
+        self.df["pdt_product_level_VIPRODUCTTYPE"] = ["; ".join(list(sorted(el.split("; ")))) for el in self.df["pdt_product_level_VIPRODUCTTYPE"]]
