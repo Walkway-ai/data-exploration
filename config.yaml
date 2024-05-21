@@ -1,0 +1,34 @@
+bigquery-to-retrieve:
+  key-field: PRODUCTCODE
+  tables:
+    pdt_inclexcl_ENG:
+      dataset_id: v_extract1
+      fields:
+        - productcode
+        - content
+    pdt_product_detail:
+      dataset_id: v_extract1
+      fields:
+        - productcode
+        - VIDestinationCity
+        - product_description
+        - tour_grade_description
+        - product_description
+        - viator_overview
+    pdt_product_level:
+      dataset_id: v_extract1
+      fields:
+        - ProductCode
+        - VICategory
+        - VIProductType
+        - RetailPriceFromUSD
+        - IsPrivateTour
+        - FixedDuration
+        - MinFlexibleDuration
+        - MaxFlexibleDuration
+        - StopsCount
+        - StopsTotalDuration
+        - TotalReviewCount
+        - TotalAvgRating
+        - PricingUnitType
+        - RetailPriceCurrency
