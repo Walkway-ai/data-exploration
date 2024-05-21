@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from google.cloud import bigquery
 import re
 from collections import OrderedDict
 
+from google.cloud import bigquery
+
+
 class BigQueryDataProcessor:
-
     def __init__(self, config, dataset_id, table_id, table_fields, key_field):
-
         """
         Initialize the BigQueryDataProcessor with the given configuration file path.
 
@@ -39,13 +39,16 @@ class BigQueryDataProcessor:
 
         table_ref = self.client.dataset(self.dataset_id).table(self.table_id)
         table = self.client.get_table(table_ref)
-        
+
         query = f"SELECT {self.selected_fields} FROM `{table.project}.{table.dataset_id}.{table.table_id}`"
         query_job = self.client.query(query)
         self.df = query_job.to_dataframe()
 
         prefix = self.table_id + "_"
-        self.df.columns = [prefix + re.sub(r'[^A-Za-z0-9]+', '', col.upper()) for col in self.df.columns]
+        self.df.columns = [
+            prefix + re.sub(r"[^A-Za-z0-9]+", "", col.upper())
+            for col in self.df.columns
+        ]
         self.df.rename(columns={prefix + self.key_field: self.key_field}, inplace=True)
 
         self.aggregate_and_get_set()
@@ -63,8 +66,9 @@ class BigQueryDataProcessor:
         self.df = self.df.groupby(self.key_field).agg(agg_dict).reset_index()
 
         for column in columns_to_aggregate:
-
-            self.df[column] = [list(OrderedDict.fromkeys(el).keys()) for el in list(self.df[column])]
+            self.df[column] = [
+                list(OrderedDict.fromkeys(el).keys()) for el in list(self.df[column])
+            ]
 
     def retrieve_most_recent_bigquery_table(self):
         """
