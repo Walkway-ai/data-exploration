@@ -1,5 +1,6 @@
 bigquery-to-retrieve:
   key-field: PRODUCTCODE
+  location-field: pdt_product_detail_VIDESTINATIONCITY
   tables:
     pdt_inclexcl_ENG:
       dataset_id: v_extract1
@@ -12,9 +13,6 @@ bigquery-to-retrieve:
         - productcode
         - VIDestinationCity
         - product_description
-        - tour_grade_description
-        - product_description
-        - viator_overview
     pdt_product_level:
       dataset_id: v_extract1
       fields:

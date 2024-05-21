@@ -24,6 +24,7 @@ class BigQueryDataProcessor:
         self.dataset_id = dataset_id
         self.table_id = table_id
         self.table_fields = table_fields
+        self.selected_fields = ", ".join(self.table_fields)
         self.key_field = key_field
 
         self.client = bigquery.Client()
@@ -38,10 +39,8 @@ class BigQueryDataProcessor:
 
         table_ref = self.client.dataset(self.dataset_id).table(self.table_id)
         table = self.client.get_table(table_ref)
-
-        selected_fields = ", ".join(self.table_fields)
         
-        query = f"SELECT {selected_fields} FROM `{table.project}.{table.dataset_id}.{table.table_id}`"
+        query = f"SELECT {self.selected_fields} FROM `{table.project}.{table.dataset_id}.{table.table_id}`"
         query_job = self.client.query(query)
         self.df = query_job.to_dataframe()
 
@@ -89,21 +88,7 @@ class BigQueryDataProcessor:
                     `{self.dataset_id}.{self.table_id}`
             )
             SELECT
-                product_code,
-                tour_grade_code,
-                availability_status,
-                capacity,
-                consumed_by_adult,
-                consumed_by_senior,
-                consumed_by_youth,
-                consumed_by_child,
-                consumed_by_infant,
-                start_time,
-                availability_date,
-                booking_cutoff,
-                booking_cutoff_utc,
-                updated_at,
-                updated_at_utc
+                {self.selected_fields}
             FROM
                 ranked_table
             WHERE

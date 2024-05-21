@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import gc
-from bigquery_handlers import *
+from bigquery_handlers import BigQueryDataProcessor
 from functools import reduce
 from tqdm import tqdm
 import pandas as pd

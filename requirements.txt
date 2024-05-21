@@ -3,4 +3,4 @@ pyyaml
 google-cloud-bigquery
 pandas
 db-dtypes
-pandas-profiling
+ydata-profiling
