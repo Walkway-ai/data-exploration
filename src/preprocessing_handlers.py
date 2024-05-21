@@ -210,5 +210,7 @@ class DataFrameProcessor:
         self.df_text = self.df_text.astype(str)
 
     def normalize_product_type(self):
-
-        self.df["pdt_product_level_VIPRODUCTTYPE"] = ["; ".join(list(sorted(el.split("; ")))) for el in self.df["pdt_product_level_VIPRODUCTTYPE"]]
+        self.df["pdt_product_level_VIPRODUCTTYPE"] = [
+            "; ".join(list(sorted(el.split("; "))))
+            for el in self.df["pdt_product_level_VIPRODUCTTYPE"]
+        ]
