@@ -4,3 +4,5 @@ google-cloud-bigquery
 pandas
 db-dtypes
 ydata-profiling
+transformers
+torch

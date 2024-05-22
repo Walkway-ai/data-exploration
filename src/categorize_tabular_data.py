@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import gc
 import pickle
 
 import pandas as pd
-import gc
 import yaml
 
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
@@ -21,11 +21,11 @@ def main():
     categorized_df = df.copy()
 
     for col in df.columns:
-
         if col != key_field:
-
             categorized_df[col], uniques = pd.factorize(df[col])
-            mapping_dict[col] = {code: category for code, category in enumerate(uniques)}
+            mapping_dict[col] = {
+                code: category for code, category in enumerate(uniques)
+            }
 
     categorized_df.to_pickle("tmp/product_tabular_categorized.pickle")
 
