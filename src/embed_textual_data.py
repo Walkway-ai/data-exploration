@@ -6,14 +6,13 @@ import gc
 import pandas as pd
 import torch
 from transformers import AutoModel, AutoTokenizer
+from tqdm import tqdm
 
 gc.collect()
 
-
-# Function to get embeddings from the model, handling long texts by splitting into chunks
 def get_embeddings(text_list, model, tokenizer, max_length=512):
     embeddings = []
-    for text in text_list:
+    for text in tqdm(text_list):
         inputs = tokenizer(
             text,
             return_tensors="pt",
@@ -56,29 +55,27 @@ def get_embeddings(text_list, model, tokenizer, max_length=512):
 def main():
     df = pd.read_pickle("tmp/product_textual.pickle")
 
-    # Load the tokenizer and model from Hugging Face
     model_name = "sentence-transformers/all-MiniLM-L6-v2"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name)
 
-    # Fill NaNs with empty strings to avoid errors during tokenization
     df["pdt_inclexcl_ENG_CONTENT"].fillna("", inplace=True)
     df["pdt_product_detail_PRODUCTDESCRIPTION"].fillna("", inplace=True)
 
-    # Get embeddings for each text column
     print("Generating embeddings for 'pdt_inclexcl_ENG_CONTENT'...")
     embeddings1 = get_embeddings(
         df["pdt_inclexcl_ENG_CONTENT"].tolist(), model, tokenizer
     )
+    print("Embeddings1 shape:", embeddings1.shape)
+
     print("Generating embeddings for 'pdt_product_detail_PRODUCTDESCRIPTION'...")
     embeddings2 = get_embeddings(
         df["pdt_product_detail_PRODUCTDESCRIPTION"].tolist(), model, tokenizer
     )
+    print("Embeddings1 shape:", embeddings2.shape)
 
-    # Combine embeddings into one tensor
     combined_embeddings = torch.cat((embeddings1, embeddings2), dim=1)
 
-    # Optionally, save embeddings for future use
     torch.save(combined_embeddings, "tmp/combined_embeddings.pt")
 
     print("Embeddings generated and saved successfully.")

@@ -6,3 +6,4 @@ db-dtypes
 ydata-profiling
 transformers
 torch
+scikit-learn
