@@ -7,3 +7,5 @@ ydata-profiling
 transformers
 torch
 scikit-learn
+sentence-transformers==2.2.2
+InstructorEmbedding

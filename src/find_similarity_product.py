@@ -31,9 +31,19 @@ def main():
     most_similar_product_description = df.loc[df['PRODUCTCODE'] == most_similar_product, 'pdt_product_detail_PRODUCTDESCRIPTION'].iloc[0]
     print("Given PRODUCTCODE Description:", given_product_description)
     print(50*"-")
-    print("Most similar PRODUCTCODE Description:", most_similar_product_description)
+    print("Most similar PRODUCTCODE Description:", most_similar_product, most_similar_product_description)
 
 if __name__ == "__main__":
     # text summarization ?
     #9973P4
+    #302481P376
+    #similar products, different supliers ?
+    #regarder les products codes qui sont similaires
+    #set seed pandas seed and torch seed to be the same always
+    # set results to same city
+    #check why text fields have duplicates in text
+    #how to handle products that are very similar
+    #summarization avec BERT ? après embeddings
+    #given a productcode, find the products in the same city, and other 3 cities that
+       # are the most similar, to have an idea of price, etc... (in order to give recommendations)
     main()
