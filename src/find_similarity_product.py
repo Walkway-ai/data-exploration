@@ -12,6 +12,8 @@ def find_most_similar_product(embedding, embeddings, product_codes):
 
 def main():
     df = pd.read_pickle("tmp/product_textual.pickle")
+    df = df.sample(frac=1).reset_index(drop=True)
+    print(df)
 
     combined_embeddings = torch.load("tmp/combined_embeddings.pt")
 

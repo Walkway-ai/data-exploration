@@ -1,32 +1,33 @@
+embedding-model: "sentence-transformers/all-MiniLM-L6-v2"
 bigquery-to-retrieve:
-  key-field: PRODUCTCODE
-  location-field: pdt_product_detail_VIDESTINATIONCITY
+  key-field: "PRODUCTCODE"
+  location-field: "pdt_product_detail_VIDESTINATIONCITY"
   tables:
     pdt_inclexcl_ENG:
-      dataset_id: v_extract1
+      dataset_id: "v_extract1"
       fields:
-        - productcode
-        - content
+        - "productcode"
+        - "content"
     pdt_product_detail:
-      dataset_id: v_extract1
+      dataset_id: "v_extract1"
       fields:
-        - productcode
-        - VIDestinationCity
-        - product_description
+        - "productcode"
+        - "VIDestinationCity"
+        - "product_description"
     pdt_product_level:
-      dataset_id: v_extract1
+      dataset_id: "v_extract1"
       fields:
-        - ProductCode
-        - VICategory
-        - VIProductType
-        - RetailPriceFromUSD
-        - IsPrivateTour
-        - FixedDuration
-        - MinFlexibleDuration
-        - MaxFlexibleDuration
-        - StopsCount
-        - StopsTotalDuration
-        - TotalReviewCount
-        - TotalAvgRating
-        - PricingUnitType
-        - RetailPriceCurrency
+        - "ProductCode"
+        - "VICategory"
+        - "VIProductType"
+        - "RetailPriceFromUSD"
+        - "IsPrivateTour"
+        - "FixedDuration"
+        - "MinFlexibleDuration"
+        - "MaxFlexibleDuration"
+        - "StopsCount"
+        - "StopsTotalDuration"
+        - "TotalReviewCount"
+        - "TotalAvgRating"
+        - "PricingUnitType"
+        - "RetailPriceCurrency"

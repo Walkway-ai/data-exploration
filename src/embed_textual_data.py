@@ -7,6 +7,11 @@ import pandas as pd
 import torch
 from transformers import AutoModel, AutoTokenizer
 from tqdm import tqdm
+import yaml
+
+config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
+embedding_model = config["embedding-model"]
+model_name = embedding_model.split("/")[-1]
 
 gc.collect()
 
@@ -55,32 +60,26 @@ def get_embeddings(text_list, model, tokenizer, max_length=512):
 def main():
     df = pd.read_pickle("tmp/product_textual.pickle")
 
-    model_name = "sentence-transformers/all-MiniLM-L6-v2"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(embedding_model)
+    model = AutoModel.from_pretrained(embedding_model)
 
-    df["pdt_inclexcl_ENG_CONTENT"].fillna("", inplace=True)
-    df["pdt_product_detail_PRODUCTDESCRIPTION"].fillna("", inplace=True)
-
-    print("Generating embeddings for 'pdt_inclexcl_ENG_CONTENT'...")
+    text_field = "pdt_inclexcl_ENG_CONTENT"
+    print(f"Generating embeddings for {text_field}...")
     embeddings1 = get_embeddings(
-        df["pdt_inclexcl_ENG_CONTENT"].tolist(), model, tokenizer
+        df[text_field].tolist(), model, tokenizer
     )
-    print("Embeddings1 shape:", embeddings1.shape)
 
-    print("Generating embeddings for 'pdt_product_detail_PRODUCTDESCRIPTION'...")
+    text_field = "pdt_product_detail_PRODUCTDESCRIPTION"
+    print(f"Generating embeddings for {text_field}...")
     embeddings2 = get_embeddings(
-        df["pdt_product_detail_PRODUCTDESCRIPTION"].tolist(), model, tokenizer
+        df[text_field].tolist(), model, tokenizer
     )
-    print("Embeddings1 shape:", embeddings2.shape)
 
     combined_embeddings = torch.cat((embeddings1, embeddings2), dim=1)
 
-    torch.save(combined_embeddings, "tmp/combined_embeddings.pt")
+    torch.save(combined_embeddings, f"tmp/embeddings_{model_name}.pt")
 
     print("Embeddings generated and saved successfully.")
-    print(combined_embeddings)
-
 
 if __name__ == "__main__":
     main()
