@@ -5,10 +5,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 gc.collect()
 
-def find_most_similar_product(embedding, embeddings, product_codes):
-    similarities = cosine_similarity(embedding.unsqueeze(0), embeddings)
-    most_similar_index = similarities.argsort()[0][-2]  # Index of most similar excluding itself
-    return product_codes[most_similar_index]
+def find_most_similar_products(embedding, embeddings, num_similar=5):
+    similarities = cosine_similarity(embedding.unsqueeze(0), embeddings)[0]
+    similar_indices = similarities.argsort()[-(num_similar+1):-1][::-1]  # Indices of top num_similar excluding itself
+    return similar_indices
 
 def main():
     df = pd.read_pickle("tmp/product_textual.pickle")
@@ -26,24 +26,24 @@ def main():
 
     given_product_description = df.loc[df['PRODUCTCODE'] == given_product_code, 'pdt_product_detail_PRODUCTDESCRIPTION'].iloc[0]
     given_embedding = combined_embeddings[given_product_index[0]]
-    product_codes = df["PRODUCTCODE"].tolist()
-    most_similar_product = find_most_similar_product(given_embedding, combined_embeddings, product_codes)
-    most_similar_product_description = df.loc[df['PRODUCTCODE'] == most_similar_product, 'pdt_product_detail_PRODUCTDESCRIPTION'].iloc[0]
+    most_similar_indices = find_most_similar_products(given_embedding, combined_embeddings)
+
     print("Given PRODUCTCODE Description:", given_product_description)
     print(50*"-")
-    print("Most similar PRODUCTCODE Description:", most_similar_product, most_similar_product_description)
+    print("Top 5 most similar products:")
+    
+    df_tabular = pd.read_pickle("tmp/product_tabular.pickle")
+
+    for idx in most_similar_indices:
+        similar_product_row = df_tabular.iloc[idx]
+        text_data = df.iloc[idx]
+        print(similar_product_row)
+        print(text_data["pdt_inclexcl_ENG_CONTENT"])
+        print(text_data["pdt_product_detail_PRODUCTDESCRIPTION"])
+        print(50*"-")
 
 if __name__ == "__main__":
-    # text summarization ?
-    #9973P4
-    #302481P376
-    #similar products, different supliers ?
-    #regarder les products codes qui sont similaires
+    #text summarization
     #set seed pandas seed and torch seed to be the same always
-    # set results to same city
-    #check why text fields have duplicates in text
     #how to handle products that are very similar
-    #summarization avec BERT ? après embeddings
-    #given a productcode, find the products in the same city, and other 3 cities that
-       # are the most similar, to have an idea of price, etc... (in order to give recommendations)
     main()
