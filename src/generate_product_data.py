@@ -2,10 +2,8 @@
 # coding: utf-8
 
 import gc
-
 import yaml
 from ydata_profiling import ProfileReport
-
 from preprocessing_handlers import DataFrameProcessor
 
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
@@ -15,13 +13,17 @@ location_field = bigquery_config["location-field"]
 
 gc.collect()
 
-
 def main():
+    """
+    Main function to process product data and generate profiling reports.
+    """
+
     processor = DataFrameProcessor(
         data_path="tmp/product_tables.pickle",
         key_field=key_field,
         location_field=location_field,
     )
+
     processor.preprocess()
 
     processor.df.to_pickle("tmp/product_tabular.pickle")
@@ -32,7 +34,6 @@ def main():
 
     profile = ProfileReport(processor.df_text, title="Product Textual Report")
     profile.to_file("reports/product-textual-report.html")
-
 
 if __name__ == "__main__":
     main()

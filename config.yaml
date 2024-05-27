@@ -8,6 +8,7 @@ bigquery-to-retrieve:
       fields:
         - "productcode"
         - "content"
+        - "VIdestinationcity"
     pdt_product_detail:
       dataset_id: "v_extract1"
       fields:
@@ -17,6 +18,7 @@ bigquery-to-retrieve:
     pdt_product_level:
       dataset_id: "v_extract1"
       fields:
+        - "VIDestinationCity"
         - "ProductCode"
         - "VICategory"
         - "VIProductType"
@@ -31,3 +33,4 @@ bigquery-to-retrieve:
         - "TotalAvgRating"
         - "PricingUnitType"
         - "RetailPriceCurrency"
+        - "SupplierCode"

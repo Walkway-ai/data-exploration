@@ -91,13 +91,14 @@ class DataFrameProcessor:
         self.read_data()
         self.explode_dataframe()
         self.fill_missing_values()
-        self.drop_invalid_rows()
+        self.merge_and_remove_empty_cities()
         self.fill_fixed_duration()
         self.remove_outliers()
         self.create_intervals()
+        self.aggregate_tabular_fields()
         self.create_text_dataframe()
-        self.aggregate_text_fields()
-        self.explode_text_dataframe()
+        self.preprocess_tabular_fields()
+        self.preprocess_text_fields()
         self.astypestr()
         self.normalize_product_type()
 
@@ -110,15 +111,34 @@ class DataFrameProcessor:
         """Explode all columns of the DataFrame."""
 
         for col in tqdm(self.df.columns):
-            self.df = self.df.explode(col)
+
+            if col != self.key_field:
+
+                self.df = self.df.explode(col)
 
     def fill_missing_values(self):
         """Fill missing values in the DataFrame."""
 
         self.df.fillna(np.nan, inplace=True)
 
-    def drop_invalid_rows(self):
-        """Drop rows where 'self.location_field' is NaN."""
+    def merge_and_remove_empty_cities(self):
+        """Merge city values and drop rows where 'self.location_field' is NaN."""
+
+        def fill_city(row):
+            if pd.isna(row[self.location_field]):
+                if not pd.isna(row["pdt_product_level_VIDESTINATIONCITY"]):
+                    return row["pdt_product_level_VIDESTINATIONCITY"]
+                elif not pd.isna(row["pdt_inclexcl_ENG_VIDESTINATIONCITY"]):
+                    return row["pdt_inclexcl_ENG_VIDESTINATIONCITY"]
+                else:
+                    return np.nan
+            else:
+                return row[self.location_field]
+
+        self.df[self.location_field] = self.df.apply(fill_city, axis=1)
+
+        del self.df["pdt_product_level_VIDESTINATIONCITY"]
+        del self.df["pdt_inclexcl_ENG_VIDESTINATIONCITY"]
 
         self.df = self.df.dropna(subset=[self.location_field])
 
@@ -140,6 +160,7 @@ class DataFrameProcessor:
 
         del self.df["pdt_product_level_MINFLEXIBLEDURATION"]
         del self.df["pdt_product_level_MAXFLEXIBLEDURATION"]
+
 
     def remove_outliers(self):
         """Remove outliers from the DataFrame."""
@@ -166,6 +187,15 @@ class DataFrameProcessor:
         for numerical_col in tqdm(numerical_cols):
             self.df = auto_bin_intervals(self.df, numerical_col)
 
+    def aggregate_tabular_fields(self):
+        """Aggregate tabular fields in the tabular DataFrame."""
+
+        columns_to_aggregate = [
+            col for col in self.df.columns if col != self.key_field
+        ]
+        agg_dict = {col: list for col in columns_to_aggregate}
+        self.df = self.df.groupby(self.key_field).agg(agg_dict).reset_index()
+
     def create_text_dataframe(self):
         """Create a separate DataFrame with descriptive content."""
 
@@ -179,31 +209,47 @@ class DataFrameProcessor:
         for del_col in descriptive_fields:
             del self.df[del_col]
 
-        self.df.drop_duplicates(inplace=True)
+    def preprocess_tabular_fields(self):
+        """Preprocesses tabular fields in the text DataFrame."""
 
-    def aggregate_text_fields(self):
-        """Aggregate text fields in the text DataFrame."""
-
-        self.df_text.drop_duplicates(inplace=True)
         columns_to_aggregate = [
-            col for col in self.df_text.columns if col != self.key_field
+            col for col in self.df.columns if col != self.key_field
         ]
-        agg_dict = {col: list for col in columns_to_aggregate}
-        self.df_text = self.df_text.groupby(self.key_field).agg(agg_dict).reset_index()
+
+        def get_unique_value(lst):
+            unique_values = pd.unique(lst)
+            unique_values = [x for x in unique_values if pd.notna(x)]
+            if len(unique_values) == 1:
+                return unique_values[0]
+            elif len(unique_values) == 0:
+                return np.nan
+            else:
+                raise ValueError(f"Non-unique values found: {unique_values}")
+
+        for col in tqdm(columns_to_aggregate):
+
+            self.df[col] = self.df[col].apply(lambda x: get_unique_value(x))
+
+    def preprocess_text_fields(self):
+        """Preprocesses text fields in the text DataFrame."""
+
+        def unique_preserve_order(lst):
+            seen = set()
+            unique_list = []
+            for item in lst:
+                if item not in seen:
+                    unique_list.append(item)
+                    seen.add(item)
+            return unique_list
+
         self.df_text["pdt_inclexcl_ENG_CONTENT"] = [
-            ". ".join(el) if len(el) > 1 else el[0]
+            "; ".join(unique_preserve_order(el)) if len(unique_preserve_order(el)) > 1 else unique_preserve_order(el)[0]
             for el in self.df_text["pdt_inclexcl_ENG_CONTENT"]
         ]
         self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"] = [
-            ". ".join(el) if len(el) > 1 else el[0]
+            ". ".join(unique_preserve_order(el)) if len(unique_preserve_order(el)) > 1 else unique_preserve_order(el)[0]
             for el in self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"]
         ]
-
-    def explode_text_dataframe(self):
-        """Explode all columns of the text DataFrame."""
-
-        for col in tqdm(self.df_text.columns):
-            self.df_text = self.df_text.explode(col)
 
     def astypestr(self):
         self.df = self.df.astype(str)
