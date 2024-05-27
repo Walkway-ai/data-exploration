@@ -253,7 +253,9 @@ class DataFrameProcessor:
 
     def astypestr(self):
         self.df = self.df.astype(str)
+        self.df = self.df.replace("nan", "")
         self.df_text = self.df_text.astype(str)
+        self.df_text = self.df_text.replace("nan", "")
 
     def normalize_product_type(self):
         self.df["pdt_product_level_VIPRODUCTTYPE"] = [

@@ -34,12 +34,16 @@ def main():
     for i, (desc, content) in enumerate(tqdm(zip(df["pdt_product_detail_PRODUCTDESCRIPTION"][start_index:], df["pdt_inclexcl_ENG_CONTENT"][start_index:]), total=len(df)-start_index, desc="Summarizing")):
 
         if desc:
+            print(50*"-" + "SUMMARIZED DESCRIPTION" + 50*"-")
             summarized_desc = summarizer(desc, max_length=100, min_length=30, do_sample=False)[0]['summary_text']
+            print(summarized_desc)
         else:
             summarized_desc = ""
 
         if content:
+            print(50*"-" + "SUMMARIZED INCL EXCL" + 50*"-")
             summarized_content = summarizer(content, max_length=50, min_length=30, do_sample=False)[0]['summary_text']
+            print(summarized_content)
         else:
             summarized_content = ""
         
