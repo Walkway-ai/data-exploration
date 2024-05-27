@@ -42,6 +42,7 @@ def main():
 
         if content:
             print(50*"-" + "SUMMARIZED INCL EXCL" + 50*"-")
+            content = "This product includes: " + content
             summarized_content = summarizer(content, max_length=50, min_length=30, do_sample=False)[0]['summary_text']
             print(summarized_content)
         else:
