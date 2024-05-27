@@ -24,6 +24,7 @@ mkdir tmp reports
 python3 src/retrieve_bigquery_data.py
 python3 src/generate_product_data.py
 python3 src/categorize_tabular_data.py
+python3 src/language_detection.py
 python3 src/text_summarization.py
 #python3 src/embed_textual_data.py
 #python3 src/find_similarity_product.py
