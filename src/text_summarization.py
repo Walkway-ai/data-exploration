@@ -7,6 +7,11 @@ import os
 import pandas as pd
 from tqdm import tqdm
 from transformers import pipeline
+import yaml
+
+config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
+summarization_model = config["summarization-model"]
+
 
 gc.collect()
 
@@ -28,7 +33,7 @@ def main():
         descriptions_summarized = []
         start_index = 0
 
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    summarizer = pipeline("summarization", model=summarization_model)
 
     save_interval = 50
 
@@ -40,8 +45,6 @@ def main():
         )
     ):
         if desc:
-            print(50 * "-" + "DESCRIPTION" + 50 * "-")
-            print(desc)
             summarized_desc = summarizer(
                 desc, max_length=100, min_length=30, do_sample=False
             )[0]["summary_text"]

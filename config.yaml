@@ -1,3 +1,4 @@
+summarization-model: "facebook/bart-large-cnn"
 embedding-model: "sentence-transformers/all-MiniLM-L6-v2"
 bigquery-to-retrieve:
   key-field: "PRODUCTCODE"

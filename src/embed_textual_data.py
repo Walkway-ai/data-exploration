@@ -59,7 +59,8 @@ def get_embeddings(text_list, model, tokenizer, max_length=512):
 
 
 def main():
-    df = pd.read_pickle("tmp/product_textual.pickle")
+    #df = pd.read_pickle("tmp/product_textual_lang_summarized.pickle")
+    df = pd.read_pickle("tmp/product_textual_lang_summarized_intermediate.pickle")
 
     tokenizer = AutoTokenizer.from_pretrained(embedding_model)
     model = AutoModel.from_pretrained(embedding_model)
@@ -68,7 +69,7 @@ def main():
     print(f"Generating embeddings for {text_field}...")
     embeddings1 = get_embeddings(df[text_field].tolist(), model, tokenizer)
 
-    text_field = "pdt_product_detail_PRODUCTDESCRIPTION"
+    text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
     print(f"Generating embeddings for {text_field}...")
     embeddings2 = get_embeddings(df[text_field].tolist(), model, tokenizer)
 
