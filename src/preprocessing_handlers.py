@@ -111,9 +111,7 @@ class DataFrameProcessor:
         """Explode all columns of the DataFrame."""
 
         for col in tqdm(self.df.columns):
-
             if col != self.key_field:
-
                 self.df = self.df.explode(col)
 
     def fill_missing_values(self):
@@ -161,7 +159,6 @@ class DataFrameProcessor:
         del self.df["pdt_product_level_MINFLEXIBLEDURATION"]
         del self.df["pdt_product_level_MAXFLEXIBLEDURATION"]
 
-
     def remove_outliers(self):
         """Remove outliers from the DataFrame."""
 
@@ -190,9 +187,7 @@ class DataFrameProcessor:
     def aggregate_tabular_fields(self):
         """Aggregate tabular fields in the tabular DataFrame."""
 
-        columns_to_aggregate = [
-            col for col in self.df.columns if col != self.key_field
-        ]
+        columns_to_aggregate = [col for col in self.df.columns if col != self.key_field]
         agg_dict = {col: list for col in columns_to_aggregate}
         self.df = self.df.groupby(self.key_field).agg(agg_dict).reset_index()
 
@@ -212,9 +207,7 @@ class DataFrameProcessor:
     def preprocess_tabular_fields(self):
         """Preprocesses tabular fields in the text DataFrame."""
 
-        columns_to_aggregate = [
-            col for col in self.df.columns if col != self.key_field
-        ]
+        columns_to_aggregate = [col for col in self.df.columns if col != self.key_field]
 
         def get_unique_value(lst):
             unique_values = pd.unique(lst)
@@ -227,7 +220,6 @@ class DataFrameProcessor:
                 raise ValueError(f"Non-unique values found: {unique_values}")
 
         for col in tqdm(columns_to_aggregate):
-
             self.df[col] = self.df[col].apply(lambda x: get_unique_value(x))
 
     def preprocess_text_fields(self):
@@ -243,11 +235,15 @@ class DataFrameProcessor:
             return unique_list
 
         self.df_text["pdt_inclexcl_ENG_CONTENT"] = [
-            "; ".join(unique_preserve_order(el)) if len(unique_preserve_order(el)) > 1 else unique_preserve_order(el)[0]
+            "; ".join(unique_preserve_order(el))
+            if len(unique_preserve_order(el)) > 1
+            else unique_preserve_order(el)[0]
             for el in self.df_text["pdt_inclexcl_ENG_CONTENT"]
         ]
         self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"] = [
-            ". ".join(unique_preserve_order(el)) if len(unique_preserve_order(el)) > 1 else unique_preserve_order(el)[0]
+            ". ".join(unique_preserve_order(el))
+            if len(unique_preserve_order(el)) > 1
+            else unique_preserve_order(el)[0]
             for el in self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"]
         ]
 

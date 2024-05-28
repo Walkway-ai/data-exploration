@@ -2,8 +2,10 @@
 # coding: utf-8
 
 import gc
+
 import yaml
 from ydata_profiling import ProfileReport
+
 from preprocessing_handlers import DataFrameProcessor
 
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
@@ -12,6 +14,7 @@ key_field = bigquery_config["key-field"]
 location_field = bigquery_config["location-field"]
 
 gc.collect()
+
 
 def main():
     """
@@ -34,6 +37,7 @@ def main():
 
     profile = ProfileReport(processor.df_text, title="Product Textual Report")
     profile.to_file("reports/product-textual-report.html")
+
 
 if __name__ == "__main__":
     main()
