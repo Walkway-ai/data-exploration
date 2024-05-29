@@ -17,6 +17,12 @@ def find_most_similar_products(embedding, embeddings, num_similar=5):
 
 
 def main():
+
+    # Specify what is the 
+
+
+
+
     df = pd.read_pickle("tmp/product_textual.pickle")
     df = df.sample(frac=1).reset_index(drop=True)
     print(df)

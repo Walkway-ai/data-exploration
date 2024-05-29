@@ -104,7 +104,6 @@ class DataFrameProcessor:
 
     def read_data(self):
         self.df = pd.read_pickle(self.data_path)
-        self.df = self.df[:-1]
         self.df_text = None
 
     def explode_dataframe(self):
