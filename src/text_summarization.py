@@ -5,9 +5,9 @@ import gc
 import os
 
 import pandas as pd
+import yaml
 from tqdm import tqdm
 from transformers import pipeline
-import yaml
 
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
 summarization_model = config["summarization-model"]

@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import gc
-import pickle
 
 import pandas as pd
 import yaml
@@ -26,6 +25,7 @@ def main():
     del categorized_df["pdt_product_level_SUPPLIERCODE"]
 
     categorized_df.to_pickle("tmp/product_tabular_categorized.pickle")
+
 
 if __name__ == "__main__":
     main()
