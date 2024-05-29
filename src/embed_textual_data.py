@@ -31,19 +31,14 @@ def get_embeddings(df, text_field):
         embedding = model.encode([text])
         embeddings.append(embedding[0])
 
-    return torch.tensor(embeddings)
+    embeddings = torch.tensor(embeddings)
+    torch.save(embeddings, f"tmp/embeddings_{text_field}_{model_name}.pt")
 
 def main():
     df = pd.read_pickle("tmp/product_textual_lang_summarized.pickle")
 
-    embeddings1 = get_embeddings(df=df, text_field="pdt_inclexcl_ENG_CONTENT")
-    embeddings2 = get_embeddings(df=df, text_field="pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED")
-
-    combined_embeddings = torch.cat((embeddings1, embeddings2), dim=1)
-
-    torch.save(combined_embeddings, f"tmp/embeddings_{model_name}.pt")
-
-    print("Embeddings generated and saved successfully.")
+    get_embeddings(df=df, text_field="pdt_inclexcl_ENG_CONTENT")
+    get_embeddings(df=df, text_field="pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED")
 
 if __name__ == "__main__":
     main()
