@@ -12,7 +12,7 @@ model_name = embedding_model.split("/")[-1]
 gc.collect()
 
 def find_most_similar_products(embedding, embeddings, num_similar=5):
-    embedding = embedding.reshape(1, -1)  # Reshape the embedding to be 2D
+    embedding = embedding.reshape(1, -1)
     similarities = cosine_similarity(embedding, embeddings)[0]
     similar_indices = similarities.argsort()[-(num_similar + 1): -1][::-1]
     similar_scores = similarities[similar_indices]
