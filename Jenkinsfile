@@ -13,9 +13,9 @@ pipeline {
             tty: true
             resources:
               requests:
-                memory: "16Gi"
+                memory: "8Gi"
               limits:
-                memory: "48Gi"
+                memory: "10Gi"
       '''
     }
   }
@@ -66,6 +66,20 @@ pipeline {
       steps {
         container('python') {
           sh 'python3 src/embed_textual_data.py'
+        }
+      }
+    }
+    stage('generate-final-embeddings') {
+      steps {
+        container('python') {
+          sh 'python3 src/generate_final_embeddings.py'
+        }
+      }
+    }
+    stage('send-data-mongodb') {
+      steps {
+        container('python') {
+          sh 'python3 src/send_data_mongodb.py'
         }
       }
     }

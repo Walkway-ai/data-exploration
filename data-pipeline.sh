@@ -28,7 +28,7 @@ python3 src/language_detection.py
 python3 src/text_summarization.py
 python3 src/embed_textual_data.py
 python3 src/generate_final_embeddings.py
-python3 src/find_similarity_product.py
 python3 src/send_data_mongodb.py
+python3 src/find_similarity_product.py
 
 deactivate
