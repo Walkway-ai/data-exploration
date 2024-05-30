@@ -66,17 +66,3 @@ echo "-------------------------INSTALLING MONGO EXPRESS-------------------------
 echo "-----------------------------------------------------------------------------"
 #admin/pass
 kubectl apply -f kubernetes/mongodb-express.yaml
-echo "-----------------------------EXPOSING PORTS---------------------------------"
-echo "-----------------------------------------------------------------------------"
-sleep 300
-export JENKINS_POD=$(kubectl get pods -l app.kubernetes.io/name=jenkins -o jsonpath='{.items[0].metadata.name}')
-export MONGODB_POD=$(kubectl get pods -l app=mongodb -o jsonpath='{.items[0].metadata.name}')
-export MONGO_EXPRESS_POD=$(kubectl get pods -l app=mongo-express -o jsonpath='{.items[0].metadata.name}')
-{
-  kill -9 $(lsof -t -i:8080) || true
-  kill -9 $(lsof -t -i:27017) || true
-  kill -9 $(lsof -t -i:8081) || true
-} &>/dev/null
-#kubectl port-forward $JENKINS_POD 8080:8080 &
-#kubectl port-forward $MONGODB_POD 27017:27017 &
-#kubectl port-forward $MONGO_EXPRESS_POD 8081:8081 &
