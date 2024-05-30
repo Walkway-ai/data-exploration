@@ -90,7 +90,6 @@ def main():
 
     # Get the embedding of the given product.
     given_embedding = combined_embeddings[given_product_index[0]]
-    print(given_embedding)
 
     # Find the most similar products.
     most_similar_indices, similarity_scores = find_most_similar_products(
