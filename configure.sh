@@ -25,9 +25,19 @@ helm install jenkins jenkins/jenkins
 kubectl expose service jenkins --type=LoadBalancer --name=jenkins-lb
 #http://34.70.65.70:8080/
 #admin/[kubectl exec -it svc/jenkins bash][cat /run/secrets/additional/chart-admin-password]
+#admin/walkway
 
 # Install MongoDB
-helm install mongodb bitnami/mongodb
+kubectl apply -f kubernetes/walkwayai-configmap.yaml
+kubectl apply -f kubernetes/walkwayai-secrets.yaml
+kubectl apply -f kubernetes/mongodb.yaml
+sleep 20
+export CLUSTER_NODE_ID=$(kubectl get node -o wide | awk 'NR==2 {print $6}')
+export TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+envsubst < infra-config.yaml > infra-config-pipeline.yaml
+git add .
+git commit -m "new config"
+git push
 
 # Install Mongo Express
 helm install mongo-express bitnami/mongodb
