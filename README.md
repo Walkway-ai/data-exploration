@@ -1,7 +1,7 @@
 # Product Similarity
 
 ## Stack
- 
+  
 Language: Python, Bash, Groovy
 
 CI/CD: Jenkins
