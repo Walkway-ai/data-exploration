@@ -1,10 +1,11 @@
 import gc
 
+import numpy as np
+import pandas as pd
 import yaml
 from sklearn.metrics.pairwise import cosine_similarity
+
 from mongodb_lib import *
-import pandas as pd
-import numpy as np
 
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config)
@@ -30,7 +31,9 @@ def main():
     df = df.sample(frac=1).reset_index(drop=True)
     print(df)
 
-    combined_embeddings = read_object(fs, f"tmp/final_embeddings_{model_name}_concated_tabular.pickle")
+    combined_embeddings = read_object(
+        fs, f"tmp/final_embeddings_{model_name}_concated_tabular.pickle"
+    )
     combined_embeddings = np.array(combined_embeddings)
 
     given_product_code = input("Enter the PRODUCTCODE: ")

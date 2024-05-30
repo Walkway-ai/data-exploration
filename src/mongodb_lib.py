@@ -1,10 +1,12 @@
 import base64
+import json
 import logging
+
 from gridfs import GridFS
 from pymongo import MongoClient
-import json
 
 logging.basicConfig(level=logging.INFO)
+
 
 def connect_to_mongodb(config):
 
@@ -33,10 +35,11 @@ def connect_to_mongodb(config):
 
         raise
 
+
 def save_object(fs, object, object_name):
     try:
         # Check if object with the same name already exists
-        existing_file = fs.find_one({'filename': object_name})
+        existing_file = fs.find_one({"filename": object_name})
 
         if existing_file:
             # If exists, delete the existing object before saving the new one
@@ -52,9 +55,10 @@ def save_object(fs, object, object_name):
     except Exception as e:
         logging.error(f"Failed to save object '{object_name}' to MongoDB: {e}")
 
+
 def read_object(fs, object_name):
     try:
-        file_cursor = fs.find_one({'filename': object_name})
+        file_cursor = fs.find_one({"filename": object_name})
 
         if file_cursor is None:
             logging.error(f"Object '{object_name}' not found.")
