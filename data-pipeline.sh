@@ -13,7 +13,7 @@ sudo apt-get autoremove
 sudo apt install python3-pip
 sudo apt install virtualenv
 
-#sudo rm -rf venv
+sudo rm -rf venv
 virtualenv venv
 source venv/bin/activate
 
@@ -29,5 +29,6 @@ python3 src/text_summarization.py
 python3 src/embed_textual_data.py
 python3 src/generate_final_embeddings.py
 python3 src/find_similarity_product.py
+python3 src/send_data_mongodb
 
 deactivate

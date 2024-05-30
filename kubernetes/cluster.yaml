@@ -1,0 +1,5 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  apiServerAddress: ${MY_IP_ADDRESS}
+  apiServerPort: 58350
