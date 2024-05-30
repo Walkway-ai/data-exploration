@@ -22,8 +22,8 @@ helm repo update
 
 # Install Jenkins
 helm install jenkins jenkins/jenkins
-kubectl patch svc jenkins -n jenkins --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
-gcloud compute firewall-rules create allow-jenkins-nodeport --allow=tcp:30429 --description="Allow traffic to Jenkins NodePort" --direction=INGRESS --target-tags=all-instances --priority=1000
+kubectl expose service jenkins --type=LoadBalancer --name=jenkins-lb
+#http://34.70.65.70:8080/
 
 # Install MongoDB
 helm install mongodb bitnami/mongodb
