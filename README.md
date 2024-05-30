@@ -2,7 +2,11 @@
 
 ## Stack
 <<<<<<< HEAD
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 0e2858b (new config)
 =======
 
 >>>>>>> 0e2858b (new config)

@@ -20,7 +20,7 @@ sudo mv ./kind /usr/local/bin/kind
 echo "----------------------SETTING UP KUBERNETES CLUSTER--------------------------"
 echo "-----------------------------------------------------------------------------"
 ip_addresses=$(hostname -I)
-export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $1}')
+export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $2}')
 kind delete cluster --name kind
 envsubst < kubernetes/cluster.yaml | kind create cluster --retain --config=-
 kubectl cluster-info --context kind-kind
