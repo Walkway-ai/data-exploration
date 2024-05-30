@@ -29,7 +29,11 @@ kubectl cluster-info --context kind-kind
 echo "----------------------------INSTALLING JENKINS-------------------------------"
 echo "--------------------------https://localhost:8080-----------------------------"
 kubectl create namespace jenkins
+sudo apt-get install kubectx
 kubens jenkins
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
 helm repo add jenkins https://charts.jenkins.io
 helm repo update
 helm install jenkins jenkins/jenkins --set controller.resources.requests.memory=16Gi --set controller.resources.limits.memory=48Gi
@@ -42,13 +46,13 @@ kubectl create rolebinding jenkins-admin-binding --clusterrole=admin --serviceac
 echo "----------------------------INSTALLING MONGODB-------------------------------"
 echo "--------------------------https://localhost:27017----------------------------"
 echo "----------------------http://${CLUSTER_NODE_ID}:27017------------------------"
-kubectl apply -f kubernetes/debruits-configmap.yaml
-kubectl apply -f kubernetes/debruits-secret.yaml
+kubectl apply -f kubernetes/walkwayai-configmap.yaml
+kubectl apply -f kubernetes/walkwayai-secret.yaml
 kubectl apply -f kubernetes/mongodb.yaml
 sleep 20
 export CLUSTER_NODE_ID=$(kubectl get node -o wide | awk 'NR==2 {print $6}')
 export TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-envsubst < config.yaml > config_pipeline.yaml
+envsubst < infra-config.yaml > infra-config-pipeline.yaml
 git add .
 git commit -m "new config"
 git push

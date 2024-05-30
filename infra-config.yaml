@@ -1,0 +1,8 @@
+mongodbUsernameBase64: ZGVicnVpdHM=
+mongodbPasswordBase64: ZGVicnVpdHM=
+mongoDbPort: 27017
+mongoDbDatabase: walkwayai
+embeddingsCollection: embeddings
+clusterNodeId: $CLUSTER_NODE_ID
+mongoDbNodeportPort: 30000
+timestamp: $TIMESTAMP
