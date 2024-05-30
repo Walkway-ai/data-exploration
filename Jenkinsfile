@@ -1,7 +1,7 @@
 pipeline {
   agent {
     kubernetes {
-      inheritFrom 'pod/python-pod'
+      inheritFrom 'pod/python'
       label 'python'
     }
   }
