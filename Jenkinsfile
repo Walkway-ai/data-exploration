@@ -1,28 +1,11 @@
 pipeline {
   agent {
     kubernetes {
-      yaml '''
-        apiVersion: v1
-        kind: Pod
-        spec:
-          containers:
-          - name: python
-            image: python:3.10.12
-            command: ["cat"]
-            args: []
-            tty: true
-      '''
+      inheritFrom 'pod/python-pod'
+      label 'python'
     }
   }
   stages {
-    stage('install-requirements') {
-      steps {
-        container('python') {
-          sh 'mkdir tmp'
-          sh 'pip install -r requirements.txt'
-        }
-      }
-    }
     stage('retrieve-bigquery-data') {
       steps {
         container('python') {
@@ -30,6 +13,7 @@ pipeline {
         }
       }
     }
+  }
     /* 
     stage('generate-product-data') {
       steps {

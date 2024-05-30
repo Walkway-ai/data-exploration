@@ -42,6 +42,12 @@ helm install mongo-express cowboysysop/mongo-express \
   --set basicAuthPassword=walkway
 
 kubectl expose service mongo-express --type=LoadBalancer --name=mongo-express-lb
+
+# Install Python
+kubectl apply -f pod-python.yaml
+
+
+
 #sleep 20
 #export CLUSTER_NODE_ID=$(kubectl get node -o wide | awk 'NR==2 {print $6}')
 #export TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
