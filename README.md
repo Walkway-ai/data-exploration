@@ -12,8 +12,6 @@ Deployment: Kubernetes
 
 ## Setup
 
-To set up the project, run the following command in your terminal:
-
 ```bash
 bash configure.sh
 ```
@@ -21,7 +19,6 @@ bash configure.sh
 ## Jenkins Configuration
 
 ```markdown
-Configure Jenkins for seamless integration with the project:
 
 1. Open Jenkins and navigate to "Build Executor Status" > Main cluster.
 2. Set the Number of executors to 0 and create a label (e.g., "kubernetes-cluster"). Select "Only build jobs with labels...".
