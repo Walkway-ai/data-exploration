@@ -35,6 +35,7 @@ pipeline {
         }
       }
     }
+    /* 
     stage('generate-product-data') {
       steps {
         container('python') {
@@ -91,5 +92,6 @@ pipeline {
         }
       }
     }
+    */
   }
 }
