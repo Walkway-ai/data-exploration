@@ -1,12 +1,4 @@
-tqdm
-pyyaml
-google-cloud-bigquery
 pandas
-db-dtypes
-ydata-profiling
-transformers
-torch
-scikit-learn
-sentence-transformers==2.2.2
-InstructorEmbedding
-pymongo
+pyyaml
+tqdm
+google-cloud-bigquery
