@@ -1,8 +1,8 @@
-mongodbUsernameBase64: ZGVicnVpdHM=
-mongodbPasswordBase64: ZGVicnVpdHM=
+mongodbUsernameBase64: d2Fsa3dheQ==
+mongodbPasswordBase64: d2Fsa3dheQ==
 mongoDbPort: 27017
 mongoDbDatabase: walkwayai
 embeddingsCollection: embeddings
 mongoDbNodeportPort: 30000
 clusterNodeId: 172.21.0.2
-timestamp: 20240530_141710
+timestamp: 20240530_151252

@@ -20,7 +20,7 @@ sudo mv ./kind /usr/local/bin/kind
 echo "----------------------SETTING UP KUBERNETES CLUSTER--------------------------"
 echo "-----------------------------------------------------------------------------"
 ip_addresses=$(hostname -I)
-export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $2}')
+export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $1}')
 kind delete cluster --name kind
 envsubst < kubernetes/cluster.yaml | kind create cluster --retain --config=-
 kubectl cluster-info --context kind-kind
@@ -35,11 +35,17 @@ chmod 700 get_helm.sh
 echo "----------------------------INSTALLING JENKINS-------------------------------"
 echo "-----------------------------------------------------------------------------"
 #admin/[kubectl exec -it svc/jenkins bash][cat /run/secrets/additional/chart-admin-password]
+#admin/walkway
 kubectl create namespace jenkins
 kubens jenkins
 helm repo add jenkins https://charts.jenkins.io
 helm repo update
-helm install jenkins jenkins/jenkins --set controller.resources.requests.memory=8Gi --set controller.resources.limits.memory=12Gi
+helm install jenkins jenkins/jenkins \
+  --set controller.resources.requests.memory=8Gi \
+  --set controller.resources.limits.memory=12Gi \
+  --set service.type=NodePort \
+  --set service.nodePort=30002
+kubectl patch svc jenkins -p '{"spec": {"type": "NodePort", "ports": [{"port": 8080, "nodePort": 30002}]}}'
 kubectl apply -f kubernetes/jenkins-token.yaml
 echo "------------------------------BEGINNING TOKEN--------------------------------"
 kubectl describe secret $(kubectl describe serviceaccount jenkins | grep token | awk '{print $2}')
@@ -47,7 +53,7 @@ echo "---------------------------------END TOKEN--------------------------------
 kubectl create rolebinding jenkins-admin-binding --clusterrole=admin --serviceaccount=jenkins:jenkins
 echo "----------------------------INSTALLING MONGODB-------------------------------"
 kubectl apply -f kubernetes/walkwayai-configmap.yaml
-kubectl apply -f kubernetes/walkwayai-secret.yaml
+kubectl apply -f kubernetes/walkwayai-secrets.yaml
 kubectl apply -f kubernetes/mongodb.yaml
 sleep 20
 export CLUSTER_NODE_ID=$(kubectl get node -o wide | awk 'NR==2 {print $6}')
@@ -56,12 +62,10 @@ envsubst < infra-config.yaml > infra-config-pipeline.yaml
 git add .
 git commit -m "new config"
 git push
-
-#admin/pass
 echo "-------------------------INSTALLING MONGO EXPRESS----------------------------"
-echo "--------------------------https://localhost:8081-----------------------------"
+echo "-----------------------------------------------------------------------------"
+#admin/pass
 kubectl apply -f kubernetes/mongodb-express.yaml
-
 echo "-----------------------------EXPOSING PORTS---------------------------------"
 echo "-----------------------------------------------------------------------------"
 sleep 300
@@ -73,6 +77,6 @@ export MONGO_EXPRESS_POD=$(kubectl get pods -l app=mongo-express -o jsonpath='{.
   kill -9 $(lsof -t -i:27017) || true
   kill -9 $(lsof -t -i:8081) || true
 } &>/dev/null
-kubectl port-forward $JENKINS_POD 8080:8080 &
-kubectl port-forward $MONGODB_POD 27017:27017 &
-kubectl port-forward $MONGO_EXPRESS_POD 8081:8081 &
+#kubectl port-forward $JENKINS_POD 8080:8080 &
+#kubectl port-forward $MONGODB_POD 27017:27017 &
+#kubectl port-forward $MONGO_EXPRESS_POD 8081:8081 &
