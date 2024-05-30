@@ -1,7 +1,11 @@
 # Product Similarity
 
 ## Stack
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 0e2858b (new config)
 Language: Python, Bash, Groovy
 
 CI/CD: Jenkins

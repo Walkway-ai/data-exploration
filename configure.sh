@@ -20,7 +20,7 @@ sudo mv ./kind /usr/local/bin/kind
 echo "----------------------SETTING UP KUBERNETES CLUSTER--------------------------"
 echo "-----------------------------------------------------------------------------"
 ip_addresses=$(hostname -I)
-export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $1}')
+export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $2}')
 kind delete cluster --name kind
 envsubst < kubernetes/cluster.yaml | kind create cluster --retain --config=-
 kubectl cluster-info --context kind-kind
@@ -39,7 +39,7 @@ kubectl create namespace jenkins
 kubens jenkins
 helm repo add jenkins https://charts.jenkins.io
 helm repo update
-helm install jenkins jenkins/jenkins --set controller.resources.requests.memory=16Gi --set controller.resources.limits.memory=48Gi
+helm install jenkins jenkins/jenkins --set controller.resources.requests.memory=8Gi --set controller.resources.limits.memory=12Gi
 kubectl apply -f kubernetes/jenkins-token.yaml
 echo "------------------------------BEGINNING TOKEN--------------------------------"
 kubectl describe secret $(kubectl describe serviceaccount jenkins | grep token | awk '{print $2}')
