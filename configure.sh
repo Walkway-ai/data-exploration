@@ -14,7 +14,6 @@ gcloud container clusters create walkway-cluster --num-nodes=3 --zone=us-central
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 gcloud container clusters get-credentials walkway-cluster --zone us-central1-c
 
-kubectl create namespace jenkins
 helm repo add jenkins https://charts.jenkins.io
 helm repo add cowboysysop https://cowboysysop.github.io/charts/
 helm repo update
