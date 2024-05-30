@@ -5,6 +5,7 @@ set -e
 gcloud auth login
 gcloud config set project "ww-da-ingestion"
 gcloud container clusters create walkway-cluster --num-nodes=1 --zone=us-central1-c
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 gcloud container clusters get-credentials walkway-cluster --zone us-central1-c
 
 # Install Jenkins
