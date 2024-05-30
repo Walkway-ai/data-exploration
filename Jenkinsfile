@@ -18,7 +18,7 @@ pipeline {
     stage('install-requirements') {
       steps {
         container('python') {
-          sh 'mkdir tmp reports'
+          sh 'mkdir tmp'
           sh 'pip install -r requirements.txt'
         }
       }
