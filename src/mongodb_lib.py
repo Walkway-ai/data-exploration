@@ -9,9 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def connect_to_mongodb(config):
-
     try:
-
         mongodb_username = base64.b64decode(config["mongodbUsernameBase64"]).decode(
             "utf-8"
         )
@@ -30,7 +28,6 @@ def connect_to_mongodb(config):
         return db, fs, client
 
     except Exception as e:
-
         logging.error(f"Failed to connect to MongoDB: {e}")
 
         raise

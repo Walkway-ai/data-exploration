@@ -2,3 +2,10 @@ pandas
 pyyaml
 tqdm
 google-cloud-bigquery
+db-dtypes
+ydata-profiling
+deep-translator
+langdetect
+transformers
+torch
+sentence-transformers==2.2.2

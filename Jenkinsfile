@@ -23,6 +23,7 @@ pipeline {
     stage('install-requirements') {
       steps {
         container('python') {
+          sh 'mkdir tmp reports'
           sh 'pip install -r requirements.txt'
         }
       }

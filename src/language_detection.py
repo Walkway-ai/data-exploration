@@ -8,10 +8,20 @@ from deep_translator import GoogleTranslator
 from langdetect import detect
 from tqdm import tqdm
 
+# Run garbage collection to free up memory.
 gc.collect()
 
 
 def detect_language(text):
+    """
+    Detect the language of a given text.
+
+    Parameters:
+    text (str): The text to detect the language of.
+
+    Returns:
+    str: The detected language code or an empty string if detection fails.
+    """
     try:
         return detect(str(text))
     except Exception:
@@ -19,6 +29,15 @@ def detect_language(text):
 
 
 def translate_text(text):
+    """
+    Translate a given text to English.
+
+    Parameters:
+    text (str): The text to translate.
+
+    Returns:
+    str: The translated text or the original text if translation fails.
+    """
     try:
         return GoogleTranslator(source="auto", target="en").translate(text)
     except Exception as e:
@@ -27,13 +46,28 @@ def translate_text(text):
 
 
 def main():
+    """
+    Main function to process and translate product descriptions.
+
+    Steps:
+    1. Load the textual product data from a pickle file.
+    2. Fill any missing values in the DataFrame.
+    3. Detect the language of product descriptions.
+    4. Translate non-English product descriptions to English.
+    5. Filter the DataFrame to include relevant columns.
+    6. Save the processed DataFrame as a pickle file.
+    """
+    # Load the textual product data from a pickle file.
     df = pd.read_pickle("tmp/product_textual.pickle")
+    # Fill any missing values with an empty string.
     df.fillna("", inplace=True)
 
+    # Detect the language of each product description.
     df["pdt_product_detail_PRODUCTDESCRIPTION_lang"] = [
         detect_language(el) for el in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
     ]
 
+    # Translate non-English product descriptions to English.
     df["pdt_product_detail_PRODUCTDESCRIPTION_translated"] = [
         translate_text(el) if lang != "en" else el
         for el, lang in tqdm(
@@ -44,6 +78,7 @@ def main():
         )
     ]
 
+    # Filter the DataFrame to include only relevant columns.
     df = df[
         [
             "PRODUCTCODE",
@@ -52,6 +87,7 @@ def main():
         ]
     ]
 
+    # Save the processed DataFrame as a pickle file.
     df.to_pickle("tmp/product_textual_lang.pickle")
 
 
