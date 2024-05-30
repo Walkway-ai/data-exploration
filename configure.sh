@@ -24,6 +24,7 @@ helm repo update
 helm install jenkins jenkins/jenkins
 kubectl expose service jenkins --type=LoadBalancer --name=jenkins-lb
 #http://34.70.65.70:8080/
+#admin/[kubectl exec -it svc/jenkins bash][cat /run/secrets/additional/chart-admin-password]
 
 # Install MongoDB
 helm install mongodb bitnami/mongodb
