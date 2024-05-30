@@ -4,5 +4,5 @@ mongoDbPort: 27017
 mongoDbDatabase: walkwayai
 embeddingsCollection: embeddings
 mongoDbNodeportPort: 30000
-clusterNodeId: 172.21.0.2
-timestamp: 20240530_151252
+clusterNodeId: 172.18.0.2
+timestamp: 20240530_165512

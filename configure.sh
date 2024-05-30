@@ -16,7 +16,7 @@ chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
 echo "------------------------------SETTING UP KUBERNETES CLUSTER"
 ip_addresses=$(hostname -I)
-export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $2}')
+export MY_IP_ADDRESS=$(echo "$ip_addresses" | awk '{print $1}')
 kind delete cluster --name kind
 envsubst < kubernetes/cluster.yaml | kind create cluster --retain --config=-
 kubectl cluster-info --context kind-kind
@@ -26,6 +26,7 @@ echo "------------------------------INSTALLING HELM"
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
+rm get_helm.sh
 echo "------------------------------INSTALLING JENKINS"
 #admin/[kubectl exec -it svc/jenkins bash][cat /run/secrets/additional/chart-admin-password]
 #admin/walkway
