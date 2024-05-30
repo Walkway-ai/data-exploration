@@ -1,12 +1,16 @@
 import gc
-import pickle
 
-import pandas as pd
 import yaml
 from sklearn.metrics.pairwise import cosine_similarity
+from mongodb_lib import *
+import pandas as pd
+import numpy as np
 
-config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
-embedding_model = config["embedding-model"]
+config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
+db, fs, client = connect_to_mongodb(config)
+
+config_model = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
+embedding_model = config_model["embedding-model"]
 model_name = embedding_model.split("/")[-1]
 
 gc.collect()
@@ -21,14 +25,13 @@ def find_most_similar_products(embedding, embeddings, num_similar=5):
 
 
 def main():
-    df = pd.read_pickle("tmp/product_textual_lang_summarized.pickle")
+    df = read_object(fs, "tmp/product_textual_lang_summarized.pickle")
+    df = pd.DataFrame(df)
     df = df.sample(frac=1).reset_index(drop=True)
     print(df)
 
-    with open(
-        f"tmp/final_embeddings_{model_name}_concated_tabular.pickle", "rb"
-    ) as file:
-        combined_embeddings = pickle.load(file)
+    combined_embeddings = read_object(fs, f"tmp/final_embeddings_{model_name}_concated_tabular.pickle")
+    combined_embeddings = np.array(combined_embeddings)
 
     given_product_code = input("Enter the PRODUCTCODE: ")
     given_product_index = df.index[df["PRODUCTCODE"] == given_product_code].tolist()
@@ -43,7 +46,7 @@ def main():
     ].iloc[0]
 
     given_embedding = combined_embeddings[given_product_index[0]]
-    print(given_embedding.shape)
+    print(given_embedding)
     most_similar_indices, similarity_scores = find_most_similar_products(
         given_embedding, combined_embeddings
     )
@@ -52,7 +55,8 @@ def main():
     print(50 * "-")
     print("Top 5 most similar products:")
 
-    df_tabular = pd.read_pickle("tmp/product_tabular.pickle")
+    df_tabular = read_object(fs, "tmp/product_tabular.pickle")
+    df_tabular = pd.DataFrame(df_tabular)
 
     for idx, score in zip(most_similar_indices, similarity_scores):
         similar_product_row = df_tabular.iloc[idx]
