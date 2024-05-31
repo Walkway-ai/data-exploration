@@ -1,28 +1,10 @@
 pipeline {
-  agent {
-    kubernetes {
-      label 'python'
-      yaml """
-apiVersion: v1
-kind: Pod
-metadata:
-  name: python
-  labels:
-    app: python
-spec:
-  containers:
-  - name: python
-    image: fabiocuri/python-walkway:latest
-    command: ["cat"]
-    tty: true
-"""
-    }
-  }
+  agent any
   stages {
     stage('retrieve-bigquery-data') {
       steps {
-        container('python') {
-          sh 'python3 src/retrieve_bigquery_data.py'
+        script {
+          sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 /path/to/src/retrieve_bigquery_data.py'
         }
       }
     }

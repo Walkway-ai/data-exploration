@@ -42,8 +42,11 @@ helm install mongo-express cowboysysop/mongo-express \
 kubectl expose service mongo-express --type=LoadBalancer --name=mongo-express-lb
 
 # Create Python image
+docker build -t fabiocuri/python-walkway:latest .
 docker push fabiocuri/python-walkway:latest
-docker push fabiocuri/python-walkway:latest
+
+# Create Python pod
+kubectl apply -f pod-python.yaml
 
 #sleep 20
 #export CLUSTER_NODE_ID=$(kubectl get node -o wide | awk 'NR==2 {print $6}')
