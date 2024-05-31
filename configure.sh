@@ -42,6 +42,8 @@ helm install mongo-express cowboysysop/mongo-express \
 kubectl expose service mongo-express --type=LoadBalancer --name=mongo-express-lb
 
 # Create Python image
+docker rmi fabiocuri/python-walkway:1.0
+docker rmi fabiocuri/python-walkway:latest
 docker build -t fabiocuri/python-walkway:1.0 .
 docker tag fabiocuri/python-walkway:1.0 fabiocuri/python-walkway:latest
 docker push fabiocuri/python-walkway:latest
