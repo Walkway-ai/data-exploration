@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-
+from mongodb_lib import *
 
 def detect_and_treat_outliers(
     df, column, method="zscore", threshold=3, replace_with="mean"
@@ -73,7 +73,7 @@ def auto_bin_intervals(df, column_name):
 
 
 class DataFrameProcessor:
-    def __init__(self, data_path, key_field, location_field):
+    def __init__(self, data_path, key_field, location_field, fs):
         """
         Initialize the DataFrameProcessor with a path to the pickle file.
 
@@ -86,6 +86,7 @@ class DataFrameProcessor:
         self.data_path = data_path
         self.key_field = key_field
         self.location_field = location_field
+        self.fs = fs
 
     def preprocess(self):
         self.read_data()
@@ -103,7 +104,8 @@ class DataFrameProcessor:
         self.normalize_product_type()
 
     def read_data(self):
-        self.df = pd.read_pickle(self.data_path)
+        self.df = read_object(self.fs, self.data_path)
+        self.df = pd.DataFrame(self.df)
         self.df_text = None
 
     def explode_dataframe(self):

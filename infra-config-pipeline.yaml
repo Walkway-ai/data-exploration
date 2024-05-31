@@ -1,6 +1,6 @@
 mongodbUsernameBase64: d2Fsa3dheQ==
 mongodbPasswordBase64: d2Fsa3dheQ==
 mongoDbDatabase: walkwayai
-mongoDbExternalIp: $MONGO_DB_EXTERNAL_IP
+mongoDbExternalIp: 34.68.245.45
 mongoDbPort: 27017
-timestamp: $TIMESTAMP
+timestamp: 

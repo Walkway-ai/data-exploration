@@ -9,12 +9,17 @@ import yaml
 from tqdm import tqdm
 
 from bigquery_handlers import BigQueryDataProcessor
+from mongodb_lib import *
 
 # Load configuration from yaml file.
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
 bigquery_config = config["bigquery-to-retrieve"]
 key_field = bigquery_config["key-field"]
 tables = bigquery_config["tables"]
+
+# Load configuration from yaml file for MongoDB connection.
+config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
+db, fs, client = connect_to_mongodb(config_infra)
 
 # Run garbage collection to free up memory.
 gc.collect()
@@ -44,33 +49,38 @@ def main():
     2. Merge the DataFrames into a single DataFrame using a common key field.
     3. Save the merged DataFrame as a pickle file.
     """
-    # Initialize an empty list to store DataFrames.
-    dfs = []
 
-    # Iterate over each table specified in the configuration.
-    for bigquery_table in tqdm(tables):
-        # Retrieve table elements from the configuration.
-        table_elements = tables[bigquery_table]
+    object_name = "product_tables"
+    existing_file = fs.find_one({"filename": object_name})
 
-        # Create a BigQueryDataProcessor instance to handle data retrieval.
-        bqdp = BigQueryDataProcessor(
-            config=config,
-            dataset_id=table_elements["dataset_id"],
-            table_id=bigquery_table,
-            table_fields=table_elements["fields"],
-            key_field=key_field,
-        )
-        # Read the BigQuery table into a DataFrame.
-        bqdp.read_bigquery_table()
+    if not existing_file:
+            
+        # Initialize an empty list to store DataFrames.
+        dfs = []
 
-        # Append the retrieved DataFrame to the list.
-        dfs.append(bqdp.df)
+        # Iterate over each table specified in the configuration.
+        for bigquery_table in tqdm(tables):
+            # Retrieve table elements from the configuration.
+            table_elements = tables[bigquery_table]
 
-    # Merge all DataFrames in the list into a single DataFrame.
-    product_df = reduce(merge_dfs, dfs)
+            # Create a BigQueryDataProcessor instance to handle data retrieval.
+            bqdp = BigQueryDataProcessor(
+                config=config,
+                dataset_id=table_elements["dataset_id"],
+                table_id=bigquery_table,
+                table_fields=table_elements["fields"],
+                key_field=key_field,
+            )
+            # Read the BigQuery table into a DataFrame.
+            bqdp.read_bigquery_table()
 
-    # Save the merged DataFrame as a pickle file.
-    product_df.to_pickle("product_tables.pickle")
+            # Append the retrieved DataFrame to the list.
+            dfs.append(bqdp.df)
+
+        # Merge all DataFrames in the list into a single DataFrame.
+        product_df = reduce(merge_dfs, dfs)
+
+        save_object(fs=fs, object=product_df, object_name=object_name)
 
 
 if __name__ == "__main__":
