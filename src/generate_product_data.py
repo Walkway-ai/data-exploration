@@ -35,10 +35,13 @@ def main():
     4. Generate and save profiling reports for both tabular and textual data.
     """
 
-    object_name = "product_tabular"
-    existing_file = fs.find_one({"filename": object_name})
+    tabular_object_name = "product_tabular"
+    tabular_existing_file = fs.find_one({"filename": tabular_object_name})
 
-    if not existing_file:
+    textual_object_name = "product_textual"
+    textual_existing_file = fs.find_one({"filename": textual_object_name})
+
+    if not tabular_existing_file or not textual_existing_file:
             
         # Initialize the DataFrameProcessor with the product data path and key fields.
         processor = DataFrameProcessor(
@@ -52,9 +55,9 @@ def main():
         processor.preprocess()
 
         # Save the processed tabular data as a pickle file.
-        save_object(fs=fs, object=processor.df, object_name="product_tabular")
+        save_object(fs=fs, object=processor.df, object_name=tabular_object_name)
         # Save the processed textual data as a pickle file.
-        save_object(fs=fs, object=processor.df_text, object_name="product_textual")
+        save_object(fs=fs, object=processor.df_text, object_name=textual_object_name)
 
         # Generate a profiling report for the tabular data.
         profile = ProfileReport(processor.df, title="Product Tabular Report")

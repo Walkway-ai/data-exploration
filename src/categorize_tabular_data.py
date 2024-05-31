@@ -55,7 +55,7 @@ def main():
         del categorized_df["pdt_product_level_SUPPLIERCODE"]
 
         # Save the categorized DataFrame as a pickle file.
-        save_object(fs=fs, object=categorized_df, object_name="product_tabular_categorized")
+        save_object(fs=fs, object=categorized_df, object_name=object_name)
 
 
 if __name__ == "__main__":

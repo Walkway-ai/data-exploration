@@ -7,6 +7,13 @@ import pandas as pd
 from deep_translator import GoogleTranslator
 from langdetect import detect
 from tqdm import tqdm
+import yaml
+
+from mongodb_lib import *
+
+# Load configuration from yaml file for MongoDB connection.
+config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
+db, fs, client = connect_to_mongodb(config_infra)
 
 # Run garbage collection to free up memory.
 gc.collect()
@@ -57,38 +64,45 @@ def main():
     5. Filter the DataFrame to include relevant columns.
     6. Save the processed DataFrame as a pickle file.
     """
-    # Load the textual product data from a pickle file.
-    df = pd.read_pickle("tmp/product_textual.pickle")
-    # Fill any missing values with an empty string.
-    df.fillna("", inplace=True)
 
-    # Detect the language of each product description.
-    df["pdt_product_detail_PRODUCTDESCRIPTION_lang"] = [
-        detect_language(el) for el in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
-    ]
+    object_name = "product_textual_lang"
+    existing_file = fs.find_one({"filename": object_name})
 
-    # Translate non-English product descriptions to English.
-    df["pdt_product_detail_PRODUCTDESCRIPTION_translated"] = [
-        translate_text(el) if lang != "en" else el
-        for el, lang in tqdm(
-            zip(
-                df["pdt_product_detail_PRODUCTDESCRIPTION"],
-                df["pdt_product_detail_PRODUCTDESCRIPTION_lang"],
-            )
-        )
-    ]
+    if not existing_file:
+            
+        # Load the textual product data from a pickle file.
+        df = read_object(fs, "product_textual")
+        df = pd.DataFrame(df)
+        # Fill any missing values with an empty string.
+        df.fillna("", inplace=True)
 
-    # Filter the DataFrame to include only relevant columns.
-    df = df[
-        [
-            "PRODUCTCODE",
-            "pdt_inclexcl_ENG_CONTENT",
-            "pdt_product_detail_PRODUCTDESCRIPTION_translated",
+        # Detect the language of each product description.
+        df["pdt_product_detail_PRODUCTDESCRIPTION_lang"] = [
+            detect_language(el) for el in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
         ]
-    ]
 
-    # Save the processed DataFrame as a pickle file.
-    df.to_pickle("tmp/product_textual_lang.pickle")
+        # Translate non-English product descriptions to English.
+        df["pdt_product_detail_PRODUCTDESCRIPTION_translated"] = [
+            translate_text(el) if lang != "en" else el
+            for el, lang in tqdm(
+                zip(
+                    df["pdt_product_detail_PRODUCTDESCRIPTION"],
+                    df["pdt_product_detail_PRODUCTDESCRIPTION_lang"],
+                )
+            )
+        ]
+
+        # Filter the DataFrame to include only relevant columns.
+        df = df[
+            [
+                "PRODUCTCODE",
+                "pdt_inclexcl_ENG_CONTENT",
+                "pdt_product_detail_PRODUCTDESCRIPTION_translated",
+            ]
+        ]
+
+        # Save the processed DataFrame as a pickle file.
+        save_object(fs=fs, object=df, object_name=object_name)
 
 
 if __name__ == "__main__":
