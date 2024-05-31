@@ -70,7 +70,7 @@ def main():
     product_df = reduce(merge_dfs, dfs)
 
     # Save the merged DataFrame as a pickle file.
-    product_df.to_pickle("tmp/product_tables.pickle")
+    product_df.to_pickle("product_tables.pickle")
 
 
 if __name__ == "__main__":

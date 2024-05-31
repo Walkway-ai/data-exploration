@@ -14,6 +14,7 @@ gcloud container clusters create walkway-cluster --num-nodes=3 --zone=us-central
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 gcloud container clusters get-credentials walkway-cluster --zone us-central1-c
 
+# Set up Helm
 helm repo add jenkins https://charts.jenkins.io
 helm repo add cowboysysop https://cowboysysop.github.io/charts/
 helm repo update
@@ -25,10 +26,7 @@ kubectl expose service jenkins --type=LoadBalancer --name=jenkins-lb
 #admin/walkway
 
 # Install MongoDB
-helm install mongo oci://registry-1.docker.io/bitnamicharts/mongodb \
-  --set auth.rootUser=walkway \
-  --set auth.rootPassword=walkway
-
+helm install mongo oci://registry-1.docker.io/bitnamicharts/mongodb --set auth.rootUser=walkway --set auth.rootPassword=walkway
 kubectl expose service mongo-mongodb --type=LoadBalancer --name=mongodb-lb
 
 # Install Mongo Express
@@ -43,10 +41,9 @@ helm install mongo-express cowboysysop/mongo-express \
 
 kubectl expose service mongo-express --type=LoadBalancer --name=mongo-express-lb
 
-# Install Python
-kubectl apply -f pod-python.yaml
-
-
+# Create Python image
+docker push fabiocuri/python-walkway:latest
+docker push fabiocuri/python-walkway:latest
 
 #sleep 20
 #export CLUSTER_NODE_ID=$(kubectl get node -o wide | awk 'NR==2 {print $6}')
