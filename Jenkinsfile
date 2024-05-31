@@ -1,6 +1,13 @@
 pipeline {
   agent any
   stages {
+    stage('create-python-env') {
+      steps {
+        script {
+          sh 'kubectl apply -f pod-python.yaml'
+        }
+      }
+    }
     stage('retrieve-bigquery-data') {
       steps {
         script {
