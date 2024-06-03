@@ -1,6 +1,6 @@
 summarization-model: "facebook/bart-large-cnn"
-#embedding-model: "jinaai/jina-embeddings-v2-base-en"
-embedding-model: "thenlper/gte-large"
+embedding-model: "jinaai/jina-embeddings-v2-base-en"
+#embedding-model: "thenlper/gte-large"
 bigquery-to-retrieve:
   key-field: "PRODUCTCODE"
   location-field: "pdt_product_detail_VIDESTINATIONCITY"

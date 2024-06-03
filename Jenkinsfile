@@ -69,10 +69,10 @@ spec:
                 }
             }
         }
-        stage('product-similarity') { 
+        stage('generate-similarity-product') { 
             steps {
                 container('python') {
-                    sh 'echo test'
+                    sh 'python3 src/generate_similarity_product.py'
                 }
             }
         }

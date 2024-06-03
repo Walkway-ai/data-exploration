@@ -36,8 +36,10 @@ def connect_to_mongodb(config):
 def save_object(fs, object, object_name):
     try:
 
-        if "embeddings" in object_name:
+        if "embeddings" in object_name and "product_similarities" not in object_name:
             model_bytes = json.dumps(object.tolist()).encode()
+        elif "product_similarities" in object_name:
+            model_bytes = json.dumps(object).encode()
         else:
             model_bytes = object.to_json().encode()
 

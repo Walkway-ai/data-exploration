@@ -45,6 +45,7 @@ export TIMESTAMP=$(date +%s)
 export MONGO_DB_EXTERNAL_IP=$(kubectl get service mongodb-lb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 envsubst < infra-config.yaml > infra-config-pipeline.yaml
 
-git add .
-git commit -m "new config"
-git push
+# Create Python image
+docker build -t fabiocuri/python-walkway:latest .
+docker tag fabiocuri/python-walkway:latest fabiocuri/python-walkway:latest
+docker push fabiocuri/python-walkway:latest
