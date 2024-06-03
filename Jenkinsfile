@@ -20,7 +20,7 @@ spec:
         }
     }
     stages {
-        stage('Install Dependencies') {
+        stage('install dependencies') {
             steps {
                 container('python') {
                     sh 'pip install -r requirements.txt'
