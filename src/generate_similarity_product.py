@@ -50,15 +50,8 @@ def find_most_similar_products(embedding, embeddings, num_similar=15):
 
 def main():
     """
-    Main function to find and display the most similar products.
+    Main function to find the most similar products.
 
-    Steps:
-    1. Load the summarized product textual data from MongoDB.
-    2. Shuffle and reset the DataFrame index.
-    3. Load the combined embeddings from MongoDB.
-    4. Prompt the user to input a PRODUCTCODE.
-    5. Find the embedding of the given product and calculate similarity scores.
-    6. Display the most similar products and their details.
     """
 
     object_name = f"product_similarities_{model_name}"
