@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'python-agent'
+            label 'python'
             defaultContainer 'python'
             yaml """
 apiVersion: v1
@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
   - name: python
-    image: python:3.9
+    image: fabiocuri/python-walkway:latest
     command:
     - cat
     tty: true
@@ -20,13 +20,6 @@ spec:
         }
     }
     stages {
-        stage('install dependencies') {
-            steps {
-                container('python') {
-                    sh 'pip install -r requirements.txt'
-                }
-            }
-        }
         stage('retrieve-bigquery-data') {
             steps {
                 container('python') {
