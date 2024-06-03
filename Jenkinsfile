@@ -5,7 +5,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo test'
-                    // sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/retrieve_bigquery_data.py'
                 }
             }
         }
@@ -13,7 +12,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo test'
-                    // sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/generate_product_data.py'
                 }
             }
         }
@@ -21,7 +19,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo test'
-                    // sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/categorize_tabular_data.py'
                 }
             }
         }
@@ -29,7 +26,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo test'
-                    // sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/language_detection.py'
                 }
             }
         }
@@ -37,7 +33,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo test'
-                    // sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/text_summarization.py'
                 }
             }
         }
@@ -45,7 +40,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo test'
-                    // sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/embed_textual_data.py'
                 }
             }
         }
@@ -53,7 +47,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo test'
-                    // sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/generate_final_embeddings.py'
                 }
             }
         }
