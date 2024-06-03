@@ -6,9 +6,8 @@ import gc
 import yaml
 from ydata_profiling import ProfileReport
 
-from preprocessing_handlers import DataFrameProcessor
-
 from mongodb_lib import *
+from preprocessing_handlers import DataFrameProcessor
 
 # Load configuration from yaml file.
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
@@ -42,13 +41,13 @@ def main():
     textual_existing_file = fs.find_one({"filename": textual_object_name})
 
     if not tabular_existing_file or not textual_existing_file:
-            
+
         # Initialize the DataFrameProcessor with the product data path and key fields.
         processor = DataFrameProcessor(
             data_path="product_tables",
             key_field=key_field,
             location_field=location_field,
-            fs=fs
+            fs=fs,
         )
 
         # Preprocess the data.

@@ -4,10 +4,10 @@
 import gc
 
 import pandas as pd
+import yaml
 from deep_translator import GoogleTranslator
 from langdetect import detect
 from tqdm import tqdm
-import yaml
 
 from mongodb_lib import *
 
@@ -69,7 +69,7 @@ def main():
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file:
-            
+
         # Load the textual product data from a pickle file.
         df = read_object(fs, "product_textual")
         df = pd.DataFrame(df)
@@ -78,7 +78,8 @@ def main():
 
         # Detect the language of each product description.
         df["pdt_product_detail_PRODUCTDESCRIPTION_lang"] = [
-            detect_language(el) for el in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
+            detect_language(el)
+            for el in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
         ]
 
         # Translate non-English product descriptions to English.

@@ -54,7 +54,7 @@ def main():
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file:
-            
+
         # Initialize an empty list to store DataFrames.
         dfs = []
 

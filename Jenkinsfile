@@ -36,5 +36,26 @@ pipeline {
                 }
             }
         }
+        stage('create-embeddings') { 
+            steps {
+                script {
+                    sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/embed_textual_data.py'
+                }
+            }
+        }
+        stage('create-final-embeddings') { 
+            steps {
+                script {
+                    sh 'kubectl exec -it $(kubectl get pod -l app=python -o jsonpath="{.items[0].metadata.name}") -- python3 src/generate_final_embeddings.py'
+                }
+            }
+        }
+        stage('create-final-embeddings') { 
+            steps {
+                script {
+                    sh 'echo test'
+                }
+            }
+        }
     }
 }

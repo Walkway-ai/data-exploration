@@ -66,3 +66,19 @@ def read_object(fs, object_name):
     except Exception as e:
         logging.error(f"Failed to read object '{object_name}' from MongoDB: {e}")
         return None
+
+
+def remove_object(fs, object_name):
+    try:
+        # Find the file by its name
+        file = fs.find_one({"filename": object_name})
+        if file:
+            # Delete the file using its ID
+            fs.delete(file._id)
+            logging.info(f"Successfully deleted '{object_name}' from MongoDB GridFS")
+        else:
+            logging.warning(
+                f"No file found with name '{object_name}' in MongoDB GridFS"
+            )
+    except Exception as e:
+        logging.error(f"Failed to delete object '{object_name}' from MongoDB: {e}")

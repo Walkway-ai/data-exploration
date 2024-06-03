@@ -2,17 +2,21 @@
 # coding: utf-8
 
 import gc
-import pickle
 
 import numpy as np
 import pandas as pd
-import torch
 import yaml
+
+from mongodb_lib import *
 
 # Load configuration from yaml file.
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
 embedding_model = config["embedding-model"]
 model_name = embedding_model.split("/")[-1]
+
+# Load configuration from yaml file for MongoDB connection.
+config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
+db, fs, client = connect_to_mongodb(config_infra)
 
 # Run garbage collection to free up memory.
 gc.collect()
@@ -29,27 +33,34 @@ def main():
     4. Concatenate the tabular data with the two sets of embeddings.
     5. Save the final concatenated embeddings as a pickle file.
     """
-    # Load the categorized tabular data from a pickle file.
-    df_tabular = pd.read_pickle("tmp/product_tabular_categorized.pickle")
 
-    # Load the embeddings for 'pdt_inclexcl_ENG_CONTENT'.
-    embeddings1 = torch.load(f"tmp/embeddings_pdt_inclexcl_ENG_CONTENT_{model_name}.pt")
+    object_name = f"final_embeddings_{model_name}_concatenated_w_tabular"
+    existing_file = fs.find_one({"filename": object_name})
 
-    # Load the embeddings for 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED'.
-    embeddings2 = torch.load(
-        f"tmp/embeddings_pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED_{model_name}.pt"
-    )
+    if not existing_file:
 
-    # Concatenate the tabular data with the two sets of embeddings.
-    final_embeddings = np.concatenate(
-        (df_tabular.values, embeddings1.numpy(), embeddings2.numpy()), axis=1
-    )
+        # Load the categorized tabular data from a pickle file.
+        df_tabular = read_object(fs, "product_tabular_categorized")
+        df_tabular = pd.DataFrame(df_tabular)
 
-    # Save the final concatenated embeddings as a pickle file.
-    with open(
-        f"tmp/final_embeddings_{model_name}_concated_tabular.pickle", "wb"
-    ) as file:
-        pickle.dump(final_embeddings, file)
+        # Load the embeddings for 'pdt_inclexcl_ENG_CONTENT'.
+        embeddings1 = read_object(
+            fs, f"embeddings_pdt_inclexcl_ENG_CONTENT_{model_name}"
+        )
+
+        # Load the embeddings for 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED'.
+        embeddings2 = read_object(
+            fs,
+            f"embeddings_pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED_{model_name}",
+        )
+
+        # Concatenate the tabular data with the two sets of embeddings.
+        final_embeddings = np.concatenate(
+            (df_tabular.values, np.array(embeddings1), np.array(embeddings2)), axis=1
+        )
+
+        # Save the final concatenated embeddings as a pickle file.
+        save_object(fs=fs, object=final_embeddings, object_name=object_name)
 
 
 if __name__ == "__main__":

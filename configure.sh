@@ -41,6 +41,7 @@ helm install mongo-express cowboysysop/mongo-express \
 
 kubectl expose service mongo-express --type=LoadBalancer --name=mongo-express-lb
 
+export TIMESTAMP=$(date +%s)
 export MONGO_DB_EXTERNAL_IP=$(kubectl get service mongodb-lb -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 envsubst < infra-config.yaml > infra-config-pipeline.yaml
 

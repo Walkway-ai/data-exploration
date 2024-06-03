@@ -10,10 +10,16 @@ from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 from transformers import AutoModel
 
+from mongodb_lib import *
+
 # Load configuration from yaml file.
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
 embedding_model = config["embedding-model"]
 model_name = embedding_model.split("/")[-1]
+
+# Load configuration from yaml file for MongoDB connection.
+config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
+db, fs, client = connect_to_mongodb(config_infra)
 
 # Run garbage collection to free up memory.
 gc.collect()
@@ -47,7 +53,9 @@ def get_embeddings(df, text_field):
 
     # Convert embeddings to a torch tensor and save to file.
     embeddings = torch.tensor(embeddings)
-    torch.save(embeddings, f"tmp/embeddings_{text_field}_{model_name}.pt")
+    save_object(
+        fs=fs, object=embeddings, object_name=f"embeddings_{text_field}_{model_name}"
+    )
 
 
 def main():
@@ -59,12 +67,31 @@ def main():
     2. Generate embeddings for the 'pdt_inclexcl_ENG_CONTENT' field.
     3. Generate embeddings for the 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED' field.
     """
-    # Load the summarized product textual data from a pickle file.
-    df = pd.read_pickle("tmp/product_textual_lang_summarized.pickle")
 
-    # Generate embeddings for the specified text fields.
-    get_embeddings(df=df, text_field="pdt_inclexcl_ENG_CONTENT")
-    get_embeddings(df=df, text_field="pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED")
+    field_inclexcl = "pdt_inclexcl_ENG_CONTENT"
+    embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
+    embeddings_inclexcl_existing_file = fs.find_one(
+        {"filename": embeddings_inclexcl_name}
+    )
+
+    field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
+    embeddings_description_name = f"embeddings_{field_description}_{model_name}"
+    embeddings_description_existing_file = fs.find_one(
+        {"filename": embeddings_description_name}
+    )
+
+    if (
+        not embeddings_inclexcl_existing_file
+        or not embeddings_description_existing_file
+    ):
+
+        # Load the summarized product textual data from a pickle file.
+        df = read_object(fs, "product_textual_lang_summarized")
+        df = pd.DataFrame(df)
+
+        # Generate embeddings for the specified text fields.
+        get_embeddings(df=df, text_field=field_inclexcl)
+        get_embeddings(df=df, text_field=field_description)
 
 
 if __name__ == "__main__":

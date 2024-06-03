@@ -40,7 +40,7 @@ def main():
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file:
-            
+
         # Load the product textual data from a pickle file.
         df = read_object(fs, "product_textual_lang")
         df = pd.DataFrame(df)
