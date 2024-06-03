@@ -50,7 +50,7 @@ pipeline {
                 }
             }
         }
-        stage('create-final-embeddings') { 
+        stage('product-similarity') { 
             steps {
                 script {
                     sh 'echo test'
