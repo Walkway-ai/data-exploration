@@ -61,8 +61,6 @@ spec:
                 script {
                     def logs = readFile(env.LOG_FILE)
                     def emailBody = """
-                        Experiment Logs:
-
                         ${logs}
 
                         User Feedback:
