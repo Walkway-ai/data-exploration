@@ -20,13 +20,17 @@ spec:
         }
     }
     parameters {
-        string(name: 'product_id', defaultValue: '9866P79', description: 'The ID of the product')
-        choice(name: 'city', choices: ['same', 'different'], description: 'The name of the city')
-        choice(name: 'supplier_code', choices: ['different', 'same'], description: 'The supplier code')
+        string(name: 'product_id', defaultValue: '9866P79', description: 'ID of the product (e.g. 9866P79)')
+        choice(name: 'city', choices: ['same', 'different'], description: 'If same, only products from the same city are shown.')
+        choice(name: 'supplier_code', choices: ['different', 'same'], description: 'If same, only products from the same supplier code are shown.')
         choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'gte-large'], description: 'Embedding model')
     }
+    environment {
+        LOG_FILE = 'experiment.log'
+        USER_FEEDBACK = ''
+    }
     stages {
-        stage('experiment-product-similarity') { 
+        stage('experiment-product-similarity') {
             steps {
                 container('python') {
                     sh """
@@ -34,14 +38,38 @@ spec:
                         -product_id ${params.product_id} \
                         -city_name ${params.city} \
                         -supplier_code ${params.supplier_code} \
-                        -embedding_model ${params.embedding_model}
+                        -embedding_model ${params.embedding_model} | tee ${env.LOG_FILE}
                     """
                 }
             }
         }
-        stage('send-feedback-email') { 
+        stage('ask-for-feedback') {
             steps {
-                emailext(attachLog: true, body: 'testbody', subject: 'testsubject', to: 'fabio@walkway.ai')
+                script {
+                    env.USER_FEEDBACK = input message: 'Please provide your feedback', parameters: [string(name: 'feedback', defaultValue: '', description: 'Your feedback')]
+                }
+            }
+        }
+        stage('send-feedback-email') {
+            steps {
+                script {
+                    def logs = readFile(env.LOG_FILE)
+                    def emailBody = """
+                        Experiment Logs:
+
+                        ${logs}
+
+                        User Feedback:
+
+                        ${env.USER_FEEDBACK}
+                    """
+                    emailext(
+                        attachLog: true, 
+                        body: emailBody, 
+                        subject: 'Experiment Feedback', 
+                        to: 'fabio@walkway.ai'
+                    )
+                }
             }
         }
     }
