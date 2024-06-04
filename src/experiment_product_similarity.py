@@ -132,10 +132,8 @@ def main():
                 print(f"Similar product: {row['PRODUCTCODE']}")
                 print(f"Similarity score: {row['score']}")
                 print("")
-                print(
-                    f"Summarized description:"
-                )
-                print(str(row['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED']))
+                print(f"Summarized description:")
+                print(str(row["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]))
 
         else:
 
