@@ -37,5 +37,10 @@ spec:
                 }
             }
         }
+        stage('send-feedback-email') { 
+            steps {
+                emailext(attachLog: true, body: 'testbody', subject: 'testsubject', to: 'fabio@walkway.ai')
+            }
+        }
     }
 }
