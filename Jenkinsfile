@@ -19,11 +19,6 @@ spec:
 """
         }
     }
-    parameters {
-        string(name: 'product_id', defaultValue: '9866P79', description: 'The ID of the product')
-        choice(name: 'city', choices: ['same', 'different'], description: 'The name of the city')
-        choice(name: 'supplier_code', choices: ['same', 'different'], description: 'The supplier code')
-    }
     stages {
         stage('retrieve-bigquery-data') {
             steps {
@@ -78,18 +73,6 @@ spec:
             steps {
                 container('python') {
                     sh 'python3 src/generate_similarity_product.py'
-                }
-            }
-        }
-        stage('experiment-product-similarity') { 
-            steps {
-                container('python') {
-                    sh """
-                    python3 src/experiment_product_similarity.py \
-                        -product_id ${params.product_id} \
-                        -city_name ${params.city} \
-                        -supplier_code ${params.supplier_code}
-                    """
                 }
             }
         }
