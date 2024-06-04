@@ -27,7 +27,6 @@ spec:
     }
     environment {
         LOG_FILE = 'experiment.log'
-        USER_FEEDBACK = ''
     }
     stages {
         stage('experiment-product-similarity') {
@@ -46,7 +45,8 @@ spec:
         stage('ask-for-feedback') {
             steps {
                 script {
-                    env.USER_FEEDBACK = input message: 'Please provide your feedback', parameters: [string(name: 'feedback', defaultValue: '', description: 'Your feedback')]
+                    def userFeedback = input message: 'Please provide your feedback', parameters: [string(name: 'feedback', defaultValue: '', description: 'Your feedback')]
+                    currentBuild.description = userFeedback
                 }
             }
         }
@@ -61,7 +61,7 @@ spec:
 
                         User Feedback:
 
-                        ${env.USER_FEEDBACK}
+                        ${currentBuild.description}
                     """
                     emailext(
                         attachLog: true, 
