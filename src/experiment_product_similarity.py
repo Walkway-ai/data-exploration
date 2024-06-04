@@ -115,10 +115,8 @@ def main():
         print(50 * "-")
         print("EXPERIMENT WITH PARAMETERS:")
         print(f"City: {city_name}")
-        print(50 * "-")
         print(f"Supplier code: {supplier_code}")
         print(f"PRODUCTCODE selected: {product_id}")
-        print("")
         print("Summarized description:")
         print(df_text_product)
 
@@ -136,6 +134,7 @@ def main():
 
         else:
 
+            print(50 * "-")
             print("No products were found for the combination.")
 
 
