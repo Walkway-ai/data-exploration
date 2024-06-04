@@ -20,7 +20,7 @@ spec:
         }
     }
     parameters {
-        string(name: 'product_id', defaultValue: '9866P79', description: 'ID of the product (e.g. 9866P79)')
+        string(name: 'product_id', defaultValue: '9866P79', description: 'ID of the product (e.g. 9866P79, 73434P108, 156679P2, 73995P7, 70667P4)')
         choice(name: 'city', choices: ['same', 'different'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'same'], description: 'If same, only products from the same supplier code are shown.')
         choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'gte-large'], description: 'Embedding model')
