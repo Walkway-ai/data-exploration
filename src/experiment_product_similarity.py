@@ -118,14 +118,20 @@ def main():
         print("Summarized description:")
         print(df_text_product)
 
-        for index, row in df_result.iterrows():
+        if len(df_result) > 0:
 
-            print(50 * "-")
-            print(f"Similar product: {row['PRODUCTCODE']}")
-            print(f"Similarity score: {row['score']}")
-            print(
-                f"Summarized description: {row['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED']}"
-            )
+            for index, row in df_result.iterrows():
+
+                print(50 * "-")
+                print(f"Similar product: {row['PRODUCTCODE']}")
+                print(f"Similarity score: {row['score']}")
+                print(
+                    f"Summarized description: {row['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED']}"
+                )
+
+        else:
+
+            print("No products were found for the combination.")
 
 
 if __name__ == "__main__":
