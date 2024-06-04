@@ -131,7 +131,7 @@ def main():
                 print(
                     f"Summarized description:"
                 )
-                print({row['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED']})
+                print(str(row['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED']))
 
         else:
 
