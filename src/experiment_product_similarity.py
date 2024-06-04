@@ -129,8 +129,9 @@ def main():
                 print(f"Similarity score: {row['score']}")
                 print("")
                 print(
-                    f"Summarized description: {row['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED']}"
+                    f"Summarized description:"
                 )
+                print({row['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED']})
 
         else:
 
