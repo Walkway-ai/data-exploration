@@ -10,11 +10,6 @@ from mongodb_lib import *
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config)
 
-# Load configuration from yaml file for embedding model.
-config_model = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
-embedding_model = config_model["embedding-model"]
-model_name = embedding_model.split("/")[-1]
-
 # Run garbage collection to free up memory.
 gc.collect()
 
@@ -35,6 +30,9 @@ def main():
     parser.add_argument(
         "-supplier_code", type=str, required=True, help="Supplier code."
     )
+    parser.add_argument(
+        "-embedding_model", type=str, required=True, help="Embedding model."
+    )
 
     # Parse the arguments
     args = parser.parse_args()
@@ -43,8 +41,9 @@ def main():
     product_id = args.product_id
     city_name = args.city_name
     supplier_code = args.supplier_code
+    embedding_model = args.embedding_model
 
-    object_name = f"product_similarities_{model_name}"
+    object_name = f"product_similarities_{embedding_model}"
     existing_file = fs.find_one({"filename": object_name})
 
     if existing_file:
