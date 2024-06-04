@@ -33,7 +33,7 @@ spec:
                     python3 src/experiment_product_similarity.py \
                         -product_id ${params.product_id} \
                         -city_name ${params.city} \
-                        -supplier_code ${params.supplier_code}
+                        -supplier_code ${params.supplier_code} \
                         -embedding_model ${params.embedding_model}
                     """
                 }
