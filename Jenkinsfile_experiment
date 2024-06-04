@@ -23,7 +23,7 @@ spec:
         string(name: 'product_id', defaultValue: '9866P79', description: 'The ID of the product')
         choice(name: 'city', choices: ['same', 'different'], description: 'The name of the city')
         choice(name: 'supplier_code', choices: ['different', 'same'], description: 'The supplier code')
-        choice(name: 'embedding_model', choices: ['jinaai/jina-embeddings-v2-base-en', 'thenlper/gte-large'], description: 'Embedding model')
+        choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'gte-large'], description: 'Embedding model')
     }
     stages {
         stage('experiment-product-similarity') { 
