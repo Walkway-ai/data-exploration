@@ -121,6 +121,11 @@ def main():
 
         if len(df_result) > 0:
 
+            print(50 * "-")
+            print(50 * "-")
+            print("RESULTS")
+            print(50 * "-")
+
             for index, row in df_result.iterrows():
 
                 print(50 * "-")
