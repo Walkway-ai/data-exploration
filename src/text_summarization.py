@@ -77,7 +77,7 @@ def main():
         ):
             if desc:
                 summarized_desc = summarizer(
-                    desc, max_length=100, min_length=30, do_sample=False
+                    desc, max_length=150, min_length=30, do_sample=False
                 )[0]["summary_text"]
             else:
                 summarized_desc = ""
