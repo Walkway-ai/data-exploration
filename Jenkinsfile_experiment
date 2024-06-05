@@ -42,7 +42,7 @@ spec:
                 }
             }
         }
-        stage('ask-for-feedback') {
+        stage('give-feedback') {
             steps {
                 script {
                     def feedbackMessage = """
