@@ -115,6 +115,7 @@ def main():
         print("EXPERIMENT WITH PARAMETERS:")
         print(f"City: {city_name}")
         print(f"Supplier code: {supplier_code}")
+        print(f"Embedding model: {embedding_model}")
         print(f"PRODUCTCODE selected: {product_id}")
         print("Summarized description:")
         print(df_text_product)
