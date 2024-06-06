@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
   - name: python
-    image: fabiocuri/python-walkway:latest
+    image: walkwayai/python:latest
     command:
     - cat
     tty: true

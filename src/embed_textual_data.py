@@ -12,12 +12,11 @@ from transformers import AutoModel
 
 from mongodb_lib import *
 
-# Load configuration from yaml file.
+# Load configuration from YAML files.
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
 embedding_model = config["embedding-model"]
 model_name = embedding_model.split("/")[-1]
 
-# Load configuration from yaml file for MongoDB connection.
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
@@ -64,10 +63,9 @@ def main():
 
     Steps:
     1. Load the summarized product textual data from a pickle file.
-    2. Generate embeddings for the 'pdt_inclexcl_ENG_CONTENT' field.
-    3. Generate embeddings for the 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED' field.
+    2. Generate embeddings for the 'pdt_inclexcl_ENG_CONTENT' field if not already present.
+    3. Generate embeddings for the 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED' field if not already present.
     """
-
     field_inclexcl = "pdt_inclexcl_ENG_CONTENT"
     embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
     embeddings_inclexcl_existing_file = fs.find_one(
@@ -84,14 +82,17 @@ def main():
         not embeddings_inclexcl_existing_file
         or not embeddings_description_existing_file
     ):
-
         # Load the summarized product textual data from a pickle file.
         df = read_object(fs, "product_textual_lang_summarized")
         df = pd.DataFrame(df)
 
-        # Generate embeddings for the specified text fields.
-        get_embeddings(df=df, text_field=field_inclexcl)
-        get_embeddings(df=df, text_field=field_description)
+        # Generate embeddings for the specified text fields if not already present.
+        if not embeddings_inclexcl_existing_file:
+            get_embeddings(df=df, text_field=field_inclexcl)
+        if not embeddings_description_existing_file:
+            get_embeddings(df=df, text_field=field_description)
+    else:
+        print(f"All required embeddings are already present in the database.")
 
 
 if __name__ == "__main__":

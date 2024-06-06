@@ -10,16 +10,15 @@ from google.cloud import bigquery
 class BigQueryDataProcessor:
     def __init__(self, config, dataset_id, table_id, table_fields, key_field):
         """
-        Initialize the BigQueryDataProcessor with the given configuration file path.
+        Initialize the BigQueryDataProcessor with the given parameters.
 
         Parameters:
-        config (str): The configuration file.
+        config (str): The path to the configuration file.
         dataset_id (str): The dataset ID in BigQuery.
         table_id (str): The table ID in BigQuery.
-        table_fields (str): The fields to be collected.
+        table_fields (list of str): The fields to be collected.
         key_field (str): The column name to group by.
         """
-
         self.config = config
         self.dataset_id = dataset_id
         self.table_id = table_id
@@ -33,10 +32,12 @@ class BigQueryDataProcessor:
         """
         Read a BigQuery table into a DataFrame and aggregate its values.
 
-        Returns:
-        pd.DataFrame: The aggregated DataFrame with cleaned column names.
-        """
+        This method reads data from the specified BigQuery table, cleans up the column names,
+        and calls the aggregation method to process the DataFrame.
 
+        Returns:
+        None
+        """
         table_ref = self.client.dataset(self.dataset_id).table(self.table_id)
         table = self.client.get_table(table_ref)
 
@@ -57,17 +58,19 @@ class BigQueryDataProcessor:
         """
         Aggregate and deduplicate values in each column of the DataFrame based on the key field.
 
-        Returns:
-        pd.DataFrame: The aggregated DataFrame with unique lists of values for each column.
-        """
+        This method groups the DataFrame by the key field and aggregates the other columns,
+        removing duplicate values in each list.
 
+        Returns:
+        None
+        """
         columns_to_aggregate = [col for col in self.df.columns if col != self.key_field]
         agg_dict = {col: list for col in columns_to_aggregate}
         self.df = self.df.groupby(self.key_field).agg(agg_dict).reset_index()
 
         for column in columns_to_aggregate:
             self.df[column] = [
-                list(OrderedDict.fromkeys(el).keys()) for el in list(self.df[column])
+                list(OrderedDict.fromkeys(el).keys()) for el in self.df[column]
             ]
 
     def retrieve_most_recent_bigquery_table(self):
@@ -75,13 +78,12 @@ class BigQueryDataProcessor:
         Retrieve the most recent records for each product from the specified BigQuery table
         and create or replace a new table with these records.
 
-        Parameters:
-        dataset_id (str): The dataset ID in BigQuery.
-        table_id (str): The table ID in BigQuery.
+        This method creates a new table in the specified dataset with the most recent records
+        for each product, determined by the `updated_at` timestamp.
+
+        Returns:
+        None
         """
-
-        client = bigquery.Client()
-
         query = f"""
             CREATE OR REPLACE TABLE `preprocessed.{self.table_id}` AS
             WITH ranked_table AS (
@@ -99,4 +101,4 @@ class BigQueryDataProcessor:
                 row_num = 1
         """
 
-        client.query(query).result()
+        self.client.query(query).result()

@@ -9,7 +9,7 @@ from deep_translator import GoogleTranslator
 from langdetect import detect
 from tqdm import tqdm
 
-from mongodb_lib import *
+from mongodb_lib import connect_to_mongodb, read_object, save_object
 
 # Load configuration from yaml file for MongoDB connection.
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -30,8 +30,9 @@ def detect_language(text):
     str: The detected language code or an empty string if detection fails.
     """
     try:
-        return detect(str(text))
-    except Exception:
+        return detect(text)
+    except Exception as e:
+        print(f"Language detection error: {e}")
         return ""
 
 
@@ -57,12 +58,12 @@ def main():
     Main function to process and translate product descriptions.
 
     Steps:
-    1. Load the textual product data from a pickle file.
+    1. Load the textual product data from MongoDB.
     2. Fill any missing values in the DataFrame.
     3. Detect the language of product descriptions.
     4. Translate non-English product descriptions to English.
     5. Filter the DataFrame to include relevant columns.
-    6. Save the processed DataFrame as a pickle file.
+    6. Save the processed DataFrame to MongoDB.
     """
 
     object_name = "product_textual_lang"
@@ -70,28 +71,25 @@ def main():
 
     if not existing_file:
 
-        # Load the textual product data from a pickle file.
+        # Load the textual product data from MongoDB.
         df = read_object(fs, "product_textual")
         df = pd.DataFrame(df)
         # Fill any missing values with an empty string.
         df.fillna("", inplace=True)
 
         # Detect the language of each product description.
-        df["pdt_product_detail_PRODUCTDESCRIPTION_lang"] = [
-            detect_language(el)
-            for el in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
+        df["language"] = [
+            detect_language(text)
+            for text in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
         ]
 
         # Translate non-English product descriptions to English.
-        df["pdt_product_detail_PRODUCTDESCRIPTION_translated"] = [
-            translate_text(el) if lang != "en" else el
-            for el, lang in tqdm(
-                zip(
-                    df["pdt_product_detail_PRODUCTDESCRIPTION"],
-                    df["pdt_product_detail_PRODUCTDESCRIPTION_lang"],
-                )
-            )
-        ]
+        df["pdt_product_detail_PRODUCTDESCRIPTION_translated"] = df.apply(
+            lambda row: translate_text(row["pdt_product_detail_PRODUCTDESCRIPTION"])
+            if row["language"] != "en"
+            else row["pdt_product_detail_PRODUCTDESCRIPTION"],
+            axis=1,
+        )
 
         # Filter the DataFrame to include only relevant columns.
         df = df[
@@ -102,8 +100,11 @@ def main():
             ]
         ]
 
-        # Save the processed DataFrame as a pickle file.
+        # Save the processed DataFrame to MongoDB.
         save_object(fs=fs, object=df, object_name=object_name)
+
+    else:
+        print("Processed data already exists in MongoDB. Skipping processing.")
 
 
 if __name__ == "__main__":

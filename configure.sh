@@ -46,6 +46,6 @@ export MONGO_DB_EXTERNAL_IP=$(kubectl get service mongodb-lb -o jsonpath='{.stat
 envsubst < infra-config.yaml > infra-config-pipeline.yaml
 
 # Create Python image
-docker build -t fabiocuri/python-walkway:latest .
-docker tag fabiocuri/python-walkway:latest fabiocuri/python-walkway:latest
-docker push fabiocuri/python-walkway:latest
+docker build -t walkwayai/python:latest .
+docker tag walkwayai/python:latest walkwayai/python:latest
+docker push walkwayai/python:latest

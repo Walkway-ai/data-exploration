@@ -8,12 +8,11 @@ import yaml
 
 from mongodb_lib import *
 
-# Load configuration from yaml file.
+# Load configuration from YAML files.
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
 bigquery_config = config["bigquery-to-retrieve"]
 key_field = bigquery_config["key-field"]
 
-# Load configuration from yaml file for MongoDB connection.
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
@@ -30,14 +29,12 @@ def main():
     2. Create a copy of the DataFrame for categorization.
     3. Factorize each column in the DataFrame.
     4. Remove the key field and supplier code from the categorized DataFrame.
-    5. Save the categorized DataFrame as a pickle file.
+    5. Save the categorized DataFrame as a pickle file if it does not already exist in MongoDB.
     """
-
     object_name = "product_tabular_categorized"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file:
-
         # Load the tabular product data from a pickle file.
         df = read_object(fs, "product_tabular")
         df = pd.DataFrame(df)
@@ -51,11 +48,14 @@ def main():
 
         # Remove the key field from the categorized DataFrame.
         del categorized_df[key_field]
+
         # Remove the supplier code from the categorized DataFrame.
         del categorized_df["pdt_product_level_SUPPLIERCODE"]
 
         # Save the categorized DataFrame as a pickle file.
         save_object(fs=fs, object=categorized_df, object_name=object_name)
+    else:
+        print(f"The object '{object_name}' already exists in the database.")
 
 
 if __name__ == "__main__":

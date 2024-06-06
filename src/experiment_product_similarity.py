@@ -55,7 +55,7 @@ def main():
         df_raw = pd.DataFrame(df_raw)
         df_raw_product = df_raw[df_raw["PRODUCTCODE"] == product_id]
 
-        df_text = read_object(fs, "product_textual_lang_summarized")
+        df_text = read_object(fs, "product_textual_lang_summarized_backup")
         df_text = pd.DataFrame(df_text)
         df_text_product = str(
             list(

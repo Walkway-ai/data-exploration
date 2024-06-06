@@ -6,7 +6,7 @@ import yaml
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 
-from mongodb_lib import *
+from mongodb_lib import connect_to_mongodb, read_object, save_object
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -50,10 +50,14 @@ def find_most_similar_products(embedding, embeddings, num_similar=15):
 
 def main():
     """
-    Main function to find the most similar products.
+    Main function to find the most similar products based on embeddings.
 
+    Steps:
+    1. Check if the similarity data already exists in MongoDB.
+    2. If not, load the product textual data and combined embeddings.
+    3. Calculate the most similar products for each product in the dataset.
+    4. Save the similarity data to MongoDB.
     """
-
     object_name = f"product_similarities_{model_name}"
     existing_file = fs.find_one({"filename": object_name})
 
@@ -71,8 +75,9 @@ def main():
 
         similarity_dict = {}
 
-        for given_product_index in tqdm(range(len(list(df["PRODUCTCODE"])))):
-
+        for given_product_index in tqdm(
+            range(len(df["PRODUCTCODE"])), desc="Calculating similarities"
+        ):
             # Get the embedding of the given product.
             given_embedding = combined_embeddings[given_product_index]
 
@@ -82,13 +87,17 @@ def main():
             )
 
             similar_products = [
-                list(df["PRODUCTCODE"])[el] for el in most_similar_indices
+                df["PRODUCTCODE"].iloc[el] for el in most_similar_indices
             ]
-            similarity_dict[list(df["PRODUCTCODE"])[given_product_index]] = list(
+            similarity_dict[df["PRODUCTCODE"].iloc[given_product_index]] = list(
                 zip(similar_products, similarity_scores)
             )
 
+        # Save the similarity dictionary to MongoDB.
         save_object(fs=fs, object=similarity_dict, object_name=object_name)
+
+    else:
+        print("Similarity data already exists in MongoDB. Skipping computation.")
 
 
 if __name__ == "__main__":

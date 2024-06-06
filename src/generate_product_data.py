@@ -6,16 +6,15 @@ import gc
 import yaml
 from ydata_profiling import ProfileReport
 
-from mongodb_lib import *
+from mongodb_lib import connect_to_mongodb, save_object
 from preprocessing_handlers import DataFrameProcessor
 
-# Load configuration from yaml file.
+# Load configuration from YAML files.
 config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
 bigquery_config = config["bigquery-to-retrieve"]
 key_field = bigquery_config["key-field"]
 location_field = bigquery_config["location-field"]
 
-# Load configuration from yaml file for MongoDB connection.
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
@@ -33,7 +32,6 @@ def main():
     3. Save the processed tabular and textual data as pickle files.
     4. Generate and save profiling reports for both tabular and textual data.
     """
-
     tabular_object_name = "product_tabular"
     tabular_existing_file = fs.find_one({"filename": tabular_object_name})
 
@@ -59,14 +57,21 @@ def main():
         save_object(fs=fs, object=processor.df_text, object_name=textual_object_name)
 
         # Generate a profiling report for the tabular data.
-        profile = ProfileReport(processor.df, title="Product Tabular Report")
+        tabular_profile = ProfileReport(processor.df, title="Product Tabular Report")
         # Save the tabular profiling report to an HTML file.
-        profile.to_file("reports/product-tabular-report.html")
+        tabular_profile.to_file("reports/product-tabular-report.html")
 
         # Generate a profiling report for the textual data.
-        profile = ProfileReport(processor.df_text, title="Product Textual Report")
+        textual_profile = ProfileReport(
+            processor.df_text, title="Product Textual Report"
+        )
         # Save the textual profiling report to an HTML file.
-        profile.to_file("reports/product-textual-report.html")
+        textual_profile.to_file("reports/product-textual-report.html")
+
+    else:
+        print(
+            "The tabular and/or textual data files already exist. Skipping processing and profiling."
+        )
 
 
 if __name__ == "__main__":
