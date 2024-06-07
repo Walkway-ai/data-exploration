@@ -51,7 +51,7 @@ def query_gpt(df, df_product):
         ],
     )
 
-    return ast.literal_eval(result.choices[0].message.content)
+    return result
 
 def main():
 
@@ -143,30 +143,38 @@ def main():
 
         result = query_gpt(df, df_product)
 
-        print("EXPERIMENT WITH PARAMETERS:")
-        print(f"City: {city_name}")
-        print(f"Supplier code: {supplier_code}")
-        print(f"Embedding model: {embedding_model}")
-        print("")
-        print("Product details:")
-        
-        for column_name, value in df_product.items():
-            print(f"{column_name}: {value}")
+        try:
 
-        if len(result) > 0:
+            result = ast.literal_eval(result.choices[0].message.content)
 
-            df = df[df["PRODUCTCODE"].isin(result)]
+            print("EXPERIMENT WITH PARAMETERS:")
+            print(f"City: {city_name}")
+            print(f"Supplier code: {supplier_code}")
+            print(f"Embedding model: {embedding_model}")
+            print("")
+            print("Product details:")
+            
+            for column_name, value in df_product.items():
+                print(f"{column_name}: {value}")
 
-            print(50 * "-")
-            print("RESULTS")
-            print(50 * "-")
-            print("Similar product details:")
-            for column_name, series in df.items():
-                print(f"{column_name}: {series.iloc[0]}")
+            if len(result) > 0:
 
-        else:
+                df = df[df["PRODUCTCODE"].isin(result)]
 
-            print("No products were found for the combination.")
+                print(50 * "-")
+                print("RESULTS")
+                print(50 * "-")
+                print("Similar product details:")
+                for column_name, series in df.items():
+                    print(f"{column_name}: {series.iloc[0]}")
+
+            else:
+
+                print("No products were found for the combination.")
+
+        except Exception as e:
+
+            print(e)
 
 
 if __name__ == "__main__":
