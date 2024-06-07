@@ -3,8 +3,12 @@ import gc
 
 import pandas as pd
 import yaml
-
+from collections import defaultdict
 from mongodb_lib import *
+from openai import GPT, ClassificationRequest
+
+# Initialize your ChatGPT instance
+gpt = GPT(engine="text-davinci", api_key="sk-proj-oZzPbmxH9ozD9MkvLvWBT3BlbkFJGCJXmNzO5IYFmUZ68Wrm")
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -13,6 +17,20 @@ db, fs, client = connect_to_mongodb(config)
 # Run garbage collection to free up memory.
 gc.collect()
 
+def query_gpt(df, df_product):
+
+    df = df.astype(str)
+    df_product = df_product.astype(str)
+
+    product_features = ' '.join(['{}_{}'.format(col, val) for col, val in df_product.items()])
+
+    for _, row in df.iterrows():
+
+        current_features = ' '.join(['{}_{}'.format(col, val) for col, val in row.items()])
+        
+        similarity_score = gpt.classification([product_features, current_features])
+
+        print(row['PRODUCTCODE'], similarity_score)
 
 def main():
 
@@ -46,69 +64,70 @@ def main():
     object_name = f"product_similarities_{embedding_model}"
     existing_file = fs.find_one({"filename": object_name})
 
+    city_feature = "pdt_product_detail_VIDESTINATIONCITY"
+    supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
+
     if existing_file:
 
         similarity_dict = read_object(fs, object_name)
         similar_products = similarity_dict[product_id]
+        id_score = defaultdict(lambda: 0)
+        id_score.update({key: value for key, value in similar_products})
+
+        all_products = list(id_score.keys())
+        all_products.append(product_id)
 
         df_raw = read_object(fs, "product_tabular")
         df_raw = pd.DataFrame(df_raw)
-        df_raw_product = df_raw[df_raw["PRODUCTCODE"] == product_id]
+        df_raw = df_raw[df_raw["PRODUCTCODE"].isin(all_products)]
 
         df_text = read_object(fs, "product_textual_lang_summarized_backup")
         df_text = pd.DataFrame(df_text)
-        df_text_product = str(
-            list(
-                df_text[df_text["PRODUCTCODE"] == product_id][
-                    "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
-                ]
-            )[0]
-        )
+        df_text = df_text[df_text["PRODUCTCODE"].isin(all_products)]
 
-        str_city = str(list(df_raw_product["pdt_product_detail_VIDESTINATIONCITY"])[0])
-        str_supplier_code = str(
-            list(df_raw_product["pdt_product_level_SUPPLIERCODE"])[0]
-        )
+        df = pd.merge(df_raw, df_text, on="PRODUCTCODE", how="outer")
 
-        df_raw_similarity = df_raw[
-            df_raw["PRODUCTCODE"].isin([el[0] for el in similar_products])
-        ]
-        df_text_similarity = df_text[
-            df_text["PRODUCTCODE"].isin([el[0] for el in similar_products])
-        ]
+        del df["pdt_product_detail_PRODUCTDESCRIPTION_translated"]
 
-        df_result = pd.merge(
-            df_raw_similarity, df_text_similarity, on="PRODUCTCODE", how="outer"
-        )
+        # Product features
+        df_product = df.iloc[-1]
+        df = df[:-1]
 
         if city_name == "same":
 
-            df_result = df_result[
-                df_result["pdt_product_detail_VIDESTINATIONCITY"] == str_city
+            df = df[
+                df[city_feature] == str(df_product[city_feature])
             ]
 
         if city_name == "different":
 
-            df_result = df_result[
-                df_result["pdt_product_detail_VIDESTINATIONCITY"] != str_city
+            df = df[
+                df[city_feature] != str(df_product[city_feature])
             ]
 
         if supplier_code == "same":
 
-            df_result = df_result[
-                df_result["pdt_product_level_SUPPLIERCODE"] == str_supplier_code
+            df = df[
+                df[supplier_code_feature] == str(df_product[supplier_code_feature])
             ]
 
         if supplier_code == "different":
 
-            df_result = df_result[
-                df_result["pdt_product_level_SUPPLIERCODE"] != str_supplier_code
+            df = df[
+                df[supplier_code_feature] != str(df_product[supplier_code_feature])
             ]
 
-        df_result["score"] = [
-            el[1] for el in similar_products if el[0] in list(df_result["PRODUCTCODE"])
-        ]
-        df_result = df_result.sort_values(by="score", ascending=False)
+        # Take top 5
+        df = df[:5]
+
+        del df[city_feature]
+        del df[supplier_code_feature]
+
+        result = query_gpt(df, df_product)
+
+        import sys
+
+        sys.exit()
 
         print(50 * "-")
         print(50 * "-")

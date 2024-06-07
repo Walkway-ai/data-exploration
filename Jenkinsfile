@@ -51,6 +51,7 @@ spec:
         stage('text-summarization') { 
             steps {
                 container('python') {
+                    sh 'mkdir tmp'
                     sh 'python3 src/text_summarization.py'
                 }
             }
