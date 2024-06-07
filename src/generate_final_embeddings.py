@@ -33,6 +33,7 @@ def main():
     5. Save the final concatenated embeddings as a pickle file.
     """
     object_name = f"final_embeddings_{model_name}_concatenated_w_tabular"
+    remove_object(fs, object_name)
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file:

@@ -21,7 +21,7 @@ model_name = embedding_model.split("/")[-1]
 gc.collect()
 
 
-def find_most_similar_products(embedding, embeddings, num_similar=15):
+def find_most_similar_products(embedding, embeddings, num_similar=50):
     """
     Find the most similar products based on cosine similarity.
 

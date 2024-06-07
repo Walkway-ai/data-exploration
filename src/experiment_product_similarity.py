@@ -3,12 +3,11 @@ import gc
 
 import pandas as pd
 import yaml
+import ast
+pd.set_option('display.max_columns', None)
 from collections import defaultdict
 from mongodb_lib import *
-from openai import GPT, ClassificationRequest
-
-# Initialize your ChatGPT instance
-gpt = GPT(engine="text-davinci", api_key="sk-proj-oZzPbmxH9ozD9MkvLvWBT3BlbkFJGCJXmNzO5IYFmUZ68Wrm")
+from openai import OpenAI
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -17,20 +16,42 @@ db, fs, client = connect_to_mongodb(config)
 # Run garbage collection to free up memory.
 gc.collect()
 
+system_role = "You are an expert in online bookings in the tourism and entertainment industry and can find products that are the same, but with different descriptions."
+
 def query_gpt(df, df_product):
 
     df = df.astype(str)
     df_product = df_product.astype(str)
 
-    product_features = ' '.join(['{}_{}'.format(col, val) for col, val in df_product.items()])
+    product_features = '; '.join(['{}: {}'.format(col, val) for col, val in df_product.items()])
+
+    candidates_str = ""
 
     for _, row in df.iterrows():
 
-        current_features = ' '.join(['{}_{}'.format(col, val) for col, val in row.items()])
-        
-        similarity_score = gpt.classification([product_features, current_features])
+        candidates_str_now = '; '.join(['{}_{}'.format(col, val) for col, val in row.items()])
 
-        print(row['PRODUCTCODE'], similarity_score)
+        candidates_str += "\n" + candidates_str_now
+
+    prompt = f"Given the following product: \n ----- \n {product_features} \n ----- \n, give me a Python list of all PRODUCTCODE of the products below that are very similar to it, if any (e.g. ['18745FBP', 'H73TOUR2']). If there are none, return an empty list ([]). You should mainly compare the pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED to make your decision. Your answer should only contain a Python list with the results. \n ----- {candidates_str}"
+
+    #client = secretmanager.SecretManagerServiceClient()
+    #secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
+    #response = client.access_secret_version(request={"name": secret_name})
+    #apikey = response.payload.data.decode("UTF-8")
+    apikey = "sk-proj-JnVgq03M094rYihMyFpeT3BlbkFJGluZobSDuqE8pFb013m7"
+
+    client = OpenAI(api_key=apikey)
+
+    result = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": system_role},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    return ast.literal_eval(result.choices[0].message.content)
 
 def main():
 
@@ -120,44 +141,31 @@ def main():
         # Take top 5
         df = df[:5]
 
-        del df[city_feature]
-        del df[supplier_code_feature]
-
         result = query_gpt(df, df_product)
 
-        import sys
-
-        sys.exit()
-
-        print(50 * "-")
-        print(50 * "-")
         print("EXPERIMENT WITH PARAMETERS:")
         print(f"City: {city_name}")
         print(f"Supplier code: {supplier_code}")
         print(f"Embedding model: {embedding_model}")
-        print(f"PRODUCTCODE selected: {product_id}")
-        print("Summarized description:")
-        print(df_text_product)
+        print("")
+        print("Product details:")
+        
+        for column_name, value in df_product.items():
+            print(f"{column_name}: {value}")
 
-        if len(df_result) > 0:
+        if len(result) > 0:
 
-            print(50 * "-")
+            df = df[df["PRODUCTCODE"].isin(result)]
+
             print(50 * "-")
             print("RESULTS")
             print(50 * "-")
-
-            for index, row in df_result.iterrows():
-
-                print(50 * "-")
-                print(f"Similar product: {row['PRODUCTCODE']}")
-                print(f"Similarity score: {row['score']}")
-                print("")
-                print(f"Summarized description:")
-                print(str(row["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]))
+            print("Similar product details:")
+            for column_name, series in df.items():
+                print(f"{column_name}: {series.iloc[0]}")
 
         else:
 
-            print(50 * "-")
             print("No products were found for the combination.")
 
 

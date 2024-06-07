@@ -56,14 +56,14 @@ spec:
                 }
             }
         }
-        stage('create-embeddings') { 
+        stage('embed-textual-data') { 
             steps {
                 container('python') {
                     sh 'python3 src/embed_textual_data.py'
                 }
             }
         }
-        stage('create-final-embeddings') { 
+        stage('generate-final-embeddings') { 
             steps {
                 container('python') {
                     sh 'python3 src/generate_final_embeddings.py'
@@ -73,7 +73,7 @@ spec:
         stage('generate-product-similarity') { 
             steps {
                 container('python') {
-                    sh 'python3 src/generate_similarity_product.py'
+                    sh 'python3 src/generate_product_similarity.py'
                 }
             }
         }
