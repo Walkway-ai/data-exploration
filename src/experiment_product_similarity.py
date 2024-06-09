@@ -46,7 +46,7 @@ def query_gpt(df, df_product):
     client = OpenAI(api_key=apikey)
 
     result = client.chat.completions.create(
-        model="gpt-4.0",
+        model="gpt-4-turbo",
         messages=[
             {"role": "system", "content": system_role},
             {"role": "user", "content": prompt},
