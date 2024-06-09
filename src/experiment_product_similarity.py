@@ -35,7 +35,7 @@ def query_gpt(df, df_product):
 
         candidates_str += "\n \n" + candidates_str_now
 
-    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined primarily based on the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED. \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
+    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED. \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
 
     #client = secretmanager.SecretManagerServiceClient()
     #secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
@@ -146,8 +146,11 @@ def main():
 
         del df["score"]
 
+        df_product = df_product[["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]]
+        df = df[["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]]
+
         # Take top k
-        df = df[:5]
+        df = df[:20]
 
         result = query_gpt(df, df_product)
 
@@ -168,18 +171,22 @@ def main():
 
             print(product_features)
 
+            print(50 * "-")
+            print("RESULTS")
+            print(50 * "-")
+            print("Similar product details:")
+
             if len(result) > 0:
 
                 df = df[df["PRODUCTCODE"].isin(result)]
 
-                print(50 * "-")
-                print("RESULTS")
-                print(50 * "-")
-                print("Similar product details:")
+                for _, row in df.iterrows():
 
-                result_features = "\n".join([f"{col}: {list(df[col])[0]}" for col in list(df.columns)])
+                    df_now = pd.DataFrame(row).T
 
-                print(result_features)
+                    result_features = "\n".join([f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)])
+                    print(50 * "-")
+                    print(result_features)
 
             else:
 
