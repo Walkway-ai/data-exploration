@@ -74,7 +74,6 @@ def main():
 
     field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
     embeddings_description_name = f"embeddings_{field_description}_{model_name}"
-    remove_object(fs, embeddings_description_name)
     embeddings_description_existing_file = fs.find_one(
         {"filename": embeddings_description_name}
     )

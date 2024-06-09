@@ -102,7 +102,7 @@ def main():
         df_raw = pd.DataFrame(df_raw)
         df_raw = df_raw[df_raw["PRODUCTCODE"].isin(all_products)]
 
-        df_text = read_object(fs, "product_textual_lang_summarized_backup")
+        df_text = read_object(fs, "product_textual_lang_summarized")
         df_text = pd.DataFrame(df_text)
         df_text = df_text[df_text["PRODUCTCODE"].isin(all_products)]
 

@@ -6,7 +6,7 @@ import yaml
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 
-from mongodb_lib import connect_to_mongodb, read_object, save_object
+from mongodb_lib import *
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
