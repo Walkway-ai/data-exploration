@@ -23,15 +23,17 @@ def query_gpt(df, df_product):
     df = df.astype(str)
     df_product = df_product.astype(str)
 
-    product_features = '; '.join(['{}: {}'.format(col, val) for col, val in df_product.items()])
+    product_features = "\n".join([f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)])
 
     candidates_str = ""
 
     for _, row in df.iterrows():
 
-        candidates_str_now = '; '.join(['{}_{}'.format(col, val) for col, val in row.items()])
+        df_now = pd.DataFrame(row).T
 
-        candidates_str += "\n" + candidates_str_now
+        candidates_str_now = "\n".join([f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)])
+
+        candidates_str += "\n \n" + candidates_str_now
 
     prompt = f"Given the following product: \n ----- \n {product_features} \n ----- \n, give me a Python list of all PRODUCTCODE of the products below that are very similar to it, if any (e.g. ['18745FBP', 'H73TOUR2']). If there are none, return an empty list ([]). You should mainly compare the pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED to make your decision. Your answer should only contain a Python list with the results. \n ----- {candidates_str}"
 
@@ -111,34 +113,40 @@ def main():
         del df["pdt_product_detail_PRODUCTDESCRIPTION_translated"]
 
         # Product features
-        df_product = df.iloc[-1]
-        df = df[:-1]
+        df_product = df[df["PRODUCTCODE"]==product_id]
+        df = df[df["PRODUCTCODE"]!=product_id]
 
         if city_name == "same":
 
             df = df[
-                df[city_feature] == str(df_product[city_feature])
+                df[city_feature] == str(list(df_product[city_feature])[0])
             ]
 
         if city_name == "different":
 
             df = df[
-                df[city_feature] != str(df_product[city_feature])
+                df[city_feature] != str(list(df_product[city_feature])[0])
             ]
 
         if supplier_code == "same":
 
             df = df[
-                df[supplier_code_feature] == str(df_product[supplier_code_feature])
+                df[supplier_code_feature] == str(list(df_product[supplier_code_feature])[0])
             ]
 
         if supplier_code == "different":
 
             df = df[
-                df[supplier_code_feature] != str(df_product[supplier_code_feature])
+                df[supplier_code_feature] != str(list(df_product[supplier_code_feature])[0])
             ]
 
-        # Take top 5
+        df["score"] = [id_score[p_id] for p_id in list(df["PRODUCTCODE"])]
+
+        df = df.sort_values(by='score', ascending=False)
+
+        del df["score"]
+
+        # Take top k
         df = df[:5]
 
         result = query_gpt(df, df_product)
@@ -154,8 +162,9 @@ def main():
             print("")
             print("Product details:")
             
-            for column_name, value in df_product.items():
-                print(f"{column_name}: {value}")
+            product_features = "\n".join([f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)])
+
+            print(product_features)
 
             if len(result) > 0:
 
@@ -165,8 +174,10 @@ def main():
                 print("RESULTS")
                 print(50 * "-")
                 print("Similar product details:")
-                for column_name, series in df.items():
-                    print(f"{column_name}: {series.iloc[0]}")
+
+                result_features = "\n".join([f"{col}: {list(df[col])[0]}" for col in list(df.columns)])
+
+                print(result_features)
 
             else:
 
@@ -174,7 +185,7 @@ def main():
 
         except Exception as e:
 
-            print(e)
+            print("No products were found for the combination.")
 
 
 if __name__ == "__main__":
