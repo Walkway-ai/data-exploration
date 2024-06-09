@@ -151,6 +151,8 @@ def main():
 
         result = query_gpt(df, df_product)
 
+        print(result)
+
         try:
 
             result = ast.literal_eval(result.choices[0].message.content)
