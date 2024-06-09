@@ -16,7 +16,7 @@ db, fs, client = connect_to_mongodb(config)
 # Run garbage collection to free up memory.
 gc.collect()
 
-system_role = "You are an expert in online bookings in the tourism and entertainment industry and can find products that are the same, but written differently."
+system_role = "You are an expert in online bookings in the tourism and entertainment industry."
 
 def query_gpt(df, df_product):
 
