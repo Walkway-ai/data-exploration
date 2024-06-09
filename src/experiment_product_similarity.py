@@ -16,7 +16,7 @@ db, fs, client = connect_to_mongodb(config)
 # Run garbage collection to free up memory.
 gc.collect()
 
-system_role = "You are an expert in online bookings in the tourism and entertainment industry."
+system_role = "You are an expert in online bookings and product matching in the tourism and entertainment industry. Your expertise includes comparing product descriptions to identify highly similar products."
 
 def query_gpt(df, df_product):
 
@@ -35,7 +35,7 @@ def query_gpt(df, df_product):
 
         candidates_str += "\n \n" + candidates_str_now
 
-    prompt = f"Given the following REFERENCE PRODUCT: \n ----- \n {product_features} \n ----- \n, give me a Python list of all PRODUCTCODE of the POSSIBILITY PRODUCTS below that are extremely similar to it, if any (e.g. ['18745FBP', 'H73TOUR2']). If there are none, return an empty list ([]). You should mainly compare the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED to decide whether the REFERENCE PRODUCT is similar to any of the POSSIBILITY PRODUCTS. Your answer should only contain a Python list with the results. \n ----- {candidates_str}"
+    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined primarily based on the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED. If no products are similar, return an empty list. \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should only contain a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
 
     #client = secretmanager.SecretManagerServiceClient()
     #secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
