@@ -35,7 +35,7 @@ def query_gpt(df, df_product):
 
         candidates_str += "\n \n" + candidates_str_now
 
-    prompt = f"Given the following product: \n ----- \n {product_features} \n ----- \n, give me a Python list of all PRODUCTCODE of the products below that are extremely similar to it, if any (e.g. ['18745FBP', 'H73TOUR2']). If there are none, return an empty list ([]). You should mainly compare the content from pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED to make your decision. Your answer should only contain a Python list with the results. \n ----- {candidates_str}"
+    prompt = f"Given the following REFERENCE PRODUCT: \n ----- \n {product_features} \n ----- \n, give me a Python list of all PRODUCTCODE of the POSSIBILITY PRODUCTS below that are extremely similar to it, if any (e.g. ['18745FBP', 'H73TOUR2']). If there are none, return an empty list ([]). You should mainly compare the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED to decide whether the REFERENCE PRODUCT is similar to any of the POSSIBILITY PRODUCTS. Your answer should only contain a Python list with the results. \n ----- {candidates_str}"
 
     #client = secretmanager.SecretManagerServiceClient()
     #secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
