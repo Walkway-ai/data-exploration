@@ -46,10 +46,8 @@ spec:
             steps {
                 script {
                     def feedbackMessage = """
-                    Please, provide feedback based on these key points:
-                    1. Were the similarity scores too high (e.g. 0.99)?
-                    2. Were the different similarity scores too close to each other?
-                    3. Are the summarized texts from the related products coherent with the original product (e.g. are they somehow related?)
+                    Did the results give similar results to the original product?
+                    Were results better with OpenAI?
                     """
                     def userFeedback = input message: feedbackMessage, parameters: [string(name: 'feedback', defaultValue: '', description: 'Your feedback')]
                     currentBuild.description = userFeedback
