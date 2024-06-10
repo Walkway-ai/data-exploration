@@ -8,6 +8,7 @@ pd.set_option('display.max_columns', None)
 from collections import defaultdict
 from mongodb_lib import *
 from openai import OpenAI
+import subprocess
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -154,27 +155,25 @@ def main():
 
         result = query_gpt(df, df_product)
 
-        print(result)
+        subprocess.run(['clear'])
 
         try:
 
             result = ast.literal_eval(result.choices[0].message.content)
 
+            print(50 * "-")
             print("EXPERIMENT WITH PARAMETERS:")
             print(f"City: {city_name}")
             print(f"Supplier code: {supplier_code}")
             print(f"Embedding model: {embedding_model}")
-            print("")
-            print("Product details:")
             
             product_features = "\n".join([f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)])
+            product_features = product_features.replace("pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "Summarized description")
 
             print(product_features)
 
             print(50 * "-")
-            print("RESULTS")
-            print(50 * "-")
-            print("Similar product details:")
+            print("RESULTS:")
 
             if len(result) > 0:
 
@@ -185,7 +184,9 @@ def main():
                     df_now = pd.DataFrame(row).T
 
                     result_features = "\n".join([f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)])
-                    print(50 * "-")
+                    result_features = result_features.replace("pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "Summarized description")
+
+                    print(10 * "-")
                     print(result_features)
 
             else:
