@@ -1,14 +1,17 @@
 import argparse
+import ast
 import gc
 
 import pandas as pd
 import yaml
-import ast
-pd.set_option('display.max_columns', None)
-from collections import defaultdict
-from mongodb_lib import *
-from openai import OpenAI
+
+pd.set_option("display.max_columns", None)
 import subprocess
+from collections import defaultdict
+
+from openai import OpenAI
+
+from mongodb_lib import *
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -19,12 +22,15 @@ gc.collect()
 
 system_role = "You are an expert in online bookings and product matching in the tourism and entertainment industry. Your expertise includes comparing product descriptions to identify highly similar products."
 
+
 def query_gpt(df, df_product):
 
     df = df.astype(str)
     df_product = df_product.astype(str)
 
-    product_features = "\n".join([f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)])
+    product_features = "\n".join(
+        [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
+    )
 
     candidates_str = ""
 
@@ -32,16 +38,18 @@ def query_gpt(df, df_product):
 
         df_now = pd.DataFrame(row).T
 
-        candidates_str_now = "\n".join([f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)])
+        candidates_str_now = "\n".join(
+            [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
+        )
 
         candidates_str += "\n \n" + candidates_str_now
 
     prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED. \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
 
-    #client = secretmanager.SecretManagerServiceClient()
-    #secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
-    #response = client.access_secret_version(request={"name": secret_name})
-    #apikey = response.payload.data.decode("UTF-8")
+    # client = secretmanager.SecretManagerServiceClient()
+    # secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
+    # response = client.access_secret_version(request={"name": secret_name})
+    # apikey = response.payload.data.decode("UTF-8")
     apikey = "sk-proj-JnVgq03M094rYihMyFpeT3BlbkFJGluZobSDuqE8pFb013m7"
 
     client = OpenAI(api_key=apikey)
@@ -55,6 +63,7 @@ def query_gpt(df, df_product):
     )
 
     return result
+
 
 def main():
 
@@ -114,40 +123,40 @@ def main():
         del df["pdt_product_detail_PRODUCTDESCRIPTION_translated"]
 
         # Product features
-        df_product = df[df["PRODUCTCODE"]==product_id]
-        df = df[df["PRODUCTCODE"]!=product_id]
+        df_product = df[df["PRODUCTCODE"] == product_id]
+        df = df[df["PRODUCTCODE"] != product_id]
 
         if city_name == "same":
 
-            df = df[
-                df[city_feature] == str(list(df_product[city_feature])[0])
-            ]
+            df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
 
         if city_name == "different":
 
-            df = df[
-                df[city_feature] != str(list(df_product[city_feature])[0])
-            ]
+            df = df[df[city_feature] != str(list(df_product[city_feature])[0])]
 
         if supplier_code == "same":
 
             df = df[
-                df[supplier_code_feature] == str(list(df_product[supplier_code_feature])[0])
+                df[supplier_code_feature]
+                == str(list(df_product[supplier_code_feature])[0])
             ]
 
         if supplier_code == "different":
 
             df = df[
-                df[supplier_code_feature] != str(list(df_product[supplier_code_feature])[0])
+                df[supplier_code_feature]
+                != str(list(df_product[supplier_code_feature])[0])
             ]
 
         df["score"] = [id_score[p_id] for p_id in list(df["PRODUCTCODE"])]
 
-        df = df.sort_values(by='score', ascending=False)
+        df = df.sort_values(by="score", ascending=False)
 
         del df["score"]
 
-        df_product = df_product[["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]]
+        df_product = df_product[
+            ["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]
+        ]
         df = df[["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]]
 
         # Take top k
@@ -155,39 +164,78 @@ def main():
 
         result = query_gpt(df, df_product)
 
-        subprocess.run(['clear'])
+        subprocess.run(["clear"])
+
+        print(50 * "-")
+        print("")
+        print("EXPERIMENT WITH PARAMETERS:")
+        print(f"City: {city_name}")
+        print(f"Supplier code: {supplier_code}")
+        print(f"Embedding model: {embedding_model}")
+
+        product_features = "\n".join(
+            [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
+        )
+        product_features = product_features.replace(
+            "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "Summarized description"
+        )
+
+        print(product_features)
+
+        print(50 * "-")
+        print("")
+        print("RESULTS WITHOUT OPENAI:")
+        print("")
+
+        df_raw = df[:3]
+
+        for _, row in df_raw.iterrows():
+
+            df_now = pd.DataFrame(row).T
+
+            result_features = "\n".join(
+                [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
+            )
+            result_features = result_features.replace(
+                "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED",
+                "Summarized description",
+            )
+
+            print(result_features)
+            print("")
+
+        print(50 * "-")
+        print("")
+        print("RESULTS WITH OPENAI:")
+        print("")
 
         try:
 
             result = ast.literal_eval(result.choices[0].message.content)
 
-            print(50 * "-")
-            print("EXPERIMENT WITH PARAMETERS:")
-            print(f"City: {city_name}")
-            print(f"Supplier code: {supplier_code}")
-            print(f"Embedding model: {embedding_model}")
-            
-            product_features = "\n".join([f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)])
-            product_features = product_features.replace("pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "Summarized description")
-
-            print(product_features)
-
-            print(50 * "-")
-            print("RESULTS:")
-
             if len(result) > 0:
 
-                df = df[df["PRODUCTCODE"].isin(result)]
+                result = result[:3]
 
-                for _, row in df.iterrows():
+                df_openai = df[df["PRODUCTCODE"].isin(result)]
+
+                for _, row in df_openai.iterrows():
 
                     df_now = pd.DataFrame(row).T
 
-                    result_features = "\n".join([f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)])
-                    result_features = result_features.replace("pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "Summarized description")
+                    result_features = "\n".join(
+                        [
+                            f"{col}: {list(df_now[col])[0]}"
+                            for col in list(df_now.columns)
+                        ]
+                    )
+                    result_features = result_features.replace(
+                        "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED",
+                        "Summarized description",
+                    )
 
-                    print(10 * "-")
                     print(result_features)
+                    print("\n")
 
             else:
 
