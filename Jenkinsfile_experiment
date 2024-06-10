@@ -29,7 +29,7 @@ spec:
         LOG_FILE = 'experiment.log'
     }
     stages {
-        stage('experiment-product-similarity') {
+        stage('Experiment Results') {
             steps {
                 container('python') {
                     sh """
@@ -42,7 +42,7 @@ spec:
                 }
             }
         }
-        stage('give-feedback') {
+        stage('Write your feedback') {
             steps {
                 script {
                     def feedbackMessage = """
@@ -56,7 +56,7 @@ spec:
                 }
             }
         }
-        stage('send-feedback-email') {
+        stage('Send Feedback') {
             steps {
                 script {
                     def logs = readFile(env.LOG_FILE)
