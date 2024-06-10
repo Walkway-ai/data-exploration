@@ -46,7 +46,7 @@ spec:
             steps {
                 script {
                     def feedbackMessage = """
-                    Did the results give similar results to the original product?
+                    Did the results give similar products to the original product?
                     Were results better with OpenAI?
                     """
                     def userFeedback = input message: feedbackMessage, parameters: [string(name: 'feedback', defaultValue: '', description: 'Your feedback')]
