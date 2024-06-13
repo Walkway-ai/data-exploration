@@ -50,7 +50,7 @@ def query_gpt(df, df_product):
     # secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
     # response = client.access_secret_version(request={"name": secret_name})
     # apikey = response.payload.data.decode("UTF-8")
-    apikey = "sk-proj-JnVgq03M094rYihMyFpeT3BlbkFJGluZobSDuqE8pFb013m7"
+    apikey = "sk-proj-qCHDEm7NI3LAWOyRS4IaT3BlbkFJnJFEEoaL1OTW5lsQWlFD"
 
     client = OpenAI(api_key=apikey)
 
@@ -64,6 +64,11 @@ def query_gpt(df, df_product):
 
     return result
 
+def range_to_tuple(range_str):
+    if not range_str:
+        return (float('-inf'), float('-inf'))
+    parts = range_str.strip('()[]').split(',')
+    return (float(parts[0]), float(parts[1]))
 
 def main():
 
@@ -82,7 +87,7 @@ def main():
         "-supplier_code", type=str, required=True, help="Supplier code."
     )
     parser.add_argument(
-        "-tourgrade", type=str, required=True, help="Tour grade."
+        "-rating", type=str, required=True, help="Tour average rating."
     )
     parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
@@ -95,16 +100,17 @@ def main():
     product_id = args.product_id
     city_name = args.city_name
     supplier_code = args.supplier_code
-    tour_grade = args.tour_grade
+    rating = args.rating
     embedding_model = args.embedding_model
 
     object_name = f"product_similarities_{embedding_model}"
     existing_file = fs.find_one({"filename": object_name})
 
-    city_feature = "pdt_product_detail_VIDESTINATIONCITY"
-    supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
-
     if existing_file:
+
+        city_feature = "pdt_product_detail_VIDESTINATIONCITY"
+        supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
+        avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
 
         similarity_dict = read_object(fs, object_name)
         similar_products = similarity_dict[product_id]
@@ -116,6 +122,8 @@ def main():
 
         df_raw = read_object(fs, "product_tabular")
         df_raw = pd.DataFrame(df_raw)
+        avg_rating_possible_values = list(set(df_raw[avg_rating_feature]))
+        avg_rating_possible_values = sorted(avg_rating_possible_values, key=range_to_tuple)
         df_raw = df_raw[df_raw["PRODUCTCODE"].isin(all_products)]
 
         df_text = read_object(fs, "product_textual_lang_summarized")
@@ -129,10 +137,6 @@ def main():
         # Product features
         df_product = df[df["PRODUCTCODE"] == product_id]
         df = df[df["PRODUCTCODE"] != product_id]
-
-        print(df)
-        import sys
-        sys.exit()
 
         if city_name == "same":
 
@@ -154,6 +158,27 @@ def main():
             df = df[
                 df[supplier_code_feature]
                 != str(list(df_product[supplier_code_feature])[0])
+            ]
+
+        product_avg_rating = str(list(df_product[avg_rating_feature])[0])
+        avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
+
+        if rating == "similar":
+
+            possible_values = avg_rating_possible_values[avg_rating_index-2:avg_rating_index+2]
+
+            df = df[
+                df[avg_rating_feature].isin(possible_values)
+            ]
+
+        if rating == "different":
+
+            possible_values = avg_rating_possible_values[:avg_rating_index-2] + avg_rating_possible_values[avg_rating_index+2:]
+
+            product_avg_rating[:avg_rating_index-2:avg_rating_index+2]
+
+            df = df[
+                df[avg_rating_feature].isin(possible_values)
             ]
 
         df["score"] = [id_score[p_id] for p_id in list(df["PRODUCTCODE"])]
