@@ -20,12 +20,12 @@ spec:
         }
     }
     parameters {
-        string(name: 'product_id', defaultValue: '9866P79', description: 'ID of the product (e.g. 9866P79, 73434P108, 156679P2, 73995P7, 70667P4)')
+        string(name: 'product_id', defaultValue: '73434P108', description: 'ID of the product (e.g. 9866P79, 73434P108, 156679P2, 73995P7, 70667P4)')
         choice(name: 'city', choices: ['same', 'any', 'different'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'any', 'same'], description: 'If same, only products from the same supplier code are shown.')
-        choice(name: 'rating', choices: ['similar', 'any', 'different'], description: 'If similar, only products with similar average ratings are shown. If different, only products with different average ratings are shown.')
-        choice(name: 'start_year', choices: ['2022', '2023', '2024'], description: 'Only products from this year will be considered.')
-        choice(name: 'embedding_model', choices: ['mean', 'jina-embeddings-v2-base-en', 'gte-large'], description: 'Embedding model')
+        choice(name: 'rating', choices: ['any', 'similar', 'different'], description: 'If similar, only products with similar average ratings are shown.')
+        choice(name: 'start_year', choices: ['2023', '2022', '2024'], description: 'Products older than this year will not be considered.')
+        choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'mean', 'gte-large'], description: 'Embedding model.')
     }
     environment {
         LOG_FILE = 'experiment.log'
