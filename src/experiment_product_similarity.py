@@ -152,8 +152,8 @@ def main():
         df_product = df[df["PRODUCTCODE"] == product_id]
         df = df[df["PRODUCTCODE"] != product_id]
 
-        print("original results")
-        print(df.shape)
+        print("Number of initial candidates:")
+        print(df.shape[0])
 
         if city_name == "same":
 
@@ -163,8 +163,8 @@ def main():
 
             df = df[df[city_feature] != str(list(df_product[city_feature])[0])]
 
-        print("city")
-        print(df.shape)
+        print("Number of initial candidates after the city filter:")
+        print(df.shape[0])
 
         if supplier_code == "same":
 
@@ -180,8 +180,8 @@ def main():
                 != str(list(df_product[supplier_code_feature])[0])
             ]
 
-        print("supplier code")
-        print(df.shape)
+        print("Number of initial candidates after the supplier code filter:")
+        print(df.shape[0])
 
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
@@ -205,8 +205,8 @@ def main():
 
             df = df[df[avg_rating_feature].isin(possible_values)]
 
-        print("rating")
-        print(df.shape)
+        print("Number of initial candidates after the average rating filter:")
+        print(df.shape[0])
 
         # Only retrieve products from start_year
 
@@ -216,8 +216,8 @@ def main():
         df = df[df["year"] >= int(start_year)]
         del df["year"]
 
-        print("year")
-        print(df.shape)
+        print("Number of initial candidates after the year filter:")
+        print(df.shape[0])
 
         # Add scores
 
