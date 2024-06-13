@@ -3,6 +3,7 @@
 
 import gc
 from functools import reduce
+import argparse
 
 import pandas as pd
 import yaml
@@ -49,10 +50,15 @@ def main():
     3. Save the merged DataFrame as a pickle file if it doesn't already exist.
     """
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
+    
+    args = parser.parse_args()
+
     object_name = "product_tables"
     existing_file = fs.find_one({"filename": object_name})
 
-    if not existing_file:
+    if not existing_file or args.overwrite:
         # Initialize an empty list to store DataFrames
         dfs = []
 
@@ -78,7 +84,13 @@ def main():
         # Merge all DataFrames in the list into a single DataFrame
         product_df = reduce(merge_dfs, dfs)
 
+        print(product_df)
+
+        import sys
+        sys.exit()
+
         # Save the merged DataFrame as a pickle file
+        remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=product_df, object_name=object_name)
 
 

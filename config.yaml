@@ -37,3 +37,8 @@ bigquery-to-retrieve:
         - "PricingUnitType"
         - "RetailPriceCurrency"
         - "SupplierCode"
+    bookings:
+      dataset_id: "v_extract1"
+      fields:
+        - "ProductCode"
+        - "OrderDate"

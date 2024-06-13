@@ -93,6 +93,9 @@ def main():
         "-rating", type=str, required=True, help="Tour average rating."
     )
     parser.add_argument(
+        "-start_year", type=str, required=True, help="Star year of products."
+    )
+    parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
 
@@ -183,6 +186,13 @@ def main():
             df = df[
                 df[avg_rating_feature].isin(possible_values)
             ]
+
+        # Only retrieve products from start_year
+
+        print(df)
+
+        import sys
+        sys.exit()
 
         df["score"] = [id_score[p_id] for p_id in list(df["PRODUCTCODE"])]
 

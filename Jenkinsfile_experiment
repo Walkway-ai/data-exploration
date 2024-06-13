@@ -24,6 +24,7 @@ spec:
         choice(name: 'city', choices: ['same', 'any', 'different'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'any', 'same'], description: 'If same, only products from the same supplier code are shown.')
         choice(name: 'rating', choices: ['similar', 'any', 'different'], description: 'If similar, only products with similar average ratings are shown. If different, only products with different average ratings are shown.')
+        integer(name: 'start_year', defaultValue: 2023, description: 'Only products from this year will be considered.')
         choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'gte-large'], description: 'Embedding model')
     }
     environment {

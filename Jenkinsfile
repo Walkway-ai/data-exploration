@@ -19,11 +19,17 @@ spec:
 """
         }
     }
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('google-service-account-key')
+    }
     stages {
         stage('retrieve-bigquery-data') {
             steps {
                 container('python') {
-                    sh 'python3 src/retrieve_bigquery_data.py'
+                    sh '''
+                    export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"
+                    python3 src/retrieve_bigquery_data.py --overwrite
+                    '''
                 }
             }
         }
