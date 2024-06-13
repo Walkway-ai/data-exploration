@@ -61,7 +61,6 @@ class BigQueryDataProcessor:
         self.df.rename(columns={prefix + self.key_field: self.key_field}, inplace=True)
 
         self.aggregate_and_get_set()
-        self.df.fillna("", inplace=True)
 
     def aggregate_and_get_set(self):
         """

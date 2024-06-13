@@ -92,11 +92,14 @@ def main():
         # Merge all DataFrames in the list into a single DataFrame
         product_df = reduce(merge_dfs, dfs)
 
-        print(product_df)
-
         # Save the merged DataFrame as a pickle file
         remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=product_df, object_name=object_name)
+
+    else:
+        print(
+            "Skipping retreiving BigQuery data."
+        )
 
 
 if __name__ == "__main__":

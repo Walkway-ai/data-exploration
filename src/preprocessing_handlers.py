@@ -98,7 +98,7 @@ class DataFrameProcessor:
         self.fill_fixed_duration()
         self.remove_outliers()
         self.create_intervals()
-        self.aggregate_tabular_fields()
+        self.aggregate_all_fields()
         self.create_text_dataframe()
         self.preprocess_tabular_fields()
         self.preprocess_text_fields()
@@ -187,7 +187,7 @@ class DataFrameProcessor:
         for numerical_col in tqdm(numerical_cols):
             self.df = auto_bin_intervals(self.df, numerical_col)
 
-    def aggregate_tabular_fields(self):
+    def aggregate_all_fields(self):
         """Aggregate tabular fields in the tabular DataFrame."""
 
         columns_to_aggregate = [col for col in self.df.columns if col != self.key_field]

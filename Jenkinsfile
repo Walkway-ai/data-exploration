@@ -33,13 +33,13 @@ spec:
                 }
             }
         }
-        // stage('generate-product-data') {
-        //     steps {
-        //         container('python') {
-        //             sh 'python3 src/generate_product_data.py'
-        //         }
-        //     }
-        // }
+        stage('generate-product-data') {
+            steps {
+                container('python') {
+                    sh 'python3 src/generate_product_data.py --overwrite'
+                }
+            }
+        }
         // stage('categorize-tabular-data') {
         //     steps {
         //         container('python') {
