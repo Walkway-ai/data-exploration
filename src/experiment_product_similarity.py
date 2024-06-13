@@ -154,6 +154,7 @@ def main():
 
         print("Number of initial candidates:")
         print(df.shape[0])
+        print(df.head(5))
 
         if city_name == "same":
 
@@ -165,6 +166,7 @@ def main():
 
         print("Number of initial candidates after the city filter:")
         print(df.shape[0])
+        print(df.head(5))
 
         if supplier_code == "same":
 
@@ -182,6 +184,7 @@ def main():
 
         print("Number of initial candidates after the supplier code filter:")
         print(df.shape[0])
+        print(df.head(5))
 
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
@@ -207,6 +210,7 @@ def main():
 
         print("Number of initial candidates after the average rating filter:")
         print(df.shape[0])
+        print(df.head(5))
 
         # Only retrieve products from start_year
 
@@ -218,6 +222,7 @@ def main():
 
         print("Number of initial candidates after the year filter:")
         print(df.shape[0])
+        print(df.head(5))
 
         # Add scores
 
