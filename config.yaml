@@ -1,6 +1,7 @@
 summarization-model: "facebook/bart-large-cnn"
 #embedding-model: "jinaai/jina-embeddings-v2-base-en"
 embedding-model: "thenlper/gte-large"
+openai_key: "sk-proj-qCHDEm7NI3LAWOyRS4IaT3BlbkFJnJFEEoaL1OTW5lsQWlFD"
 bigquery-to-retrieve:
   key-field: "PRODUCTCODE"
   location-field: "pdt_product_detail_VIDESTINATIONCITY"

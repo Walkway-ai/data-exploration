@@ -17,6 +17,10 @@ from mongodb_lib import *
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config)
 
+# Load OpenAI key from yaml file
+config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
+apikey = config["openai_key"]
+
 # Run garbage collection to free up memory.
 gc.collect()
 
@@ -50,7 +54,6 @@ def query_gpt(df, df_product):
     # secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
     # response = client.access_secret_version(request={"name": secret_name})
     # apikey = response.payload.data.decode("UTF-8")
-    apikey = "sk-proj-qCHDEm7NI3LAWOyRS4IaT3BlbkFJnJFEEoaL1OTW5lsQWlFD"
 
     client = OpenAI(api_key=apikey)
 
