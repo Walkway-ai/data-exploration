@@ -82,7 +82,7 @@ spec:
         stage('generate-mean-embeddings') { 
             steps {
                 container('python') {
-                    sh 'python3 src/generate_mean_embeddings.py --overwrite --embedding_models "thenlper/gte-large, jinaai/jina-embeddings-v2-base-en"'
+                    sh 'python3 src/generate_mean_embeddings.py --overwrite --embedding_models "thenlper/gte-large,jinaai/jina-embeddings-v2-base-en"'
                 }
             }
         }
