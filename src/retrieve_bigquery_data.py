@@ -38,7 +38,6 @@ def merge_dfs(left, right):
     """
     return pd.merge(left, right, on=key_field, how="outer")
 
-
 def main():
     """
     This script retrieves various datasets from a BigQuery database, merges them
@@ -67,6 +66,14 @@ def main():
             # Retrieve table elements from the configuration
             table_elements = tables[bigquery_table]
 
+            if bigquery_table == "bookings":
+
+                time_feature = True
+
+            else:
+
+                time_feature = False
+
             # Create a BigQueryDataProcessor instance to handle data retrieval
             bqdp = BigQueryDataProcessor(
                 config=config,
@@ -74,6 +81,7 @@ def main():
                 table_id=bigquery_table,
                 table_fields=table_elements["fields"],
                 key_field=key_field,
+                time_feature=time_feature
             )
             # Read the BigQuery table into a DataFrame
             bqdp.read_bigquery_table()
@@ -85,9 +93,6 @@ def main():
         product_df = reduce(merge_dfs, dfs)
 
         print(product_df)
-
-        import sys
-        sys.exit()
 
         # Save the merged DataFrame as a pickle file
         remove_object(fs=fs, object_name=object_name)

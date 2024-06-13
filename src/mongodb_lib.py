@@ -49,16 +49,16 @@ def save_object(fs, object, object_name):
         logging.info(f"Successfully saved '{object_name}' to MongoDB GridFS.")
 
     except Exception as e:
-        logging.error(f"Failed to save '{obj_name}' to MongoDB: {e}")
+        logging.error(f"Failed to save '{object_name}' to MongoDB: {e}")
 
 
-def read_object(fs, obj_name):
+def read_object(fs, object_name):
     try:
         # Finding object by name
-        file_cursor = fs.find_one({"filename": obj_name})
+        file_cursor = fs.find_one({"filename": object_name})
 
         if file_cursor is None:
-            logging.error(f"Object '{obj_name}' not found in MongoDB GridFS.")
+            logging.error(f"Object '{object_name}' not found in MongoDB GridFS.")
             return None
 
         # Reading and deserializing object
@@ -68,24 +68,24 @@ def read_object(fs, obj_name):
         return obj
 
     except Exception as e:
-        logging.error(f"Failed to read '{obj_name}' from MongoDB: {e}")
+        logging.error(f"Failed to read '{object_name}' from MongoDB: {e}")
         return None
 
 
-def remove_object(fs, obj_name):
+def remove_object(fs, object_name):
     try:
         # Finding and deleting object by name
-        file = fs.find_one({"filename": obj_name})
+        file = fs.find_one({"filename": object_name})
         if file:
             fs.delete(file._id)
-            logging.info(f"Successfully deleted '{obj_name}' from MongoDB GridFS.")
+            logging.info(f"Successfully deleted '{object_name}' from MongoDB GridFS.")
         else:
             logging.warning(
-                f"No object found with name '{obj_name}' in MongoDB GridFS."
+                f"No object found with name '{object_name}' in MongoDB GridFS."
             )
 
     except Exception as e:
-        logging.error(f"Failed to delete '{obj_name}' from MongoDB: {e}")
+        logging.error(f"Failed to delete '{object_name}' from MongoDB: {e}")
 
 
 def copy_object(fs, source_name, destination_name):

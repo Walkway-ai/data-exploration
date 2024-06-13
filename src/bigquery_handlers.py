@@ -8,7 +8,7 @@ from google.cloud import bigquery
 
 
 class BigQueryDataProcessor:
-    def __init__(self, config, dataset_id, table_id, table_fields, key_field):
+    def __init__(self, config, dataset_id, table_id, table_fields, key_field, time_feature):
         """
         Initialize the BigQueryDataProcessor with the given parameters.
 
@@ -25,6 +25,7 @@ class BigQueryDataProcessor:
         self.table_fields = table_fields
         self.selected_fields = ", ".join(self.table_fields)
         self.key_field = key_field
+        self.time_feature = time_feature
 
         self.client = bigquery.Client()
 
@@ -41,7 +42,14 @@ class BigQueryDataProcessor:
         table_ref = self.client.dataset(self.dataset_id).table(self.table_id)
         table = self.client.get_table(table_ref)
 
-        query = f"SELECT {self.selected_fields} FROM `{table.project}.{table.dataset_id}.{table.table_id}`"
+        if self.time_feature:
+
+            query = f"SELECT ProductCode, MAX(OrderDate) AS MostRecentOrderDate FROM `{table.project}.{table.dataset_id}.{table.table_id}` WHERE OrderDate IS NOT NULL GROUP BY ProductCode"
+
+        else:
+
+            query = f"SELECT {self.selected_fields} FROM `{table.project}.{table.dataset_id}.{table.table_id}`"
+
         query_job = self.client.query(query)
         self.df = query_job.to_dataframe()
 
@@ -53,6 +61,7 @@ class BigQueryDataProcessor:
         self.df.rename(columns={prefix + self.key_field: self.key_field}, inplace=True)
 
         self.aggregate_and_get_set()
+        self.df.fillna("", inplace=True)
 
     def aggregate_and_get_set(self):
         """
@@ -72,33 +81,3 @@ class BigQueryDataProcessor:
             self.df[column] = [
                 list(OrderedDict.fromkeys(el).keys()) for el in self.df[column]
             ]
-
-    def retrieve_most_recent_bigquery_table(self):
-        """
-        Retrieve the most recent records for each product from the specified BigQuery table
-        and create or replace a new table with these records.
-
-        This method creates a new table in the specified dataset with the most recent records
-        for each product, determined by the `updated_at` timestamp.
-
-        Returns:
-        None
-        """
-        query = f"""
-            CREATE OR REPLACE TABLE `preprocessed.{self.table_id}` AS
-            WITH ranked_table AS (
-                SELECT
-                    *,
-                    ROW_NUMBER() OVER (PARTITION BY product_code ORDER BY updated_at DESC) AS row_num
-                FROM
-                    `{self.dataset_id}.{self.table_id}`
-            )
-            SELECT
-                {self.selected_fields}
-            FROM
-                ranked_table
-            WHERE
-                row_num = 1
-        """
-
-        self.client.query(query).result()
