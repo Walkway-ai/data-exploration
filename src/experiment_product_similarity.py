@@ -23,7 +23,7 @@ gc.collect()
 system_role = "You are an expert in online bookings and product matching in the tourism and entertainment industry. Your expertise includes comparing product descriptions to identify highly similar products."
 
 
-def query_gpt(apikey, df, df_product):
+def query_gpt(apikey, text_field, df, df_product):
 
     df = df.astype(str)
     df_product = df_product.astype(str)
@@ -44,7 +44,7 @@ def query_gpt(apikey, df, df_product):
 
         candidates_str += "\n \n" + candidates_str_now
 
-    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED, and similar products include the same activities (e.g. a tour in the same place, or the same activity). \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
+    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of {text_field}, and similar products include the same activities (e.g. a tour in the same place, or the same activity). \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
 
     client = OpenAI(api_key=apikey)
 
@@ -114,6 +114,8 @@ def main():
         supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
         avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
         time_feature = "bookings_MOSTRECENTORDERDATE"
+        text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
+        product_field = "PRODUCTCODE"
 
         similarity_dict = read_object(fs, object_name)
         similar_products = similarity_dict[product_id]
@@ -129,18 +131,18 @@ def main():
         avg_rating_possible_values = sorted(
             list(set(df_raw[avg_rating_feature])), key=range_to_tuple
         )
-        df_raw = df_raw[df_raw["PRODUCTCODE"].isin(all_products)]
+        df_raw = df_raw[df_raw[product_field].isin(all_products)]
 
         df_text = read_object(fs, "product_textual_lang_summarized")
         df_text = pd.DataFrame(df_text)
-        df_text = df_text[df_text["PRODUCTCODE"].isin(all_products)]
+        df_text = df_text[df_text[product_field].isin(all_products)]
 
-        df = pd.merge(df_raw, df_text, on="PRODUCTCODE", how="outer")
+        df = pd.merge(df_raw, df_text, on=product_field, how="outer")
 
         df = df[
             [
-                "PRODUCTCODE",
-                "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED",
+                product_field,
+                text_field,
                 city_feature,
                 supplier_code_feature,
                 avg_rating_feature,
@@ -149,12 +151,12 @@ def main():
         ]
 
         # Product features
-        df_product = df[df["PRODUCTCODE"] == product_id]
-        df = df[df["PRODUCTCODE"] != product_id]
+        df_product = df[df[product_field] == product_id]
+        df = df[df[product_field] != product_id]
 
         print("Number of initial candidates:")
         print(df.shape[0])
-        print(df.head(5))
+        print(df[[product_field, text_field]].head(5))
 
         if city_name == "same":
 
@@ -166,7 +168,7 @@ def main():
 
         print("Number of initial candidates after the city filter:")
         print(df.shape[0])
-        print(df.head(5))
+        print(df[[product_field, text_field]].head(5))
 
         if supplier_code == "same":
 
@@ -184,7 +186,7 @@ def main():
 
         print("Number of initial candidates after the supplier code filter:")
         print(df.shape[0])
-        print(df.head(5))
+        print(df[[product_field, text_field]].head(5))
 
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
@@ -210,7 +212,7 @@ def main():
 
         print("Number of initial candidates after the average rating filter:")
         print(df.shape[0])
-        print(df.head(5))
+        print(df[[product_field, text_field]].head(5))
 
         # Only retrieve products from start_year
 
@@ -222,11 +224,11 @@ def main():
 
         print("Number of initial candidates after the year filter:")
         print(df.shape[0])
-        print(df.head(5))
+        print(df[[product_field, text_field]].head(5))
 
         # Add scores
 
-        df["score"] = [id_score[p_id] for p_id in list(df["PRODUCTCODE"])]
+        df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
         df = df.sort_values(by="score", ascending=False)
         del df["score"]
 
@@ -255,7 +257,7 @@ def main():
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
         )
         product_features = product_features.replace(
-            "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "Summarized description"
+            text_field, "Summarized description"
         )
 
         print(product_features)
@@ -275,7 +277,7 @@ def main():
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
             )
             result_features = result_features.replace(
-                "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED",
+                text_field,
                 "Summarized description",
             )
 
@@ -290,14 +292,14 @@ def main():
         try:
 
             df_openai = df[:30]
-            result = query_gpt(apikey, df_openai, df_product)
+            result = query_gpt(apikey, text_field, df_openai, df_product)
             result = ast.literal_eval(result.choices[0].message.content)
 
             if len(result) > 0:
 
                 result = result[:10]
 
-                df_openai = df_openai[df_openai["PRODUCTCODE"].isin(result)]
+                df_openai = df_openai[df_openai[product_field].isin(result)]
 
                 for _, row in df_openai.iterrows():
 
@@ -310,7 +312,7 @@ def main():
                         ]
                     )
                     result_features = result_features.replace(
-                        "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED",
+                        text_field,
                         "Summarized description",
                     )
 
