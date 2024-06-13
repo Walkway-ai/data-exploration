@@ -154,6 +154,11 @@ def main():
         df_product = df[df[product_field] == product_id]
         df = df[df[product_field] != product_id]
 
+        # Sort by scores
+        df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
+        df = df.sort_values(by="score", ascending=False)
+        del df["score"]
+
         print("Number of initial candidates:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
@@ -225,12 +230,6 @@ def main():
         print("Number of initial candidates after the year filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
-
-        # Add scores
-
-        df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
-        df = df.sort_values(by="score", ascending=False)
-        del df["score"]
 
         del df[city_feature]
         del df[supplier_code_feature]
