@@ -67,11 +67,13 @@ def query_gpt(df, df_product):
 
     return result
 
+
 def range_to_tuple(range_str):
     if not range_str:
-        return (float('-inf'), float('-inf'))
-    parts = range_str.strip('()[]').split(',')
+        return (float("-inf"), float("-inf"))
+    parts = range_str.strip("()[]").split(",")
     return (float(parts[0]), float(parts[1]))
+
 
 def main():
 
@@ -89,9 +91,7 @@ def main():
     parser.add_argument(
         "-supplier_code", type=str, required=True, help="Supplier code."
     )
-    parser.add_argument(
-        "-rating", type=str, required=True, help="Tour average rating."
-    )
+    parser.add_argument("-rating", type=str, required=True, help="Tour average rating.")
     parser.add_argument(
         "-start_year", type=str, required=True, help="Star year of products."
     )
@@ -129,7 +129,9 @@ def main():
         df_raw = read_object(fs, "product_tabular")
         df_raw = pd.DataFrame(df_raw)
         avg_rating_possible_values = list(set(df_raw[avg_rating_feature]))
-        avg_rating_possible_values = sorted(avg_rating_possible_values, key=range_to_tuple)
+        avg_rating_possible_values = sorted(
+            avg_rating_possible_values, key=range_to_tuple
+        )
         df_raw = df_raw[df_raw["PRODUCTCODE"].isin(all_products)]
 
         df_text = read_object(fs, "product_textual_lang_summarized")
@@ -171,27 +173,29 @@ def main():
 
         if rating == "similar":
 
-            possible_values = avg_rating_possible_values[avg_rating_index-2:avg_rating_index+2]
-
-            df = df[
-                df[avg_rating_feature].isin(possible_values)
+            possible_values = avg_rating_possible_values[
+                avg_rating_index - 2 : avg_rating_index + 2
             ]
+
+            df = df[df[avg_rating_feature].isin(possible_values)]
 
         if rating == "different":
 
-            possible_values = avg_rating_possible_values[:avg_rating_index-2] + avg_rating_possible_values[avg_rating_index+2:]
+            possible_values = (
+                avg_rating_possible_values[: avg_rating_index - 2]
+                + avg_rating_possible_values[avg_rating_index + 2 :]
+            )
 
-            product_avg_rating[:avg_rating_index-2:avg_rating_index+2]
+            product_avg_rating[: avg_rating_index - 2 : avg_rating_index + 2]
 
-            df = df[
-                df[avg_rating_feature].isin(possible_values)
-            ]
+            df = df[df[avg_rating_feature].isin(possible_values)]
 
         # Only retrieve products from start_year
 
         print(df)
 
         import sys
+
         sys.exit()
 
         df["score"] = [id_score[p_id] for p_id in list(df["PRODUCTCODE"])]

@@ -8,7 +8,9 @@ from google.cloud import bigquery
 
 
 class BigQueryDataProcessor:
-    def __init__(self, config, dataset_id, table_id, table_fields, key_field, time_feature):
+    def __init__(
+        self, config, dataset_id, table_id, table_fields, key_field, time_feature
+    ):
         """
         Initialize the BigQueryDataProcessor with the given parameters.
 

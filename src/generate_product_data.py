@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import gc
 import argparse
+import gc
 
 import yaml
 from ydata_profiling import ProfileReport
@@ -35,8 +35,10 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+
     args = parser.parse_args()
 
     tabular_object_name = "product_tabular"
@@ -78,9 +80,7 @@ def main():
         textual_profile.to_file("reports/product-textual-report.html")
 
     else:
-        print(
-            "Skipping processing and profiling."
-        )
+        print("Skipping processing and profiling.")
 
 
 if __name__ == "__main__":

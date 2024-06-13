@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import gc
 from functools import reduce
-import argparse
 
 import pandas as pd
 import yaml
@@ -38,6 +38,7 @@ def merge_dfs(left, right):
     """
     return pd.merge(left, right, on=key_field, how="outer")
 
+
 def main():
     """
     This script retrieves various datasets from a BigQuery database, merges them
@@ -50,8 +51,10 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+
     args = parser.parse_args()
 
     object_name = "product_tables"
@@ -81,7 +84,7 @@ def main():
                 table_id=bigquery_table,
                 table_fields=table_elements["fields"],
                 key_field=key_field,
-                time_feature=time_feature
+                time_feature=time_feature,
             )
             # Read the BigQuery table into a DataFrame
             bqdp.read_bigquery_table()
@@ -97,9 +100,7 @@ def main():
         save_object(fs=fs, object=product_df, object_name=object_name)
 
     else:
-        print(
-            "Skipping retreiving BigQuery data."
-        )
+        print("Skipping retreiving BigQuery data.")
 
 
 if __name__ == "__main__":

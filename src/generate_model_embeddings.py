@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import gc
 
 import numpy as np
 import pandas as pd
 import yaml
-import argparse
 
 from mongodb_lib import *
 
@@ -35,8 +35,12 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    parser.add_argument("--embedding_model", type=str, required=True, help="The embedding model.")
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+    parser.add_argument(
+        "--embedding_model", type=str, required=True, help="The embedding model."
+    )
 
     args = parser.parse_args()
 
@@ -81,9 +85,7 @@ def main():
         save_object(fs=fs, object=final_embeddings, object_name=object_name)
 
     else:
-        print(
-            "Skipping generation of model embeddings."
-        )
+        print("Skipping generation of model embeddings.")
 
 
 if __name__ == "__main__":

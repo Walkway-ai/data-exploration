@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import gc
 import argparse
+import gc
 
 import pandas as pd
 import yaml
@@ -34,8 +34,10 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+
     args = parser.parse_args()
 
     object_name = "product_tabular_categorized"
@@ -64,9 +66,7 @@ def main():
         remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=df, object_name=object_name)
     else:
-        print(
-            "Skipping categorization of tabular data."
-        )
+        print("Skipping categorization of tabular data.")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import gc
 import os
 
@@ -8,7 +9,7 @@ import pandas as pd
 import yaml
 from tqdm import tqdm
 from transformers import pipeline
-import argparse
+
 from mongodb_lib import *
 
 # Load configuration from yaml file for MongoDB connection.
@@ -33,8 +34,15 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    parser.add_argument("--summarization_model", type=str, required=True, help="The summarization model.")
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+    parser.add_argument(
+        "--summarization_model",
+        type=str,
+        required=True,
+        help="The summarization model.",
+    )
 
     args = parser.parse_args()
 
@@ -110,9 +118,7 @@ def main():
             os.remove(intermediate_file)
 
     else:
-        print(
-            "Skipping summarization."
-        )
+        print("Skipping summarization.")
 
 
 if __name__ == "__main__":

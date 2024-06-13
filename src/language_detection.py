@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import gc
 
 import pandas as pd
@@ -8,7 +9,6 @@ import yaml
 from deep_translator import GoogleTranslator
 from langdetect import detect
 from tqdm import tqdm
-import argparse
 
 from mongodb_lib import *
 
@@ -68,8 +68,10 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+
     args = parser.parse_args()
 
     object_name = "product_textual_lang"
@@ -111,9 +113,7 @@ def main():
         save_object(fs=fs, object=df, object_name=object_name)
 
     else:
-        print(
-            "Skipping language detection."
-        )
+        print("Skipping language detection.")
 
 
 if __name__ == "__main__":

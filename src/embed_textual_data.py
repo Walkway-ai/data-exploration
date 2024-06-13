@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import gc
 
 import pandas as pd
 import torch
 import yaml
-import argparse
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 from transformers import AutoModel
@@ -64,9 +64,13 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    parser.add_argument("--embedding_model", type=str, required=True, help="The embedding model.")
-    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+    parser.add_argument(
+        "--embedding_model", type=str, required=True, help="The embedding model."
+    )
+
     args = parser.parse_args()
 
     embedding_model = args.embedding_model
@@ -95,13 +99,21 @@ def main():
 
         # Generate embeddings for the specified text fields if not already present.
         if not embeddings_inclexcl_existing_file:
-            get_embeddings(df=df, text_field=field_inclexcl, embedding_model=embedding_model, model_name=model_name)
+            get_embeddings(
+                df=df,
+                text_field=field_inclexcl,
+                embedding_model=embedding_model,
+                model_name=model_name,
+            )
         if not embeddings_description_existing_file:
-            get_embeddings(df=df, text_field=field_description, embedding_model=embedding_model, model_name=model_name)
+            get_embeddings(
+                df=df,
+                text_field=field_description,
+                embedding_model=embedding_model,
+                model_name=model_name,
+            )
     else:
-        print(
-            "Skipping embeddings."
-        )
+        print("Skipping embeddings.")
 
 
 if __name__ == "__main__":

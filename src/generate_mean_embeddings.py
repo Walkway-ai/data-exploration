@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import gc
 
 import numpy as np
 import yaml
-import argparse
 from sklearn.decomposition import PCA
 
 from mongodb_lib import *
@@ -16,6 +16,7 @@ db, fs, client = connect_to_mongodb(config_infra)
 # Run garbage collection to free up memory.
 gc.collect()
 
+
 def reduce_dimension(concatenated_array, target_dim=1000):
     """
     Reduce the dimension of the array to the target dimension using PCA.
@@ -25,11 +26,16 @@ def reduce_dimension(concatenated_array, target_dim=1000):
 
     return reduced_array
 
+
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    parser.add_argument("--embedding_models", type=str, required=True, help="The embedding model.")
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+    parser.add_argument(
+        "--embedding_models", type=str, required=True, help="The embedding model."
+    )
 
     args = parser.parse_args()
 
@@ -55,7 +61,7 @@ def main():
 
             em_ = np.array(em_)
             l.append(em_)
-        
+
         # Concatenate the arrays along the feature axis (axis=1)
         concatenated_array = np.concatenate(l, axis=1)
 
@@ -67,9 +73,7 @@ def main():
         save_object(fs=fs, object=reduced_array, object_name=object_name)
 
     else:
-        print(
-            "Skipping generation of mean embeddings."
-        )
+        print("Skipping generation of mean embeddings.")
 
 
 if __name__ == "__main__":

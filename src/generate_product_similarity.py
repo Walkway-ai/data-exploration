@@ -1,3 +1,4 @@
+import argparse
 import gc
 
 import numpy as np
@@ -5,7 +6,6 @@ import pandas as pd
 import yaml
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
-import argparse
 
 from mongodb_lib import *
 
@@ -56,9 +56,13 @@ def main():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
-    parser.add_argument("--embedding_model", type=str, required=True, help="The embedding model.")
-    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Enable overwrite mode"
+    )
+    parser.add_argument(
+        "--embedding_model", type=str, required=True, help="The embedding model."
+    )
+
     args = parser.parse_args()
 
     embedding_model = args.embedding_model
