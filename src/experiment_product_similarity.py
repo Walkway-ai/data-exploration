@@ -152,6 +152,9 @@ def main():
         df_product = df[df["PRODUCTCODE"] == product_id]
         df = df[df["PRODUCTCODE"] != product_id]
 
+        print("original results")
+        print(df.shape)
+
         if city_name == "same":
 
             df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
@@ -159,6 +162,9 @@ def main():
         if city_name == "different":
 
             df = df[df[city_feature] != str(list(df_product[city_feature])[0])]
+
+        print("city")
+        print(df.shape)
 
         if supplier_code == "same":
 
@@ -173,6 +179,9 @@ def main():
                 df[supplier_code_feature]
                 != str(list(df_product[supplier_code_feature])[0])
             ]
+
+        print("supplier code")
+        print(df.shape)
 
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
@@ -196,6 +205,9 @@ def main():
 
             df = df[df[avg_rating_feature].isin(possible_values)]
 
+        print("rating")
+        print(df.shape)
+
         # Only retrieve products from start_year
 
         df["year"] = pd.to_datetime(df[time_feature], unit="ms")
@@ -203,6 +215,9 @@ def main():
 
         df = df[df["year"] >= int(start_year)]
         del df["year"]
+
+        print("year")
+        print(df.shape)
 
         # Add scores
 
