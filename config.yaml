@@ -1,4 +1,4 @@
-openai_key: "sk-proj-qCHDEm7NI3LAWOyRS4IaT3BlbkFJnJFEEoaL1OTW5lsQWlFD"
+openai_key: "sk-proj-wIFV15r9aeU81IbC10fwT3BlbkFJ0iqCObiD1uLt9AldMIpW"
 bigquery-to-retrieve:
   key-field: "PRODUCTCODE"
   location-field: "pdt_product_detail_VIDESTINATIONCITY"

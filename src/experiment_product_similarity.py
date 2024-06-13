@@ -48,12 +48,7 @@ def query_gpt(df, df_product):
 
         candidates_str += "\n \n" + candidates_str_now
 
-    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED. \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
-
-    # client = secretmanager.SecretManagerServiceClient()
-    # secret_name = "projects/725559607119/secrets/OPENAI_APIKEY_PRODUCTSIMILARITY/versions/1"
-    # response = client.access_secret_version(request={"name": secret_name})
-    # apikey = response.payload.data.decode("UTF-8")
+    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED, and similar products include the same activities (e.g. a tour in the same place, or the same activity). \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
 
     client = OpenAI(api_key=apikey)
 
@@ -107,6 +102,7 @@ def main():
     city_name = args.city_name
     supplier_code = args.supplier_code
     rating = args.rating
+    start_year = args.start_year
     embedding_model = args.embedding_model
 
     object_name = f"product_similarities_{embedding_model}"
@@ -117,6 +113,7 @@ def main():
         city_feature = "pdt_product_detail_VIDESTINATIONCITY"
         supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
         avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
+        time_feature = "bookings_MOSTRECENTORDERDATE"
 
         similarity_dict = read_object(fs, object_name)
         similar_products = similarity_dict[product_id]
@@ -128,9 +125,9 @@ def main():
 
         df_raw = read_object(fs, "product_tabular")
         df_raw = pd.DataFrame(df_raw)
-        avg_rating_possible_values = list(set(df_raw[avg_rating_feature]))
+
         avg_rating_possible_values = sorted(
-            avg_rating_possible_values, key=range_to_tuple
+            list(set(df_raw[avg_rating_feature])), key=range_to_tuple
         )
         df_raw = df_raw[df_raw["PRODUCTCODE"].isin(all_products)]
 
@@ -140,7 +137,16 @@ def main():
 
         df = pd.merge(df_raw, df_text, on="PRODUCTCODE", how="outer")
 
-        del df["pdt_product_detail_PRODUCTDESCRIPTION_translated"]
+        df = df[
+            [
+                "PRODUCTCODE",
+                "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED",
+                city_feature,
+                supplier_code_feature,
+                avg_rating_feature,
+                time_feature,
+            ]
+        ]
 
         # Product features
         df_product = df[df["PRODUCTCODE"] == product_id]
@@ -192,27 +198,27 @@ def main():
 
         # Only retrieve products from start_year
 
-        print(df)
+        df["year"] = pd.to_datetime(df[time_feature], unit="ms")
+        df["year"] = df["year"].dt.year
 
-        import sys
+        df = df[df["year"] >= int(start_year)]
+        del df["year"]
 
-        sys.exit()
+        # Add scores
 
         df["score"] = [id_score[p_id] for p_id in list(df["PRODUCTCODE"])]
-
         df = df.sort_values(by="score", ascending=False)
-
         del df["score"]
 
-        df_product = df_product[
-            ["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]
-        ]
-        df = df[["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]]
+        del df[city_feature]
+        del df[supplier_code_feature]
+        del df[avg_rating_feature]
+        del df[time_feature]
 
-        # Take top k
-        df = df[:20]
-
-        result = query_gpt(df, df_product)
+        del df_product[city_feature]
+        del df_product[supplier_code_feature]
+        del df_product[avg_rating_feature]
+        del df_product[time_feature]
 
         subprocess.run(["clear"])
 
@@ -221,6 +227,8 @@ def main():
         print("EXPERIMENT WITH PARAMETERS:")
         print(f"City: {city_name}")
         print(f"Supplier code: {supplier_code}")
+        print(f"Average rating: {rating}")
+        print(f"Start year: {start_year}")
         print(f"Embedding model: {embedding_model}")
 
         product_features = "\n".join(
@@ -237,9 +245,9 @@ def main():
         print("RESULTS WITHOUT OPENAI:")
         print("")
 
-        df_raw = df[:3]
+        df_no_openai = df[:10]
 
-        for _, row in df_raw.iterrows():
+        for _, row in df_no_openai.iterrows():
 
             df_now = pd.DataFrame(row).T
 
@@ -261,13 +269,15 @@ def main():
 
         try:
 
+            df_openai = df[:30]
+            result = query_gpt(df_openai, df_product)
             result = ast.literal_eval(result.choices[0].message.content)
 
             if len(result) > 0:
 
-                result = result[:3]
+                result = result[:10]
 
-                df_openai = df[df["PRODUCTCODE"].isin(result)]
+                df_openai = df_openai[df_openai["PRODUCTCODE"].isin(result)]
 
                 for _, row in df_openai.iterrows():
 
