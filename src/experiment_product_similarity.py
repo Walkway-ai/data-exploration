@@ -82,6 +82,9 @@ def main():
         "-supplier_code", type=str, required=True, help="Supplier code."
     )
     parser.add_argument(
+        "-tourgrade", type=str, required=True, help="Tour grade."
+    )
+    parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
 
@@ -92,6 +95,7 @@ def main():
     product_id = args.product_id
     city_name = args.city_name
     supplier_code = args.supplier_code
+    tour_grade = args.tour_grade
     embedding_model = args.embedding_model
 
     object_name = f"product_similarities_{embedding_model}"
@@ -125,6 +129,10 @@ def main():
         # Product features
         df_product = df[df["PRODUCTCODE"] == product_id]
         df = df[df["PRODUCTCODE"] != product_id]
+
+        print(df)
+        import sys
+        sys.exit()
 
         if city_name == "same":
 
