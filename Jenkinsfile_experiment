@@ -34,13 +34,18 @@ spec:
         stage('Experiment Results') {
             steps {
                 container('python') {
-                    sh """
-                    python3 src/experiment_product_similarity.py \
-                        -product_id ${params.product_id} \
-                        -city_name ${params.city} \
-                        -supplier_code ${params.supplier_code} \
-                        -embedding_model ${params.embedding_model} | tee ${env.LOG_FILE}
-                    """
+                    script {
+                        withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
+                            sh """
+                            python3 src/experiment_product_similarity.py \
+                                -product_id ${params.product_id} \
+                                -city_name ${params.city} \
+                                -supplier_code ${params.supplier_code} \
+                                -embedding_model ${params.embedding_model} \
+                                -apikey ${OPENAI_API_KEY} | tee ${env.LOG_FILE}
+                            """
+                        }
+                    }
                 }
             }
         }

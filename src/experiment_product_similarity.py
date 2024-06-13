@@ -17,17 +17,13 @@ from mongodb_lib import *
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config)
 
-# Load OpenAI key from yaml file
-config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
-apikey = config["openai_key"]
-
 # Run garbage collection to free up memory.
 gc.collect()
 
 system_role = "You are an expert in online bookings and product matching in the tourism and entertainment industry. Your expertise includes comparing product descriptions to identify highly similar products."
 
 
-def query_gpt(df, df_product):
+def query_gpt(apikey, df, df_product):
 
     df = df.astype(str)
     df_product = df_product.astype(str)
@@ -93,6 +89,9 @@ def main():
     parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
+    parser.add_argument(
+        "-apikey", type=str, required=True, help="OpenAI API key."
+    )
 
     # Parse the arguments
     args = parser.parse_args()
@@ -104,6 +103,7 @@ def main():
     rating = args.rating
     start_year = args.start_year
     embedding_model = args.embedding_model
+    apikey = args.apikey
 
     object_name = f"product_similarities_{embedding_model}"
     existing_file = fs.find_one({"filename": object_name})
@@ -270,7 +270,7 @@ def main():
         try:
 
             df_openai = df[:30]
-            result = query_gpt(df_openai, df_product)
+            result = query_gpt(apikey, df_openai, df_product)
             result = ast.literal_eval(result.choices[0].message.content)
 
             if len(result) > 0:
