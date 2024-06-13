@@ -40,13 +40,13 @@ spec:
                 }
             }
         }
-        // stage('categorize-tabular-data') {
-        //     steps {
-        //         container('python') {
-        //             sh 'python3 src/categorize_tabular_data.py'
-        //         }
-        //     }
-        // }
+        stage('categorize-tabular-data') {
+            steps {
+                container('python') {
+                    sh 'python3 src/categorize_tabular_data.py --overwrite'
+                }
+            }
+        }
         // stage('language-detection') { 
         //     steps {
         //         container('python') {

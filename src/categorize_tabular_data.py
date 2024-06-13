@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import gc
+import argparse
 
 import pandas as pd
 import yaml
@@ -31,31 +32,41 @@ def main():
     4. Remove the key field and supplier code from the categorized DataFrame.
     5. Save the categorized DataFrame as a pickle file if it does not already exist in MongoDB.
     """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
+    
+    args = parser.parse_args()
+
     object_name = "product_tabular_categorized"
     existing_file = fs.find_one({"filename": object_name})
 
-    if not existing_file:
+    if not existing_file or args.overwrite:
+
         # Load the tabular product data from a pickle file.
         df = read_object(fs, "product_tabular")
         df = pd.DataFrame(df)
 
-        # Create a copy of the DataFrame for categorization.
-        categorized_df = df.copy()
-
         # Factorize each column in the DataFrame.
         for col in df.columns:
-            categorized_df[col], _ = pd.factorize(df[col])
+            df[col], _ = pd.factorize(df[col])
 
         # Remove the key field from the categorized DataFrame.
-        del categorized_df[key_field]
+        del df[key_field]
 
         # Remove the supplier code from the categorized DataFrame.
-        del categorized_df["pdt_product_level_SUPPLIERCODE"]
+        del df["pdt_product_level_SUPPLIERCODE"]
+
+        # Remove the date from the categorized DataFrame.
+        del df["bookings_MOSTRECENTORDERDATE"]
 
         # Save the categorized DataFrame as a pickle file.
-        save_object(fs=fs, object=categorized_df, object_name=object_name)
+        remove_object(fs=fs, object_name=object_name)
+        save_object(fs=fs, object=df, object_name=object_name)
     else:
-        print(f"The object '{object_name}' already exists in the database.")
+        print(
+            "Skipping categorization of tabular data."
+        )
 
 
 if __name__ == "__main__":
