@@ -6,16 +6,12 @@ import gc
 import pandas as pd
 import torch
 import yaml
+import argparse
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 from transformers import AutoModel
 
 from mongodb_lib import *
-
-# Load configuration from YAML files.
-config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
-embedding_model = config["embedding-model"]
-model_name = embedding_model.split("/")[-1]
 
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
@@ -24,7 +20,7 @@ db, fs, client = connect_to_mongodb(config_infra)
 gc.collect()
 
 
-def get_embeddings(df, text_field):
+def get_embeddings(df, text_field, embedding_model, model_name):
     """
     Generate embeddings for a specified text field in the DataFrame.
 
@@ -52,9 +48,9 @@ def get_embeddings(df, text_field):
 
     # Convert embeddings to a torch tensor and save to file.
     embeddings = torch.tensor(embeddings)
-    save_object(
-        fs=fs, object=embeddings, object_name=f"embeddings_{text_field}_{model_name}"
-    )
+    object_name = f"embeddings_{text_field}_{model_name}"
+    remove_object(fs=fs, object_name=object_name)
+    save_object(fs=fs, object=embeddings, object_name=object_name)
 
 
 def main():
@@ -66,6 +62,16 @@ def main():
     2. Generate embeddings for the 'pdt_inclexcl_ENG_CONTENT' field if not already present.
     3. Generate embeddings for the 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED' field if not already present.
     """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
+    parser.add_argument("--embedding_model", type=str, required=True, help="The embedding model.")
+    
+    args = parser.parse_args()
+
+    embedding_model = args.embedding_model
+    model_name = embedding_model.split("/")[-1]
+
     field_inclexcl = "pdt_inclexcl_ENG_CONTENT"
     embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
     embeddings_inclexcl_existing_file = fs.find_one(
@@ -81,6 +87,7 @@ def main():
     if (
         not embeddings_inclexcl_existing_file
         or not embeddings_description_existing_file
+        or args.overwrite
     ):
         # Load the summarized product textual data from a pickle file.
         df = read_object(fs, "product_textual_lang_summarized")
@@ -88,11 +95,13 @@ def main():
 
         # Generate embeddings for the specified text fields if not already present.
         if not embeddings_inclexcl_existing_file:
-            get_embeddings(df=df, text_field=field_inclexcl)
+            get_embeddings(df=df, text_field=field_inclexcl, embedding_model=embedding_model, model_name=model_name)
         if not embeddings_description_existing_file:
-            get_embeddings(df=df, text_field=field_description)
+            get_embeddings(df=df, text_field=field_description, embedding_model=embedding_model, model_name=model_name)
     else:
-        print(f"All required embeddings are already present in the database.")
+        print(
+            "Skipping embeddings."
+        )
 
 
 if __name__ == "__main__":

@@ -8,8 +8,9 @@ import yaml
 from deep_translator import GoogleTranslator
 from langdetect import detect
 from tqdm import tqdm
+import argparse
 
-from mongodb_lib import connect_to_mongodb, read_object, save_object
+from mongodb_lib import *
 
 # Load configuration from yaml file for MongoDB connection.
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -32,7 +33,7 @@ def detect_language(text):
     try:
         return detect(text)
     except Exception as e:
-        print(f"Language detection error: {e}")
+        print(f"Language detection error: {e} in {text}")
         return ""
 
 
@@ -49,7 +50,7 @@ def translate_text(text):
     try:
         return GoogleTranslator(source="auto", target="en").translate(text)
     except Exception as e:
-        print(f"Translation error: {e}")
+        print(f"Translation error: {e} in {text}")
         return text
 
 
@@ -66,10 +67,15 @@ def main():
     6. Save the processed DataFrame to MongoDB.
     """
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
+    
+    args = parser.parse_args()
+
     object_name = "product_textual_lang"
     existing_file = fs.find_one({"filename": object_name})
 
-    if not existing_file:
+    if not existing_file or args.overwrite:
 
         # Load the textual product data from MongoDB.
         df = read_object(fs, "product_textual")
@@ -101,10 +107,13 @@ def main():
         ]
 
         # Save the processed DataFrame to MongoDB.
+        remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=df, object_name=object_name)
 
     else:
-        print("Processed data already exists in MongoDB. Skipping processing.")
+        print(
+            "Skipping language detection."
+        )
 
 
 if __name__ == "__main__":

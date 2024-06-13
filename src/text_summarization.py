@@ -8,12 +8,8 @@ import pandas as pd
 import yaml
 from tqdm import tqdm
 from transformers import pipeline
-
+import argparse
 from mongodb_lib import *
-
-# Load configuration from yaml file.
-config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
-summarization_model = config["summarization-model"]
 
 # Load configuration from yaml file for MongoDB connection.
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -36,10 +32,18 @@ def main():
     6. Clean up any intermediate files.
     """
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
+    parser.add_argument("--summarization_model", type=str, required=True, help="The summarization model.")
+
+    args = parser.parse_args()
+
+    summarization_model = args.summarization_model
+
     object_name = "product_textual_lang_summarized"
     existing_file = fs.find_one({"filename": object_name})
 
-    if not existing_file:
+    if not existing_file or args.overwrite:
 
         # Load the product textual data from a pickle file.
         df = read_object(fs, "product_textual_lang")
@@ -96,12 +100,19 @@ def main():
 
         # Add the summarized descriptions to the DataFrame and save the final results.
         df["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"] = descriptions_summarized
+
+        remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=df, object_name=object_name)
         print("Saved final results")
 
         # Remove the intermediate file if it exists.
         if os.path.exists(intermediate_file):
             os.remove(intermediate_file)
+
+    else:
+        print(
+            "Skipping summarization."
+        )
 
 
 if __name__ == "__main__":

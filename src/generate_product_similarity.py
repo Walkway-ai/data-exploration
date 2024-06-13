@@ -5,17 +5,13 @@ import pandas as pd
 import yaml
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
+import argparse
 
 from mongodb_lib import *
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config)
-
-# Load configuration from yaml file for embedding model.
-config_model = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
-embedding_model = config_model["embedding-model"]
-model_name = embedding_model.split("/")[-1]
 
 # Run garbage collection to free up memory.
 gc.collect()
@@ -58,10 +54,20 @@ def main():
     3. Calculate the most similar products for each product in the dataset.
     4. Save the similarity data to MongoDB.
     """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
+    parser.add_argument("--embedding_model", type=str, required=True, help="The embedding model.")
+    
+    args = parser.parse_args()
+
+    embedding_model = args.embedding_model
+    model_name = embedding_model.split("/")[-1]
+
     object_name = f"product_similarities_{model_name}"
     existing_file = fs.find_one({"filename": object_name})
 
-    if not existing_file:
+    if not existing_file or args.overwrite:
 
         # Load the summarized product textual data from MongoDB.
         df = read_object(fs, "product_textual_lang_summarized")
@@ -83,7 +89,7 @@ def main():
 
             # Find the most similar products.
             most_similar_indices, similarity_scores = find_most_similar_products(
-                given_embedding, combined_embeddings
+                given_embedding, combined_embeddings, num_similar=200
             )
 
             similar_products = [
@@ -94,6 +100,7 @@ def main():
             )
 
         # Save the similarity dictionary to MongoDB.
+        remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=similarity_dict, object_name=object_name)
 
     else:

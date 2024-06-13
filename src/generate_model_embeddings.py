@@ -6,6 +6,7 @@ import gc
 import numpy as np
 import pandas as pd
 import yaml
+import argparse
 
 from mongodb_lib import *
 
@@ -32,10 +33,20 @@ def main():
     4. Concatenate the tabular data with the two sets of embeddings.
     5. Save the final concatenated embeddings as a pickle file.
     """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--overwrite', action='store_true', help='Enable overwrite mode')
+    parser.add_argument("--embedding_model", type=str, required=True, help="The embedding model.")
+
+    args = parser.parse_args()
+
+    embedding_model = args.embedding_model
+    model_name = embedding_model.split("/")[-1]
+
     object_name = f"final_embeddings_{model_name}_concatenated_w_tabular"
     existing_file = fs.find_one({"filename": object_name})
 
-    if not existing_file:
+    if not existing_file or args.overwrite:
 
         # Load the categorized tabular data from a pickle file.
         df_tabular = read_object(fs, "product_tabular_categorized")
@@ -65,11 +76,14 @@ def main():
             (df_tabular.values, np.array(embeddings1), np.array(embeddings2)), axis=1
         )
 
-        # Save the final concatenated embeddings as a pickle file.
+        # Save the model concatenated embeddings as a pickle file.
+        remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=final_embeddings, object_name=object_name)
 
     else:
-        print(f"The concatenated embeddings file '{object_name}' already exists.")
+        print(
+            "Skipping generation of model embeddings."
+        )
 
 
 if __name__ == "__main__":
