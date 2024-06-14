@@ -20,10 +20,11 @@ spec:
         }
     }
     parameters {
-        string(name: 'product_id', defaultValue: '73434P108', description: 'ID of the product (e.g. 9866P79, 73434P108, 156679P2, 73995P7, 70667P4)')
-        choice(name: 'city', choices: ['same', 'any', 'different'], description: 'If same, only products from the same city are shown.')
+        string(name: 'product_id', defaultValue: '6462P29', description: 'ID of the product (e.g. 104357P6, 6462P29, 16168P1, 47475P7, 3267P8)')
+        choice(name: 'city_name', choices: ['same', 'any', 'different'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'any', 'same'], description: 'If different, only products from other suppliers are shown.')
-        choice(name: 'rating', choices: ['any', 'similar', 'different'], description: 'If similar, only products with similar average ratings are shown.')
+        choice(name: 'average_rating', choices: ['any', 'similar', 'different'], description: 'If similar, only products with similar average ratings are shown.')
+        choice(name: 'tour_grade_code', choices: ['similar', 'any', 'different'], description: 'If similar, only products with similar tour grade codes are shown.')
         choice(name: 'start_year', choices: ['2023', '2022', '2024'], description: 'Products older than this year will not be considered.')
         choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'mean', 'gte-large'], description: 'Embedding model.')
     }
@@ -39,9 +40,10 @@ spec:
                             sh """
                             python3 src/experiment_product_similarity.py \
                                 -product_id ${params.product_id} \
-                                -city_name ${params.city} \
+                                -city_name ${params.city_name} \
                                 -supplier_code ${params.supplier_code} \
-                                -rating ${params.rating} \
+                                -average_rating ${params.average_rating} \
+                                -tour_grade_code ${params.tour_grade_code} \
                                 -start_year ${params.start_year} \
                                 -embedding_model ${params.embedding_model} \
                                 -apikey ${OPENAI_API_KEY} | tee ${env.LOG_FILE}

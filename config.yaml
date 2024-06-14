@@ -38,3 +38,9 @@ bigquery-to-retrieve:
       fields:
         - "ProductCode"
         - "OrderDate"
+    pdt_tourgrades:
+      dataset_id: "v_extract1"
+      fields:
+        - "product_code"
+        - "tour_grade_code"
+

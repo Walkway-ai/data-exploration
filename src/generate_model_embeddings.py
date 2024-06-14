@@ -10,11 +10,6 @@ import yaml
 
 from mongodb_lib import *
 
-# Load configuration from YAML files.
-config = yaml.load(open("config.yaml"), Loader=yaml.FullLoader)
-embedding_model = config["embedding-model"]
-model_name = embedding_model.split("/")[-1]
-
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 

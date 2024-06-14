@@ -220,7 +220,7 @@ class DataFrameProcessor:
             elif len(unique_values) == 0:
                 return np.nan
             else:
-                raise ValueError(f"Non-unique values found: {unique_values}")
+                return "; ".join(unique_values)
 
         for col in tqdm(columns_to_aggregate):
             self.df[col] = self.df[col].apply(lambda x: get_unique_value(x))

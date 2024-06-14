@@ -82,6 +82,7 @@ def main():
         # Load the textual product data from MongoDB.
         df = read_object(fs, "product_textual")
         df = pd.DataFrame(df)
+
         # Fill any missing values with an empty string.
         df.fillna("", inplace=True)
 

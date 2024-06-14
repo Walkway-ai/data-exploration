@@ -1,6 +1,7 @@
 import argparse
 import ast
 import gc
+import re
 
 import pandas as pd
 import yaml
@@ -82,16 +83,19 @@ def main():
     parser.add_argument(
         "-supplier_code", type=str, required=True, help="Supplier code."
     )
-    parser.add_argument("-rating", type=str, required=True, help="Tour average rating.")
+    parser.add_argument(
+        "-average_rating", type=str, required=True, help="Tour average rating."
+    )
+    parser.add_argument(
+        "-tour_grade_code", type=str, required=True, help="Tour grade code."
+    )
     parser.add_argument(
         "-start_year", type=str, required=True, help="Star year of products."
     )
     parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
-    parser.add_argument(
-        "-apikey", type=str, required=True, help="OpenAI API key."
-    )
+    parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
 
     # Parse the arguments
     args = parser.parse_args()
@@ -100,7 +104,8 @@ def main():
     product_id = args.product_id
     city_name = args.city_name
     supplier_code = args.supplier_code
-    rating = args.rating
+    average_rating = args.average_rating
+    tour_grade_code = args.tour_grade_code
     start_year = args.start_year
     embedding_model = args.embedding_model
     apikey = args.apikey
@@ -113,6 +118,7 @@ def main():
         city_feature = "pdt_product_detail_VIDESTINATIONCITY"
         supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
         avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
+        tour_grade_code_feature = "pdt_tourgrades_TOURGRADECODE"
         time_feature = "bookings_MOSTRECENTORDERDATE"
         text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
         product_field = "PRODUCTCODE"
@@ -146,6 +152,7 @@ def main():
                 city_feature,
                 supplier_code_feature,
                 avg_rating_feature,
+                tour_grade_code_feature,
                 time_feature,
             ]
         ]
@@ -171,7 +178,7 @@ def main():
 
             df = df[df[city_feature] != str(list(df_product[city_feature])[0])]
 
-        print("Number of initial candidates after the city filter:")
+        print("Number of candidates after the city filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
 
@@ -189,25 +196,25 @@ def main():
                 != str(list(df_product[supplier_code_feature])[0])
             ]
 
-        print("Number of initial candidates after the supplier code filter:")
+        print("Number of candidates after the supplier code filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
 
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
 
-        if rating == "similar":
+        if average_rating == "similar":
 
             possible_values = avg_rating_possible_values[
-                avg_rating_index - 2 : avg_rating_index + 2
+                avg_rating_index - 1 : avg_rating_index + 2
             ]
 
             df = df[df[avg_rating_feature].isin(possible_values)]
 
-        if rating == "different":
+        if average_rating == "different":
 
             possible_values = (
-                avg_rating_possible_values[: avg_rating_index - 2]
+                avg_rating_possible_values[: avg_rating_index - 1]
                 + avg_rating_possible_values[avg_rating_index + 2 :]
             )
 
@@ -215,7 +222,38 @@ def main():
 
             df = df[df[avg_rating_feature].isin(possible_values)]
 
-        print("Number of initial candidates after the average rating filter:")
+        print("Number of candidates after the average rating filter:")
+        print(df.shape[0])
+        print(df[[product_field, text_field]].head(5))
+
+        if tour_grade_code == "same":
+
+            possible_values = list(df_product[tour_grade_code_feature])[0].split(";")
+
+            df[tour_grade_code_feature] = [
+                x.split(";") for x in df[tour_grade_code_feature]
+            ]
+            is_present = [
+                set(x) & set(possible_values) for x in df[tour_grade_code_feature]
+            ]
+            bools_list = [bool(s) for s in is_present]
+            df = df[bools_list]
+
+        if tour_grade_code == "different":
+
+            possible_values = list(df_product[tour_grade_code_feature])[0].split(";")
+
+            df[tour_grade_code_feature] = [
+                x.split(";") for x in df[tour_grade_code_feature]
+            ]
+            is_present = [
+                set(x) & set(possible_values) for x in df[tour_grade_code_feature]
+            ]
+            bools_list = [bool(s) for s in is_present]
+            bools_list = [not value for value in bools_list]
+            df = df[bools_list]
+
+        print("Number of candidates after the tour grade code filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
 
@@ -234,11 +272,13 @@ def main():
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
+        del df[tour_grade_code_feature]
         del df[time_feature]
 
         del df_product[city_feature]
         del df_product[supplier_code_feature]
         del df_product[avg_rating_feature]
+        del df_product[tour_grade_code_feature]
         del df_product[time_feature]
 
         subprocess.run(["clear"])
@@ -248,9 +288,11 @@ def main():
         print("EXPERIMENT WITH PARAMETERS:")
         print(f"City: {city_name}")
         print(f"Supplier code: {supplier_code}")
-        print(f"Average rating: {rating}")
+        print(f"Average rating: {average_rating}")
+        print(f"Tour grade code: {tour_grade_code}")
         print(f"Start year: {start_year}")
         print(f"Embedding model: {embedding_model}")
+        print("")
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -292,7 +334,8 @@ def main():
 
             df_openai = df[:30]
             result = query_gpt(apikey, text_field, df_openai, df_product)
-            result = ast.literal_eval(result.choices[0].message.content)
+            result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
+            result = ast.literal_eval(result)
 
             if len(result) > 0:
 
