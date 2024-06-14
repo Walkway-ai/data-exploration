@@ -261,7 +261,7 @@ def main():
             del df["year"]
 
         print("")
-        print(f"Number of initial candidates after the year filter: {df.shape[0]}")
+        print(f"Number of candidates after the year filter: {df.shape[0]}")
 
         del df[city_feature]
         del df[supplier_code_feature]
