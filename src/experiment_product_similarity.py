@@ -167,9 +167,7 @@ def main():
         del df["score"]
 
         print("")
-        print("Number of initial candidates:")
-        print(df.shape[0])
-        print(df[[product_field, text_field]].head(5))
+        print(f"Number of initial candidates: {df.shape[0]}")
 
         if city_name == "same":
 
@@ -180,9 +178,7 @@ def main():
             df = df[df[city_feature] != str(list(df_product[city_feature])[0])]
 
         print("")
-        print("Number of candidates after the city filter:")
-        print(df.shape[0])
-        print(df[[product_field, text_field]].head(5))
+        print(f"Number of candidates after the city filter: {df.shape[0]}")
 
         if supplier_code == "same":
 
@@ -199,9 +195,7 @@ def main():
             ]
 
         print("")
-        print("Number of candidates after the supplier code filter:")
-        print(df.shape[0])
-        print(df[[product_field, text_field]].head(5))
+        print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
 
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
@@ -226,9 +220,7 @@ def main():
             df = df[df[avg_rating_feature].isin(possible_values)]
 
         print("")
-        print("Number of candidates after the average rating filter:")
-        print(df.shape[0])
-        print(df[[product_field, text_field]].head(5))
+        print(f"Number of candidates after the average rating filter: {df.shape[0]}")
 
         if tour_grade_code == "same":
 
@@ -258,9 +250,7 @@ def main():
             df = df[bools_list]
 
         print("")
-        print("Number of candidates after the tour grade code filter:")
-        print(df.shape[0])
-        print(df[[product_field, text_field]].head(5))
+        print(f"Number of candidates after the tour grade code filter: {df.shape[0]}")
 
         if start_year != "any":
 
@@ -271,9 +261,7 @@ def main():
             del df["year"]
 
         print("")
-        print("Number of initial candidates after the year filter:")
-        print(df.shape[0])
-        print(df[[product_field, text_field]].head(5))
+        print(f"Number of initial candidates after the year filter: {df.shape[0]}")
 
         del df[city_feature]
         del df[supplier_code_feature]
