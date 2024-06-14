@@ -166,6 +166,7 @@ def main():
         df = df.sort_values(by="score", ascending=False)
         del df["score"]
 
+        print("")
         print("Number of initial candidates:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
@@ -178,6 +179,7 @@ def main():
 
             df = df[df[city_feature] != str(list(df_product[city_feature])[0])]
 
+        print("")
         print("Number of candidates after the city filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
@@ -196,6 +198,7 @@ def main():
                 != str(list(df_product[supplier_code_feature])[0])
             ]
 
+        print("")
         print("Number of candidates after the supplier code filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
@@ -222,6 +225,7 @@ def main():
 
             df = df[df[avg_rating_feature].isin(possible_values)]
 
+        print("")
         print("Number of candidates after the average rating filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
@@ -253,6 +257,7 @@ def main():
             bools_list = [not value for value in bools_list]
             df = df[bools_list]
 
+        print("")
         print("Number of candidates after the tour grade code filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
@@ -265,6 +270,7 @@ def main():
             df = df[df["year"] >= int(start_year)]
             del df["year"]
 
+        print("")
         print("Number of initial candidates after the year filter:")
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
