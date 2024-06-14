@@ -257,13 +257,13 @@ def main():
         print(df.shape[0])
         print(df[[product_field, text_field]].head(5))
 
-        # Only retrieve products from start_year
+        if start_year != "any":
 
-        df["year"] = pd.to_datetime(df[time_feature], unit="ms")
-        df["year"] = df["year"].dt.year
+            df["year"] = pd.to_datetime(df[time_feature], unit="ms")
+            df["year"] = df["year"].dt.year
 
-        df = df[df["year"] >= int(start_year)]
-        del df["year"]
+            df = df[df["year"] >= int(start_year)]
+            del df["year"]
 
         print("Number of initial candidates after the year filter:")
         print(df.shape[0])
