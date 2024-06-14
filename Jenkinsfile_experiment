@@ -24,7 +24,7 @@ spec:
         choice(name: 'city_name', choices: ['same', 'any', 'different'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'any', 'same'], description: 'If different, only products from other suppliers are shown.')
         choice(name: 'average_rating', choices: ['any', 'similar', 'different'], description: 'If similar, only products with similar average ratings are shown.')
-        choice(name: 'tour_grade_code', choices: ['same', 'any', 'different'], description: 'If similar, only products with similar tour grade codes are shown.')
+        choice(name: 'tour_grade_code', choices: ['same', 'any', 'different'], description: 'If same, only products with same tour grade codes are shown.')
         choice(name: 'start_year', choices: ['2022', '2023', '2024', 'any'], description: 'Products older than this year will not be considered.')
         choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'mean', 'gte-large'], description: 'Embedding model.')
     }
