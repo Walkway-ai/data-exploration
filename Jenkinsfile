@@ -62,6 +62,21 @@ spec:
                 }
             }
         }
+        stage('landmark-detection') { 
+            steps {
+                container('python') {
+                    script {
+                        withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
+                            sh """
+                            python3 src/landmark_detection.py \
+                                --overwrite \
+                                -apikey ${OPENAI_API_KEY}
+                            """
+                        }
+                    }
+                }
+            }
+        }
         stage('embed-textual-data') { 
             steps {
                 container('python') {

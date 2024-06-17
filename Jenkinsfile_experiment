@@ -28,9 +28,6 @@ spec:
         choice(name: 'start_year', choices: ['2022', '2023', '2024', 'any'], description: 'Products older than this year will not be considered.')
         choice(name: 'embedding_model', choices: ['jina-embeddings-v2-base-en', 'mean', 'gte-large'], description: 'Embedding model.')
     }
-    environment {
-        LOG_FILE = 'experiment.log'
-    }
     stages {
         stage('Experiment Results') {
             steps {
@@ -46,7 +43,7 @@ spec:
                                 -tour_grade_code ${params.tour_grade_code} \
                                 -start_year ${params.start_year} \
                                 -embedding_model ${params.embedding_model} \
-                                -apikey ${OPENAI_API_KEY} | tee ${env.LOG_FILE}
+                                -apikey ${OPENAI_API_KEY}
                             """
                         }
                     }

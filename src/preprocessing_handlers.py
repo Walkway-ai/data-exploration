@@ -4,9 +4,7 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-
 from mongodb_lib import *
-
 
 def detect_and_treat_outliers(
     df, column, method="zscore", threshold=3, replace_with="mean"
@@ -102,6 +100,7 @@ class DataFrameProcessor:
         self.create_text_dataframe()
         self.preprocess_tabular_fields()
         self.preprocess_text_fields()
+        self.assert_sizes()
         self.astypestr()
         self.normalize_product_type()
 
@@ -249,6 +248,10 @@ class DataFrameProcessor:
             else unique_preserve_order(el)[0]
             for el in self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"]
         ]
+
+    def assert_sizes(self):
+
+        assert list(self.df[self.key_field]) == list(self.df_text[self.key_field])
 
     def astypestr(self):
         self.df = self.df.astype(str)
