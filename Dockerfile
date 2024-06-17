@@ -20,12 +20,12 @@ RUN apt-get update && \
     yes | ./google-cloud-sdk/install.sh && \
     yes | ./google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin && \
     # Clean up
-    rm google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    rm /google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Add gcloud to PATH
-ENV PATH=/workspace/google-cloud-sdk/bin:$PATH
+ENV PATH=/google-cloud-sdk/bin:$PATH
 
 WORKDIR /workspace
 
