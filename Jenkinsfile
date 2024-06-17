@@ -94,18 +94,18 @@ spec:
                 }
             }
         }
-        // stage('landmark-detection') { 
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_LANDMARK_DETECTION ? '--overwrite' : ''
-        //                 withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
-        //                     sh("python3 src/landmark_detection.py ${overwriteArg}")
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        stage('landmark-detection') { 
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_LANDMARK_DETECTION ? '--overwrite' : ''
+                        withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
+                            sh("python3 src/landmark_detection.py ${overwriteArg}")
+                        }
+                    }
+                }
+            }
+        }
         // stage('embed-textual-data') { 
         //     steps {
         //         container('python') {
