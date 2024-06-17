@@ -53,16 +53,16 @@ spec:
                 }
             }
         }
-        // stage('generate-product-data') {
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_DATA ? '--overwrite' : ''
-        //                 sh("python3 src/generate_product_data.py ${overwriteArg}")
-        //             }
-        //         }
-        //     }
-        // }
+        stage('generate-product-data') {
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_DATA ? '--overwrite' : ''
+                        sh("python3 src/generate_product_data.py ${overwriteArg}")
+                    }
+                }
+            }
+        }
         // stage('categorize-tabular-data') {
         //     steps {
         //         container('python') {
