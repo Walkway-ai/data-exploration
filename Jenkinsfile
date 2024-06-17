@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
   - name: python
-    image: walkwayai/python:1.0
+    image: walkwayai/python:test
     command:
     - cat
     tty: true
@@ -38,9 +38,16 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_RETRIEVE_BIGQUERY_DATA ? '--overwrite' : ''
                         withCredentials([file(credentialsId: 'gcp_service_account_json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                            sh("apt-get update && apt-get install -y git curl")
+                            sh("curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
+                            sh("tar -xf google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
+                            sh("yes | /workspace/google-cloud-sdk/install.sh")
+                            sh("yes | /workspace/google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin")
+                            sh("rm /workspace/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
+                            sh("apt-get clean && rm -rf /var/lib/apt/lists/*")
                             sh('export PATH="/workspace/google-cloud-sdk/bin:$PATH"')
-                            sh("gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}")
-                            sh('export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"')
+                            sh("export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS")
+                            sh("gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS")
                             sh("python3 src/retrieve_bigquery_data.py ${overwriteArg}")
                         }
                     }

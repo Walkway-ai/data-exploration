@@ -100,7 +100,7 @@ def main():
         save_object(fs=fs, object=product_df, object_name=object_name)
 
     else:
-        print("Skipping retreiving BigQuery data.")
+        print("Skipping retrieving BigQuery data.")
 
 
 if __name__ == "__main__":
