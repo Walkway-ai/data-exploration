@@ -78,7 +78,7 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_TEXT_SUMMARIZATION ? '--overwrite' : ''
                         sh("mkdir tmp")
-                        sh('python3 src/text_summarization.py ${overwriteArg} --summarization_model "facebook/bart-large-cnn"')
+                        sh("python3 src/text_summarization.py ${overwriteArg} --summarization_model 'facebook/bart-large-cnn'")
                     }
                 }
             }
@@ -98,8 +98,8 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_EMBED_TEXTUAL_DATA ? '--overwrite' : ''
-                        sh('python3 src/embed_textual_data.py ${overwriteArg} --embedding_model "thenlper/gte-large"')
-                        sh('python3 src/embed_textual_data.py ${overwriteArg} --embedding_model "jina-embeddings-v2-base-en"')
+                        sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'thenlper/gte-large'")
+                        sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'jina-embeddings-v2-base-en'")
                     }
                 }
             }
@@ -109,9 +109,9 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_GENERATE_MODEL_EMBEDDINGS ? '--overwrite' : ''
-                        sh('python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model "thenlper/gte-large"')
-                        sh('python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model "jina-embeddings-v2-base-en"')
-                        sh('python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models "thenlper/gte-large,jinaai/jina-embeddings-v2-base-en"')
+                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'thenlper/gte-large'")
+                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jina-embeddings-v2-base-en'")
+                        sh("python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en'")
                     }
                 }
             }
@@ -123,7 +123,7 @@ spec:
                         def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_SIMILARITY ? '--overwrite' : ''
                         // sh('python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model "thenlper/gte-large"')
                         // sh('python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model "jinaai/jina-embeddings-v2-base-en"')
-                        sh('python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model "mean/mean"')
+                        sh("python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model 'mean/mean'")
                     }
                 }
             }
