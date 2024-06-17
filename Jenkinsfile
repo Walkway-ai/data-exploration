@@ -12,25 +12,21 @@ metadata:
 spec:
   containers:
   - name: python
-    image: walkwayai/python:latest
+    image: walkwayai/python:1.0
     command:
     - cat
     tty: true
 """
         }
     }
-    environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp_service_account_json')
-    }
     stages {
         stage('retrieve-bigquery-data') {
             steps {
                 container('python') {
-                    withCredentials([file(credentialsId: 'gcp_service_account_json', variable: 'GC_KEY')]) {
-                        sh("gcloud auth activate-service-account --key-file=${GC_KEY}")
+                    withCredentials([file(credentialsId: 'gcp_service_account_json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        sh("gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}")
                         sh('export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"')
                         sh("python3 src/retrieve_bigquery_data.py --overwrite")
-
                     }
                 }
             }

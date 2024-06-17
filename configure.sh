@@ -2,13 +2,6 @@
 
 set -e
 
-# Set up GCP SDK and install dependencies
-curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-478.0.0-linux-x86_64.tar.gz
-tar -xf google-cloud-cli-478.0.0-linux-x86_64.tar.gz
-./google-cloud-sdk/install.sh
-./google-cloud-sdk/bin/gcloud init
-gcloud components install gke-gcloud-auth-plugin
-
 # Create cluster and configure KUBECONFIG
 gcloud container clusters create walkway-cluster --num-nodes=3 --zone=us-central1-c
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
@@ -46,6 +39,6 @@ export MONGO_DB_EXTERNAL_IP=$(kubectl get service mongodb-lb -o jsonpath='{.stat
 envsubst < infra-config.yaml > infra-config-pipeline.yaml
 
 # Create Python image
-docker build -t walkwayai/python:latest .
-docker tag walkwayai/python:latest walkwayai/python:latest
-docker push walkwayai/python:latest
+docker build -t walkwayai/python:1.0 .
+docker tag walkwayai/python:1.0 walkwayai/python:1.0
+docker push walkwayai/python:1.0
