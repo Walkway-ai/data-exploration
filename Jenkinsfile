@@ -20,13 +20,13 @@ spec:
         }
     }
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('google-service-account-key')
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp_service_account_json')
     }
     stages {
         stage('retrieve-bigquery-data') {
             steps {
                 container('python') {
-                    withCredentials([file(credentialsId: 'google-service-account-key', variable: 'GC_KEY')]) {
+                    withCredentials([file(credentialsId: 'gcp_service_account_json', variable: 'GC_KEY')]) {
                         sh("gcloud auth activate-service-account --key-file=${GC_KEY}")
                         sh('export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"')
                         sh("python3 src/retrieve_bigquery_data.py --overwrite")
