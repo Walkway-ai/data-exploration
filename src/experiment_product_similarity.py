@@ -93,6 +93,9 @@ def main():
         "-start_year", type=str, required=True, help="Star year of products."
     )
     parser.add_argument(
+        "-landmarks", type=str, required=True, help="Landmarks of the product."
+    )
+    parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
@@ -107,6 +110,7 @@ def main():
     average_rating = args.average_rating
     tour_grade_code = args.tour_grade_code
     start_year = args.start_year
+    landmarks = args.landmarks
     embedding_model = args.embedding_model
     apikey = args.apikey
 
