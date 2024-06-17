@@ -108,7 +108,7 @@ def main():
         save_object(fs=fs, object=similarity_dict, object_name=object_name)
 
     else:
-        print("Similarity data already exists in MongoDB. Skipping computation.")
+        print("Skipping product similarity.")
 
 
 if __name__ == "__main__":
