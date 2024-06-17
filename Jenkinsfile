@@ -42,7 +42,7 @@ spec:
                             sh("curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
                             sh("tar -xf google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
                             sh("yes | ./google-cloud-sdk/install.sh")
-                            sh("yes | /google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin")
+                            sh("yes | ./google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin")
                             sh("rm /google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
                             sh("apt-get clean && rm -rf /var/lib/apt/lists/*")
                             sh('export PATH="/google-cloud-sdk/bin:$PATH"')
