@@ -115,17 +115,18 @@ spec:
                 }
             }
         }
-        // stage('generate-model-embeddings') { 
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_GENERATE_MODEL_EMBEDDINGS ? '--overwrite' : ''
-        //                 sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model \"thenlper/gte-large\"")
-        //                 sh("python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models \"thenlper/gte-large,jinaai/jina-embeddings-v2-base-en\"")
-        //             }
-        //         }
-        //     }
-        // }
+        stage('generate-model-embeddings') { 
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_GENERATE_MODEL_EMBEDDINGS ? '--overwrite' : ''
+                        sh('python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model "thenlper/gte-large"')
+                        sh('python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model "jina-embeddings-v2-base-en"')
+                        sh('python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models "thenlper/gte-large,jinaai/jina-embeddings-v2-base-en"')
+                    }
+                }
+            }
+        }
         // stage('generate-product-similarity') { 
         //     steps {
         //         container('python') {
