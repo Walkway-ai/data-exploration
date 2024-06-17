@@ -26,7 +26,7 @@ spec:
         choice(name: 'average_rating', choices: ['any', 'similar', 'different'], description: 'If similar, only products with similar average ratings are shown.')
         choice(name: 'tour_grade_code', choices: ['same', 'any', 'different'], description: 'If same, only products with same tour grade codes are shown.')
         choice(name: 'start_year', choices: ['any', '2022', '2023', '2024'], description: 'Products older than this year will not be considered.')
-        choice(name: 'embedding_model', choices: ['mean', 'jina-embeddings-v2-base-en', 'gte-large'], description: 'Embedding model.')
+        choice(name: 'embedding_model', choices: ['gte-large', 'jina-embeddings-v2-base-en', 'mean'], description: 'Embedding model.')
     }
     stages {
         stage('Experiment Results') {
