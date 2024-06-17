@@ -83,17 +83,17 @@ spec:
                 }
             }
         }
-        // stage('text-summarization') { 
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_TEXT_SUMMARIZATION ? '--overwrite' : ''
-        //                 sh("mkdir tmp")
-        //                 sh("python3 src/text_summarization.py ${overwriteArg} --summarization_model \"facebook/bart-large-cnn\"")
-        //             }
-        //         }
-        //     }
-        // }
+        stage('text-summarization') { 
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_TEXT_SUMMARIZATION ? '--overwrite' : ''
+                        sh("mkdir tmp")
+                        sh("python3 src/text_summarization.py ${overwriteArg} --summarization_model \"facebook/bart-large-cnn\"")
+                    }
+                }
+            }
+        }
         // stage('landmark-detection') { 
         //     steps {
         //         container('python') {

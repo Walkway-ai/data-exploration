@@ -58,6 +58,18 @@ def main():
         df = pd.DataFrame(df)
         df.fillna("", inplace=True)
 
+        # Load the product textual data from a pickle file.
+        df_test = read_object(fs, "product_textual_lang_summarized")
+        df_test = pd.DataFrame(df_test)
+        df_test.fillna("", inplace=True)
+
+        assert list(df["PRODUCTCODE"]) == list(df_test["PRODUCTCODE"])
+
+        import sys
+        sys.exit()
+
+
+
         # Define the intermediate file path.
         intermediate_file = "tmp/product_textual_lang_summarized_intermediate.pickle"
 
