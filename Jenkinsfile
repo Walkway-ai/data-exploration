@@ -63,26 +63,26 @@ spec:
                 }
             }
         }
-        // stage('categorize-tabular-data') {
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_CATEGORIZE_TABULAR_DATA ? '--overwrite' : ''
-        //                 sh("python3 src/categorize_tabular_data.py ${overwriteArg}")
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('language-detection') { 
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_LANGUAGE_DETECTION ? '--overwrite' : ''
-        //                 sh("python3 src/language_detection.py ${overwriteArg}")
-        //             }
-        //         }
-        //     }
-        // }
+        stage('categorize-tabular-data') {
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_CATEGORIZE_TABULAR_DATA ? '--overwrite' : ''
+                        sh("python3 src/categorize_tabular_data.py ${overwriteArg}")
+                    }
+                }
+            }
+        }
+        stage('language-detection') { 
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_LANGUAGE_DETECTION ? '--overwrite' : ''
+                        sh("python3 src/language_detection.py ${overwriteArg}")
+                    }
+                }
+            }
+        }
         // stage('text-summarization') { 
         //     steps {
         //         container('python') {
