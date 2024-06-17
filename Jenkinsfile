@@ -22,7 +22,6 @@ spec:
     parameters {
         booleanParam(name: 'OVERWRITE_RETRIEVE_BIGQUERY_DATA', defaultValue: false, description: 'Overwrite data for retrieve-bigquery-data stage')
         booleanParam(name: 'OVERWRITE_GENERATE_PRODUCT_DATA', defaultValue: false, description: 'Overwrite data for generate-product-data stage')
-        booleanParam(name: 'OVERWRITE_CATEGORIZE_TABULAR_DATA', defaultValue: false, description: 'Overwrite data for categorize-tabular-data stage')
         booleanParam(name: 'OVERWRITE_LANGUAGE_DETECTION', defaultValue: false, description: 'Overwrite data for language-detection stage')
         booleanParam(name: 'OVERWRITE_TEXT_SUMMARIZATION', defaultValue: false, description: 'Overwrite data for text-summarization stage')
         booleanParam(name: 'OVERWRITE_LANDMARK_DETECTION', defaultValue: false, description: 'Overwrite data for landmark-detection stage')
@@ -58,15 +57,6 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_DATA ? '--overwrite' : ''
                         sh("python3 src/generate_product_data.py ${overwriteArg}")
-                    }
-                }
-            }
-        }
-        stage('categorize-tabular-data') {
-            steps {
-                container('python') {
-                    script {
-                        def overwriteArg = params.OVERWRITE_CATEGORIZE_TABULAR_DATA ? '--overwrite' : ''
                         sh("python3 src/categorize_tabular_data.py ${overwriteArg}")
                     }
                 }
