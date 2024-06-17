@@ -4,7 +4,9 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+
 from mongodb_lib import *
+
 
 def detect_and_treat_outliers(
     df, column, method="zscore", threshold=3, replace_with="mean"

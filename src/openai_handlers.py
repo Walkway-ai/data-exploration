@@ -1,11 +1,10 @@
 import gc
 
-import pandas as pd
-
 from openai import OpenAI
 
 # Run garbage collection to free up memory.
 gc.collect()
+
 
 def query_gpt(apikey, system_role, prompt):
 

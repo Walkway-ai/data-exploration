@@ -63,7 +63,7 @@ def main():
         # Save the processed tabular data as a pickle file.
         remove_object(fs=fs, object_name=tabular_object_name)
         save_object(fs=fs, object=processor.df, object_name=tabular_object_name)
-        
+
         # Save the processed textual data as a pickle file.
         remove_object(fs=fs, object_name=textual_object_name)
         save_object(fs=fs, object=processor.df_text, object_name=textual_object_name)

@@ -78,7 +78,13 @@ def main():
 
         # Concatenate the tabular data with the two sets of embeddings.
         final_embeddings = np.concatenate(
-            (df_tabular.values, np.array(embeddings1), np.array(embeddings2), np.array(landmarks)), axis=1
+            (
+                df_tabular.values,
+                np.array(embeddings1),
+                np.array(embeddings2),
+                np.array(landmarks),
+            ),
+            axis=1,
         )
 
         # Save the model concatenated embeddings as a pickle file.
