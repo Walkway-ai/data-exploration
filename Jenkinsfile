@@ -38,6 +38,7 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_RETRIEVE_BIGQUERY_DATA ? '--overwrite' : ''
                         withCredentials([file(credentialsId: 'gcp_service_account_json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                            sh('export PATH="/workspace/google-cloud-sdk/bin:$PATH"')
                             sh("gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}")
                             sh('export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"')
                             sh("python3 src/retrieve_bigquery_data.py ${overwriteArg}")
