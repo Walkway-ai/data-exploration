@@ -28,7 +28,6 @@ spec:
         booleanParam(name: 'OVERWRITE_LANDMARK_DETECTION', defaultValue: false, description: 'Overwrite data for landmark-detection stage')
         booleanParam(name: 'OVERWRITE_EMBED_TEXTUAL_DATA', defaultValue: false, description: 'Overwrite data for embed-textual-data stage')
         booleanParam(name: 'OVERWRITE_GENERATE_MODEL_EMBEDDINGS', defaultValue: false, description: 'Overwrite data for generate-model-embeddings stage')
-        booleanParam(name: 'OVERWRITE_GENERATE_MEAN_EMBEDDINGS', defaultValue: false, description: 'Overwrite data for generate-mean-embeddings stage')
         booleanParam(name: 'OVERWRITE_GENERATE_PRODUCT_SIMILARITY', defaultValue: false, description: 'Overwrite data for generate-product-similarity stage')
     }
     stages {
