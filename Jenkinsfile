@@ -89,7 +89,7 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_TEXT_SUMMARIZATION ? '--overwrite' : ''
                         sh("mkdir tmp")
-                        sh("python3 src/text_summarization.py ${overwriteArg} --summarization_model \"facebook/bart-large-cnn\"")
+                        sh('python3 src/text_summarization.py ${overwriteArg} --summarization_model "facebook/bart-large-cnn"')
                     }
                 }
             }
@@ -99,23 +99,22 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_LANDMARK_DETECTION ? '--overwrite' : ''
-                        withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
-                            sh("python3 src/landmark_detection.py ${overwriteArg}")
-                        }
+                        sh("python3 src/landmark_detection.py ${overwriteArg}")
                     }
                 }
             }
         }
-        // stage('embed-textual-data') { 
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_EMBED_TEXTUAL_DATA ? '--overwrite' : ''
-        //                 sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model \"thenlper/gte-large\"")
-        //             }
-        //         }
-        //     }
-        // }
+        stage('embed-textual-data') { 
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_EMBED_TEXTUAL_DATA ? '--overwrite' : ''
+                        sh('python3 src/embed_textual_data.py ${overwriteArg} --embedding_model "thenlper/gte-large"')
+                        sh('python3 src/embed_textual_data.py ${overwriteArg} --embedding_model "jina-embeddings-v2-base-en"')
+                    }
+                }
+            }
+        }
         // stage('generate-model-embeddings') { 
         //     steps {
         //         container('python') {
