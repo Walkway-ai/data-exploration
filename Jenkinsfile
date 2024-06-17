@@ -121,8 +121,8 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_SIMILARITY ? '--overwrite' : ''
-                        // sh('python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model "thenlper/gte-large"')
-                        // sh('python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model "jinaai/jina-embeddings-v2-base-en"')
+                        sh('python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model "thenlper/gte-large"')
+                        sh('python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model "jinaai/jina-embeddings-v2-base-en"')
                         sh("python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model 'mean/mean'")
                     }
                 }
