@@ -68,9 +68,7 @@ spec:
                     script {
                         withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
                             sh """
-                            python3 src/landmark_detection.py \
-                                --overwrite \
-                                -apikey ${OPENAI_API_KEY}
+                            python3 src/landmark_detection.py --overwrite 
                             """
                         }
                     }

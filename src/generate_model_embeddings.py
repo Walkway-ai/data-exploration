@@ -62,17 +62,23 @@ def main():
             f"embeddings_pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED_{model_name}",
         )
 
+        # Load the landmark one hot encodings
+        landmarks = read_object(
+            fs,
+            "one_hot_encoding_landmarks",
+        )
+
         # Ensure that the embeddings have the same number of rows as the tabular data.
         if df_tabular.shape[0] != len(embeddings1) or df_tabular.shape[0] != len(
-            embeddings2
+            embeddings2 or df_tabular.shape[0] != len(landmarks)
         ):
             raise ValueError(
-                "Mismatch in the number of rows between tabular data and embeddings."
+                "Mismatch in the number of rows between tabular data, embeddings and one hot encodings."
             )
 
         # Concatenate the tabular data with the two sets of embeddings.
         final_embeddings = np.concatenate(
-            (df_tabular.values, np.array(embeddings1), np.array(embeddings2)), axis=1
+            (df_tabular.values, np.array(embeddings1), np.array(embeddings2), np.array(landmarks)), axis=1
         )
 
         # Save the model concatenated embeddings as a pickle file.
