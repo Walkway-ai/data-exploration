@@ -45,9 +45,8 @@ spec:
                             sh("yes | ./google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin")
                             sh("rm google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
                             sh("apt-get clean && rm -rf /var/lib/apt/lists/*")
-                            sh('export PATH="/google-cloud-sdk/bin:$PATH"')
                             sh("export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS")
-                            sh("gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS")
+                            sh("./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS")
                             sh("python3 src/retrieve_bigquery_data.py ${overwriteArg}")
                         }
                     }
