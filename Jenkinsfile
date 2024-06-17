@@ -41,11 +41,11 @@ spec:
                             sh("apt-get update && apt-get install -y git curl")
                             sh("curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
                             sh("tar -xf google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
-                            sh("yes | /workspace/google-cloud-sdk/install.sh")
-                            sh("yes | /workspace/google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin")
-                            sh("rm /workspace/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
+                            sh("yes | ./google-cloud-sdk/install.sh")
+                            sh("yes | /google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin")
+                            sh("rm /google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
                             sh("apt-get clean && rm -rf /var/lib/apt/lists/*")
-                            sh('export PATH="/workspace/google-cloud-sdk/bin:$PATH"')
+                            sh('export PATH="/google-cloud-sdk/bin:$PATH"')
                             sh("export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS")
                             sh("gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS")
                             sh("python3 src/retrieve_bigquery_data.py ${overwriteArg}")
@@ -123,15 +123,6 @@ spec:
         //             script {
         //                 def overwriteArg = params.OVERWRITE_GENERATE_MODEL_EMBEDDINGS ? '--overwrite' : ''
         //                 sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model \"thenlper/gte-large\"")
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('generate-mean-embeddings') { 
-        //     steps {
-        //         container('python') {
-        //             script {
-        //                 def overwriteArg = params.OVERWRITE_GENERATE_MEAN_EMBEDDINGS ? '--overwrite' : ''
         //                 sh("python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models \"thenlper/gte-large,jinaai/jina-embeddings-v2-base-en\"")
         //             }
         //         }
@@ -144,7 +135,6 @@ spec:
         //                 def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_SIMILARITY ? '--overwrite' : ''
         //                 sh("python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model \"thenlper/gte-large\"")
         //                 sh("python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model \"jinaai/jina-embeddings-v2-base-en\"")
-
         //             }
         //         }
         //     }
