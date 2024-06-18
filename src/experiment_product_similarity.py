@@ -67,15 +67,9 @@ def range_to_tuple(range_str):
     return (float(parts[0]), float(parts[1]))
 
 
-def at_least_half_same(list1, list2):
-    # Determine the shorter length
-    min_length = min(len(list1), len(list2))
+def landmarks_are_the_same(list1, list2):
 
-    # Count the number of matching elements up to the length of the shorter list
-    matching_count = sum(1 for elem1, elem2 in zip(list1, list2) if elem1 == elem2)
-
-    # Check if at least 50% of the elements in the shorter list are the same
-    return matching_count >= min_length / 2
+    return list(sorted(list1)) == list(sorted(list2))
 
 
 def main():
@@ -311,7 +305,7 @@ def main():
                         for elem, flag in zip(name_landmarks, which_landmarks)
                         if flag
                     ]
-                    result = at_least_half_same(
+                    result = landmarks_are_the_same(
                         names_landmarks_product, names_landmarks_candidate
                     )
 
