@@ -341,6 +341,15 @@ def main():
         print(f"Average rating: {average_rating}")
         print(f"Tour grade code: {tour_grade_code}")
         print(f"Start year: {start_year}")
+
+        if product_id in list(d_landmarks.keys()):
+
+            print(f"Landmarks: {d_landmarks[product_id]}")
+
+        else:
+
+            print("Landmarks: no landmarks found for this product.")
+
         print(f"Embedding model: {embedding_model}")
         print("")
 
@@ -352,14 +361,6 @@ def main():
         )
 
         print(product_features)
-
-        if product_id in list(d_landmarks.keys()):
-
-            print(f"Landmarks: {d_landmarks[product_id]}")
-
-        else:
-
-            print("No landmarks found for this product.")
 
         print(50 * "-")
         print("")
