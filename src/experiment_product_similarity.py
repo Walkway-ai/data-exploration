@@ -67,6 +67,17 @@ def range_to_tuple(range_str):
     return (float(parts[0]), float(parts[1]))
 
 
+def at_least_half_same(list1, list2):
+    # Determine the shorter length
+    min_length = min(len(list1), len(list2))
+
+    # Count the number of matching elements up to the length of the shorter list
+    matching_count = sum(1 for elem1, elem2 in zip(list1, list2) if elem1 == elem2)
+
+    # Check if at least 50% of the elements in the shorter list are the same
+    return matching_count >= min_length / 2
+
+
 def main():
 
     parser = argparse.ArgumentParser(
@@ -141,13 +152,13 @@ def main():
         avg_rating_possible_values = sorted(
             list(set(df_raw[avg_rating_feature])), key=range_to_tuple
         )
-        df_raw = df_raw[df_raw[product_field].isin(all_products)]
+        df_raw_possible = df_raw[df_raw[product_field].isin(all_products)]
 
         df_text = read_object(fs, "product_textual_lang_summarized")
         df_text = pd.DataFrame(df_text)
-        df_text = df_text[df_text[product_field].isin(all_products)]
+        df_text_possible = df_text[df_text[product_field].isin(all_products)]
 
-        df = pd.merge(df_raw, df_text, on=product_field, how="outer")
+        df = pd.merge(df_raw_possible, df_text_possible, on=product_field, how="outer")
 
         df = df[
             [
@@ -266,6 +277,50 @@ def main():
 
         print("")
         print(f"Number of candidates after the year filter: {df.shape[0]}")
+
+        if landmarks == "same":
+
+            one_hot_encoding = read_object(fs, "one_hot_encoding_landmarks")
+            name_landmarks = read_object(fs, "name_landmarks")
+            list_products = list(df_raw[product_field])
+
+            idx_product = list_products.index(product_id)
+            which_landmarks = one_hot_encoding[idx_product]
+            which_landmarks = [bool(x) for x in which_landmarks]
+            names_landmarks_product = [
+                elem for elem, flag in zip(name_landmarks, which_landmarks) if flag
+            ]
+
+            # If product has landmarks
+
+            if names_landmarks_product:
+
+                final_candidates = list()
+
+                for candidate in list(df[product_field]):
+
+                    idx_candidate = list_products.index(candidate)
+                    which_landmarks = one_hot_encoding[idx_candidate]
+                    which_landmarks = [bool(x) for x in which_landmarks]
+                    names_landmarks_candidate = [
+                        elem
+                        for elem, flag in zip(name_landmarks, which_landmarks)
+                        if flag
+                    ]
+                    result = at_least_half_same(
+                        names_landmarks_product, names_landmarks_candidate
+                    )
+
+                    if result:
+
+                        final_candidates.append(candidate)
+
+                if final_candidates:
+
+                    df = df[df[product_field].isin(final_candidates)]
+
+        print("")
+        print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
 
         del df[city_feature]
         del df[supplier_code_feature]
