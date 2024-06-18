@@ -347,7 +347,7 @@ def main():
             
         else:
 
-            print("Landmarks: no landmarks found for this product.")
+            print("Landmarks list: no landmarks found for this product.")
 
         print(f"Embedding model: {embedding_model}")
         print("")
