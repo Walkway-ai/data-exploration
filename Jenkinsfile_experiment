@@ -33,9 +33,9 @@ spec:
         stage('Experiment Results') {
             steps {
                 container('python') {
-                    def customBuildNumber = params.product_id
-                    currentBuild.displayName = "${customBuildNumber}"
                     script {
+                        def customBuildNumber = params.product_id
+                        currentBuild.displayName = "${customBuildNumber}"
                         withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
                             sh """
                             python3 src/experiment_product_similarity.py \
