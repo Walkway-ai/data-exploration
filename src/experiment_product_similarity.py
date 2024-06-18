@@ -278,6 +278,8 @@ def main():
         print("")
         print(f"Number of candidates after the year filter: {df.shape[0]}")
 
+        d_landmarks = {}
+
         if landmarks == "same":
 
             one_hot_encoding = read_object(fs, "one_hot_encoding_landmarks")
@@ -294,6 +296,8 @@ def main():
             # If product has landmarks
 
             if names_landmarks_product:
+
+                d_landmarks[product_id] = names_landmarks_product
 
                 final_candidates = list()
 
@@ -314,6 +318,7 @@ def main():
                     if result:
 
                         final_candidates.append(candidate)
+                        d_landmarks[candidate] = names_landmarks_candidate
 
                 if final_candidates:
 
@@ -356,6 +361,10 @@ def main():
 
         print(product_features)
 
+        if product_id in list(d_landmarks.keys()):
+
+            print(f"Landmarks: {d_landmarks[product_id]}")
+
         print(50 * "-")
         print("")
         print("RESULTS WITHOUT OPENAI:")
@@ -366,6 +375,7 @@ def main():
         for _, row in df_no_openai.iterrows():
 
             df_now = pd.DataFrame(row).T
+            product_id_now = str(list(df_now[product_field])[0])
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -376,6 +386,11 @@ def main():
             )
 
             print(result_features)
+
+            if product_id_now in list(d_landmarks.keys()):
+
+                print(f"Landmarks: {d_landmarks[product_id_now]}")
+
             print("")
 
         print(50 * "-")
@@ -399,6 +414,7 @@ def main():
                 for _, row in df_openai.iterrows():
 
                     df_now = pd.DataFrame(row).T
+                    product_id_now = str(list(df_now[product_field])[0])
 
                     result_features = "\n".join(
                         [
@@ -412,6 +428,11 @@ def main():
                     )
 
                     print(result_features)
+
+                    if product_id_now in list(d_landmarks.keys()):
+
+                        print(f"Landmarks: {d_landmarks[product_id_now]}")
+                        
                     print("\n")
 
             else:
