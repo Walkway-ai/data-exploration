@@ -274,24 +274,22 @@ def main():
 
         d_landmarks = {}
 
-        if landmarks == "same":
+        one_hot_encoding = read_object(fs, "one_hot_encoding_landmarks")
+        name_landmarks = read_object(fs, "name_landmarks")
+        list_products = list(df_raw[product_field])
 
-            one_hot_encoding = read_object(fs, "one_hot_encoding_landmarks")
-            name_landmarks = read_object(fs, "name_landmarks")
-            list_products = list(df_raw[product_field])
+        idx_product = list_products.index(product_id)
+        which_landmarks = one_hot_encoding[idx_product]
+        which_landmarks = [bool(x) for x in which_landmarks]
+        names_landmarks_product = [
+            elem for elem, flag in zip(name_landmarks, which_landmarks) if flag
+        ]
 
-            idx_product = list_products.index(product_id)
-            which_landmarks = one_hot_encoding[idx_product]
-            which_landmarks = [bool(x) for x in which_landmarks]
-            names_landmarks_product = [
-                elem for elem, flag in zip(name_landmarks, which_landmarks) if flag
-            ]
+        if names_landmarks_product:
 
-            # If product has landmarks
+            d_landmarks[product_id] = names_landmarks_product
 
-            if names_landmarks_product:
-
-                d_landmarks[product_id] = names_landmarks_product
+            if landmarks == "same":
 
                 final_candidates = list()
 
@@ -358,6 +356,10 @@ def main():
         if product_id in list(d_landmarks.keys()):
 
             print(f"Landmarks: {d_landmarks[product_id]}")
+
+        else:
+
+            print("No landmarks found for this product.")
 
         print(50 * "-")
         print("")
