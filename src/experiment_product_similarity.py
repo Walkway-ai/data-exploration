@@ -312,9 +312,7 @@ def main():
                         final_candidates.append(candidate)
                         d_landmarks[candidate] = names_landmarks_candidate
 
-                if final_candidates:
-
-                    df = df[df[product_field].isin(final_candidates)]
+                df = df[df[product_field].isin(final_candidates)]
 
         print("")
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
@@ -341,11 +339,12 @@ def main():
         print(f"Average rating: {average_rating}")
         print(f"Tour grade code: {tour_grade_code}")
         print(f"Start year: {start_year}")
+        print(f"Landmarks: {landmarks}")
 
         if product_id in list(d_landmarks.keys()):
 
-            print(f"Landmarks: {d_landmarks[product_id]}")
-
+            print(f"Landmarks list: {d_landmarks[product_id]}")
+            
         else:
 
             print("Landmarks: no landmarks found for this product.")
