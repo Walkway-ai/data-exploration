@@ -20,7 +20,7 @@ spec:
         }
     }
     parameters {
-        string(name: 'product_id', defaultValue: '6462P29', description: 'ID of the product (e.g. 104357P6, 6462P29, 16168P1, 47475P7, 3267P8)')
+        string(name: 'product_id', defaultValue: '104357P6', description: 'ID of the product (e.g. 104357P6, 6462P29, 16168P1, 47475P7, 3267P8)')
         choice(name: 'city_name', choices: ['same', 'any', 'different'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'any', 'same'], description: 'If different, only products from other suppliers are shown.')
         choice(name: 'average_rating', choices: ['any', 'similar', 'different'], description: 'If similar, only products with similar average ratings are shown.')
