@@ -4,3 +4,4 @@ tmp
 run.log
 ww-da-ingestion-*
 *.pickle
+.ipynb_checkpoints
