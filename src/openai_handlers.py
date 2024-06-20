@@ -27,6 +27,7 @@ def query_gpt_with_history(apikey, prompt, conversation_history):
     result = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=conversation_history + [
+            {"role": "system", "content": "You are a multi-label classifier tasked with finding all labels applicable to a product description."},
             {"role": "user", "content": prompt},
         ],
     )
