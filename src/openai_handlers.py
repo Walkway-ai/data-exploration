@@ -20,14 +20,15 @@ def query_gpt(apikey, system_role, prompt):
 
     return result
 
-def query_gpt_with_history(apikey, prompt, conversation_history):
+
+def query_gpt_with_history(apikey, prompt, model_name, conversation_history):
 
     client = OpenAI(api_key=apikey)
 
     result = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=conversation_history + [
-            {"role": "system", "content": "You are a multi-label classifier tasked with finding all labels applicable to a product description."},
+        model=model_name,
+        messages=conversation_history
+        + [
             {"role": "user", "content": prompt},
         ],
     )

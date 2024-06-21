@@ -344,7 +344,7 @@ def main():
         if product_id in list(d_landmarks.keys()):
 
             print(f"Landmarks list: {d_landmarks[product_id]}")
-            
+
         else:
 
             print("Landmarks list: no landmarks found for this product.")
@@ -371,7 +371,7 @@ def main():
         for _, row in df_no_openai.iterrows():
 
             df_now = pd.DataFrame(row).T
-            #product_id_now = str(list(df_now[product_field])[0])
+            # product_id_now = str(list(df_now[product_field])[0])
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -410,7 +410,7 @@ def main():
                 for _, row in df_openai.iterrows():
 
                     df_now = pd.DataFrame(row).T
-                    #product_id_now = str(list(df_now[product_field])[0])
+                    # product_id_now = str(list(df_now[product_field])[0])
 
                     result_features = "\n".join(
                         [
@@ -428,7 +428,7 @@ def main():
                     # if product_id_now in list(d_landmarks.keys()):
 
                     #     print(f"Landmarks: {d_landmarks[product_id_now]}")
-                        
+
                     print("\n")
 
             else:
