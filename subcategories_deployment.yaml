@@ -1,44 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: taxonomy-deployment
-  labels:
-    app: taxonomy
+  name: dashboard-taxonomy-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: taxonomy
+      app: dashboard-taxonomy-app
   template:
     metadata:
       labels:
-        app: taxonomy
+        app: dashboard-taxonomy-app
     spec:
-      initContainers:
-        - name: init-sysctl
-          image: busybox
-          command: ["sh", "-c", "sysctl -w fs.inotify.max_user_watches=524288"]
-          securityContext:
-            privileged: true
       containers:
-        - name: taxonomy
-          image: walkwayai/taxonomy-dashboard:4.0
-          imagePullPolicy: Always
+        - name: dashboard-taxonomy-app
+          image: walkwayai/taxonomy:2.0
           ports:
             - containerPort: 8065
-          env:
-            - name: CLUSTER_IP
-              value: "taxonomy-clusterip"  # Use the headless service name here
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: taxonomy-clusterip
+  name: dashboard-taxonomy-service
 spec:
-  type: LoadBalancer
-  selector:
-    app: taxonomy
+  type: NodePort
   ports:
-    - protocol: TCP
-      port: 8065
-      targetPort: 8065
+    - port: 80
+      targetPort: 8065  # Corrected to match containerPort in Deployment
+      nodePort: 31000
+  selector:
+    app: dashboard-taxonomy-app

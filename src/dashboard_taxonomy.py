@@ -88,4 +88,4 @@ def update_descriptions(selected_category):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8065)
+    app.run_server(host='0.0.0.0', port=8065, debug=True)

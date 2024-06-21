@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.9-slim
 
 WORKDIR /app
 
@@ -10,7 +10,5 @@ COPY "src/mongodb_lib.py" /app
 RUN pip install --no-cache-dir -r requirements_taxonomy.txt
 
 EXPOSE 8065
-
-ENV PYTHONUNBUFFERED=1
 
 CMD ["python", "dashboard_taxonomy.py"]
