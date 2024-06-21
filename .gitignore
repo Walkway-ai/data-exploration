@@ -1,4 +1,5 @@
 venv
+venvtaxonomy
 __pycache__
 tmp
 run.log

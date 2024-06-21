@@ -2,9 +2,15 @@ FROM python:3.8
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY "requirements_taxonomy.txt" /app
+COPY "infra-config-pipeline.yaml" /app
+COPY "src/dashboard_taxonomy.py" /app
+COPY "src/mongodb_lib.py" /app
 
-COPY . .
+RUN pip install --no-cache-dir -r requirements_taxonomy.txt
 
-CMD ["python", "src/dashboard_taxonomy.py"]
+EXPOSE 8065
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "dashboard_taxonomy.py"]

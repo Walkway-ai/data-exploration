@@ -1,32 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: subcategories-taxonomy-app
+  name: taxonomy-deployment
+  labels:
+    app: taxonomy
 spec:
-  replicas: 1  # Adjust the number of replicas as needed
+  replicas: 1
   selector:
     matchLabels:
-      app: subcategories-taxonomy-app
+      app: taxonomy
   template:
     metadata:
       labels:
-        app: subcategories-taxonomy-app
+        app: taxonomy
     spec:
+      initContainers:
+        - name: init-sysctl
+          image: busybox
+          command: ["sh", "-c", "sysctl -w fs.inotify.max_user_watches=524288"]
+          securityContext:
+            privileged: true
       containers:
-        - name: subcategories-taxonomy-app
-          image: walkwayai/taxonomy-dashboard:latest
+        - name: taxonomy
+          image: walkwayai/taxonomy-dashboard:4.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 8065
+          env:
+            - name: CLUSTER_IP
+              value: "taxonomy-clusterip"  # Use the headless service name here
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: subcategories-taxonomy-app-service
+  name: taxonomy-clusterip
 spec:
   type: LoadBalancer
   selector:
-    app: subcategories-taxonomy-app
+    app: taxonomy
   ports:
     - protocol: TCP
-      port: 80
+      port: 8065
       targetPort: 8065
