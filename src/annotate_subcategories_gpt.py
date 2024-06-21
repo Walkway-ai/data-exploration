@@ -27,8 +27,8 @@ def main():
     parser.add_argument(
         "--overwrite", action="store_true", help="Enable overwrite mode"
     )
-    parser.add_argument("-model_name", type=str, required=True, help="OpenAI model.")
-    parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
+    parser.add_argument("--model_name", type=str, required=True, help="OpenAI model.")
+    parser.add_argument("--apikey", type=str, required=True, help="OpenAI API key.")
 
     args = parser.parse_args()
 
@@ -149,6 +149,8 @@ def main():
                 l.append([])
 
         data["sub_categories_gpt4o"] = l
+
+        remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=data, object_name=object_name)
 
 

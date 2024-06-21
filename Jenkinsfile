@@ -25,6 +25,7 @@ spec:
         booleanParam(name: 'OVERWRITE_LANGUAGE_DETECTION', defaultValue: false, description: 'Overwrite data for language-detection stage')
         booleanParam(name: 'OVERWRITE_TEXT_SUMMARIZATION', defaultValue: false, description: 'Overwrite data for text-summarization stage')
         booleanParam(name: 'OVERWRITE_LANDMARK_DETECTION', defaultValue: false, description: 'Overwrite data for landmark-detection stage')
+        booleanParam(name: 'OVERWRITE_SUBCATEGORIES_ANNOTATION', defaultValue: false, description: 'Overwrite annotation of subcategories with OpenAI')
         booleanParam(name: 'OVERWRITE_EMBED_TEXTUAL_DATA', defaultValue: false, description: 'Overwrite data for embed-textual-data stage')
         booleanParam(name: 'OVERWRITE_GENERATE_MODEL_EMBEDDINGS', defaultValue: false, description: 'Overwrite data for generate-model-embeddings stage')
         booleanParam(name: 'OVERWRITE_GENERATE_PRODUCT_SIMILARITY', defaultValue: false, description: 'Overwrite data for generate-product-similarity stage')
@@ -89,6 +90,18 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_LANDMARK_DETECTION ? '--overwrite' : ''
                         sh("python3 src/landmark_detection.py ${overwriteArg}")
+                    }
+                }
+            }
+        }
+        stage('subcategories-annotation') { 
+            steps {
+                container('python') {
+                    script {
+                        withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
+                            def overwriteArg = params.OVERWRITE_SUBCATEGORIES_ANNOTATION ? '--overwrite' : ''
+                            sh("python3 src/annotate_subcategories_gpt.py ${overwriteArg} --model_name 'gpt-4o' --apikey ${OPENAI_API_KEY}")
+                        }
                     }
                 }
             }

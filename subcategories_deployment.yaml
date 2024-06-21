@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subcategories-taxonomy-app
+spec:
+  replicas: 1  # Adjust the number of replicas as needed
+  selector:
+    matchLabels:
+      app: subcategories-taxonomy-app
+  template:
+    metadata:
+      labels:
+        app: subcategories-taxonomy-app
+    spec:
+      containers:
+        - name: subcategories-taxonomy-app
+          image: walkwayai/taxonomy-dashboard:latest
+          ports:
+            - containerPort: 8065
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: subcategories-taxonomy-app-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: subcategories-taxonomy-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8065
