@@ -1,153 +1,113 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import gc
-
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import Trainer, TrainingArguments
+from sklearn.preprocessing import MultiLabelBinarizer
 import torch
 import yaml
-from datasets import Dataset
-from sklearn.model_selection import train_test_split
-from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    DataCollatorWithPadding,
-    Trainer,
-    TrainingArguments,
-)
 
-from mongodb_lib import *
+# Assuming this is your MongoDB connection function
+from mongodb_lib import connect_to_mongodb, read_object
 
+# Load MongoDB connection configuration from YAML
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
 # Run garbage collection to free up memory.
 gc.collect()
 
-
 def main():
-
-    df = read_object(fs, "product_textual_lang_summarized_subcategories")
+    # Read data from MongoDB
+    df = read_object(fs, "product_textual_lang_summarized_subcategories_walkway")
     df = pd.DataFrame(df)
-    df = df[
-        ["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "sub_categories_gpt4o"]
+    df = df[["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "sub-categories-walkway"]]
+
+    # Filter out empty descriptions and categories
+    df = df[df["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"] != ""]
+    df = df[df["sub-categories-walkway"].apply(lambda x: len(x) > 0)]  # Ensure categories are not empty
+
+    # Explode categories into separate rows
+    df = df.explode("sub-categories-walkway")
+
+    # Remove duplicates
+    df = df.drop_duplicates()
+
+    # Group by text and aggregate categories into lists
+    df = df.groupby(["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"])["sub-categories-walkway"].apply(list).reset_index()
+
+    # Separate into texts and labels
+    texts = df['pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED'].tolist()
+    labels = df['sub-categories-walkway'].tolist()
+
+    # Use MultiLabelBinarizer to encode labels
+    mlb = MultiLabelBinarizer()
+    labels_encoded = mlb.fit_transform(labels)
+
+    # Split data into training and validation sets
+    train_texts, val_texts, train_labels, val_labels = train_test_split(texts, labels_encoded, test_size=0.2, random_state=42)
+
+    # Load BERT tokenizer
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+    # Tokenize inputs
+    train_encodings = tokenizer(train_texts, truncation=True, padding=True)
+    val_encodings = tokenizer(val_texts, truncation=True, padding=True)
+
+    # Define a function to create InputFeatures
+    def create_input_features(input_ids, attention_mask, labels):
+        return {
+            'input_ids': input_ids,
+            'attention_mask': attention_mask,
+            'labels': labels
+        }
+
+    # Create input features for training and validation
+    train_features = [
+        create_input_features(train_encodings['input_ids'][i], train_encodings['attention_mask'][i], torch.tensor(train_labels[i]))
+        for i in range(len(train_texts))
     ]
 
-    # Ensuring labels are in the correct format
-    # Create a mapping for the labels to integers
-    unique_labels = set(
-        label for sublist in df["sub_categories_gpt4o"] for label in sublist
-    )
-    label2id = {label: idx for idx, label in enumerate(unique_labels)}
-    id2label = {idx: label for label, idx in label2id.items()}
+    val_features = [
+        create_input_features(val_encodings['input_ids'][i], val_encodings['attention_mask'][i], torch.tensor(val_labels[i]))
+        for i in range(len(val_texts))
+    ]
 
-    # Convert labels to integers
-    df["labels"] = df["sub_categories_gpt4o"].apply(
-        lambda x: [label2id[label] for label in x]
-    )
+    # Define BERT model for sequence classification (adjust num_labels as per your number of classes)
+    model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=len(mlb.classes_))
 
-    # Split the dataset into training, validation, and test sets
-    train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
-    train_df, val_df = train_test_split(train_df, test_size=0.1, random_state=42)
-
-    # Convert to Hugging Face Dataset
-    train_dataset = Dataset.from_pandas(train_df)
-    val_dataset = Dataset.from_pandas(val_df)
-    test_dataset = Dataset.from_pandas(test_df)
-
-    # Load a pre-trained model and tokenizer
-    model_name = "distilbert-base-uncased"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-    # Determine the number of unique labels
-    num_labels = len(label2id)
-
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=num_labels
-    )
-
-    # Tokenize the datasets
-    def tokenize_function(examples):
-        return tokenizer(
-            examples["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"],
-            padding="max_length",
-            truncation=True,
-        )
-
-    train_dataset = train_dataset.map(tokenize_function, batched=True)
-    val_dataset = val_dataset.map(tokenize_function, batched=True)
-    test_dataset = test_dataset.map(tokenize_function, batched=True)
-
-    # Set the format of the dataset for PyTorch
-    def format_dataset(dataset):
-        dataset = dataset.map(
-            lambda examples: {
-                "labels": torch.tensor(examples["labels"], dtype=torch.float)
-            }
-        )
-        dataset.set_format(
-            type="torch", columns=["input_ids", "attention_mask", "labels"]
-        )
-        return dataset
-
-    train_dataset = format_dataset(train_dataset)
-    val_dataset = format_dataset(val_dataset)
-    test_dataset = format_dataset(test_dataset)
-
-    # Create a data collator
-    data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
-
-    # Define the training arguments
+    # Define training arguments
     training_args = TrainingArguments(
-        output_dir="./results",
-        eval_strategy="epoch",
-        learning_rate=2e-5,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=16,
+        per_device_train_batch_size=2208,
+        per_device_eval_batch_size=2208,
         num_train_epochs=3,
-        weight_decay=0.01,
+        logging_dir='./logs',
+        logging_steps=100,
+        output_dir='./output'
     )
 
-    # Define a custom trainer to handle multi-label classification
-    class MultiLabelTrainer(Trainer):
-        def compute_loss(self, model, inputs, return_outputs=False):
-            labels = inputs.pop("labels")
-            outputs = model(**inputs)
-            logits = outputs.logits
-            loss = torch.nn.BCEWithLogitsLoss()(logits, labels.float())
-            return (loss, outputs) if return_outputs else loss
-
-    # Initialize the Trainer
-    trainer = MultiLabelTrainer(
+    # Define Trainer
+    trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        tokenizer=tokenizer,
-        data_collator=data_collator,
+        train_dataset=train_features,
+        eval_dataset=val_features,
     )
 
-    # Train the model
+    # Fine-tune the model
     trainer.train()
 
-    # Evaluate the model
-    trainer.evaluate()
+    # Save the fine-tuned model
+    model.save_pretrained('fine_tuned_model_directory')
 
-    # Save the model and tokenizer
-    model.save_pretrained("./finetuned_model")
-    tokenizer.save_pretrained("./finetuned_model")
+    # Save the tokenizer as well
+    tokenizer.save_pretrained('fine_tuned_model_directory')
 
-    # Make predictions on new data
-    def predict(texts):
-        inputs = tokenizer(texts, padding=True, truncation=True, return_tensors="pt")
-        outputs = model(**inputs)
-        return torch.sigmoid(outputs.logits)
+    # Optionally, save the MultiLabelBinarizer for future use
+    import joblib
+    joblib.dump(mlb, 'mlb.pkl')
 
-    # Example usage
-    texts = ["Example text to classify"]
-    predictions = predict(texts)
-    print(predictions)
-
+    print(df)
 
 if __name__ == "__main__":
     main()
