@@ -138,7 +138,7 @@ def main():
 
         l = list()
 
-        for pc in tqdm(product_ids):
+        for pc in tqdm(data["PRODUCTCODE"].tolist()):
 
             if pc in list(final_d.keys()):
 

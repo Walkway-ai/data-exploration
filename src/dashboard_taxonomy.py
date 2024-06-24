@@ -17,16 +17,16 @@ db, fs, client = connect_to_mongodb(config_infra)
 # Run garbage collection to free up memory.
 gc.collect()
 
-df = read_object(fs, "product_textual_lang_summarized_subcategories")
+df = read_object(fs, "product_textual_lang_summarized_subcategories_walkway")
 df = pd.DataFrame(df)
-df = df[["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "sub_categories_gpt4o"]]
-df = df.explode("sub_categories_gpt4o")
+df = df[["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "sub-categories-walkway"]]
+df = df.explode("sub-categories-walkway")
 
 # Ensure the sub_categories_gpt4o column is of type string
-df["sub_categories_gpt4o"] = df["sub_categories_gpt4o"].astype(str)
+df["sub-categories-walkway"] = df["sub-categories-walkway"].astype(str)
 
 # Get unique subcategories
-unique_categories = df["sub_categories_gpt4o"].unique()
+unique_categories = df["sub-categories-walkway"].unique()
 
 # Create dropdown options
 dropdown_options = [{"label": cat, "value": cat} for cat in unique_categories]
@@ -60,7 +60,7 @@ app.layout = html.Div(
     Output("category-distribution", "figure"), Input("category-filter", "value")
 )
 def update_graph(selected_category):
-    category_counts = df["sub_categories_gpt4o"].value_counts().reset_index()
+    category_counts = df["sub-categories-walkway"].value_counts().reset_index()
     category_counts.columns = ["Sub Category", "Count"]
     category_counts = category_counts[category_counts["Count"] > 50]
     category_counts = category_counts[category_counts["Sub Category"] != "nan"]
@@ -82,7 +82,7 @@ def update_descriptions(selected_category):
     if selected_category is None:
         return html.Div()
 
-    filtered_df = df[df["sub_categories_gpt4o"] == selected_category]
+    filtered_df = df[df["sub-categories-walkway"] == selected_category]
     examples = filtered_df["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"].tolist()
 
     return html.Ul([html.Li(example) for example in examples])

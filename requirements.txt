@@ -12,3 +12,4 @@ sentence-transformers==2.2.2
 pymongo
 openai
 openpyxl
+datasets
