@@ -16,8 +16,8 @@ from transformers import (
 from mongodb_lib import connect_to_mongodb, read_object
 
 # Load MongoDB connection configuration from YAML
-config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
-db, fs, client = connect_to_mongodb(config_infra)
+#config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
+#db, fs, client = connect_to_mongodb(config_infra)
 
 # Run garbage collection to free up memory.
 gc.collect()
@@ -25,11 +25,15 @@ gc.collect()
 
 def main():
     # Read data from MongoDB
-    df = read_object(fs, "product_textual_lang_summarized_subcategories_walkway")
-    df = pd.DataFrame(df)
-    df = df[
-        ["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "sub-categories-walkway"]
-    ]
+    #df = read_object(fs, "product_textual_lang_summarized_subcategories_walkway")
+    #df = pd.DataFrame(df)
+    #df = df[
+    #    ["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "sub-categories-walkway"]
+    #]
+
+    #df.to_pickle("df.pickle")
+
+    df = pd.read_pickle("df.pickle")
 
     # Filter out empty descriptions and categories
     df = df[df["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"] != ""]
