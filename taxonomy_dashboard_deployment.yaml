@@ -14,9 +14,16 @@ spec:
     spec:
       containers:
         - name: dashboard-taxonomy-app
-          image: walkwayai/taxonomy:2.0
+          image: walkwayai/taxonomy:3.0
           ports:
             - containerPort: 8065
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
@@ -26,7 +33,7 @@ spec:
   type: NodePort
   ports:
     - port: 80
-      targetPort: 8065  # Corrected to match containerPort in Deployment
+      targetPort: 8065
       nodePort: 31000
   selector:
     app: dashboard-taxonomy-app
