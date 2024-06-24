@@ -330,10 +330,6 @@ def main():
 
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
-        if is_private == "different":
-
-            df = df[df[private_feature] != str(list(df_product[private_feature])[0])]
-
         print("")
         print(f"Number of candidates after the private filter: {df.shape[0]}")
 
