@@ -27,6 +27,7 @@ spec:
         choice(name: 'tour_grade_code', choices: ['same', 'any', 'different'], description: 'If same, only products with same tour grade codes are shown.')
         choice(name: 'start_year', choices: ['2022', 'any', '2023', '2024'], description: 'Products older than this year will not be considered.')
         choice(name: 'landmarks', choices: ['same', 'any'], description: 'If same, only products mentioning the same landmark(s) will be shown.')
+        choice(name: 'is_private', choices: ['same', 'any'], description: 'If same, only products with the same tour type (private/public) will be shown.')
         choice(name: 'embedding_model', choices: ['gte-large', 'jina-embeddings-v2-base-en', 'mean'], description: 'Embedding model.')
     }
     stages {
@@ -46,6 +47,7 @@ spec:
                                 -tour_grade_code ${params.tour_grade_code} \
                                 -start_year ${params.start_year} \
                                 -landmarks ${params.landmarks} \
+                                -is_private ${params.is_private} \
                                 -embedding_model ${params.embedding_model} \
                                 -apikey ${OPENAI_API_KEY}
                             """

@@ -101,6 +101,12 @@ def main():
         "-landmarks", type=str, required=True, help="Landmarks of the product."
     )
     parser.add_argument(
+        "-is_private",
+        type=str,
+        required=True,
+        help="Whether the activity is private or not.",
+    )
+    parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
@@ -116,6 +122,7 @@ def main():
     tour_grade_code = args.tour_grade_code
     start_year = args.start_year
     landmarks = args.landmarks
+    is_private = args.is_private
     embedding_model = args.embedding_model
     apikey = args.apikey
 
@@ -129,6 +136,7 @@ def main():
         avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
         tour_grade_code_feature = "pdt_tourgrades_TOURGRADECODE"
         time_feature = "bookings_MOSTRECENTORDERDATE"
+        private_feature = "pdt_product_level_ISPRIVATETOUR"
         text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
         product_field = "PRODUCTCODE"
 
@@ -163,6 +171,7 @@ def main():
                 avg_rating_feature,
                 tour_grade_code_feature,
                 time_feature,
+                private_feature,
             ]
         ]
 
@@ -317,17 +326,30 @@ def main():
         print("")
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
 
+        if is_private == "same":
+
+            df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
+
+        if is_private == "different":
+
+            df = df[df[private_feature] != str(list(df_product[private_feature])[0])]
+
+        print("")
+        print(f"Number of candidates after the private filter: {df.shape[0]}")
+
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
         del df[tour_grade_code_feature]
         del df[time_feature]
+        del df[private_feature]
 
         del df_product[city_feature]
         del df_product[supplier_code_feature]
         del df_product[avg_rating_feature]
         del df_product[tour_grade_code_feature]
         del df_product[time_feature]
+        del df_product[is_private]
 
         subprocess.run(["clear"])
 
@@ -340,6 +362,7 @@ def main():
         print(f"Tour grade code: {tour_grade_code}")
         print(f"Start year: {start_year}")
         print(f"Landmarks: {landmarks}")
+        print(f"Private tours: {landmarks}")
 
         if product_id in list(d_landmarks.keys()):
 

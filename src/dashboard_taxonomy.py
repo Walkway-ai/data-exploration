@@ -2,10 +2,10 @@
 # coding: utf-8
 import gc
 
+import dash
 import pandas as pd
 import plotly.express as px
 import yaml
-import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
 
@@ -62,16 +62,17 @@ app.layout = html.Div(
 def update_graph(selected_category):
     category_counts = df["sub_categories_gpt4o"].value_counts().reset_index()
     category_counts.columns = ["Sub Category", "Count"]
-    category_counts = category_counts[category_counts["Count"]>50]
-    category_counts = category_counts[category_counts["Sub Category"]!="nan"]
+    category_counts = category_counts[category_counts["Count"] > 50]
+    category_counts = category_counts[category_counts["Sub Category"] != "nan"]
     fig = px.bar(
         category_counts,
         x="Sub Category",  # Ensure this is set to your categorical variable
-        y="Count",         # Ensure this is set to the count of occurrences
+        y="Count",  # Ensure this is set to the count of occurrences
         title="Distribution of Sub Categories",
-        orientation='v'    # Explicitly set the orientation to 'v' for vertical
+        orientation="v",  # Explicitly set the orientation to 'v' for vertical
     )
     return fig
+
 
 # Callback to update the description examples based on selected category
 @app.callback(
@@ -86,6 +87,7 @@ def update_descriptions(selected_category):
 
     return html.Ul([html.Li(example) for example in examples])
 
+
 # Run the app
 if __name__ == "__main__":
-    app.run_server(host='0.0.0.0', port=8065, debug=True)
+    app.run_server(host="0.0.0.0", port=8065, debug=True)
