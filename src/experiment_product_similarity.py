@@ -447,6 +447,12 @@ def main():
 
             print("No products were found for the combination.")
 
+        columns = [
+            "Experiment ID", "City", "Supplier Code",
+            "Average Rating", "Tour Grade Code", "Start Year", 
+            "Landmarks", "Private", "Embedding Model"
+        ]
+
         results_out = [
             experiment_id,
             city_name,
@@ -460,6 +466,7 @@ def main():
         ]
 
         results_out = [
+            columns,
             results_out,
             product_features.split("\n"),
             ["SIMILAR PRODUCTS WITHOUT OPENAI"],
