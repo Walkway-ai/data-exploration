@@ -462,13 +462,10 @@ def main():
         results_out = [
             results_out,
             product_features.split("\n"),
-            ["*****"],
             ["SIMILAR PRODUCTS WITHOUT OPENAI"],
             result_features_wo_openai,
-            ["*****"],
             ["SIMILAR PRODUCTS WITH OPENAI"],
             result_features_w_openai,
-            ["*****"],
             ["*****"],
         ]
 
