@@ -6,7 +6,6 @@ import re
 import pandas as pd
 import yaml
 
-pd.set_option("display.max_columns", None)
 import argparse
 import subprocess
 from collections import defaultdict

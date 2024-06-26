@@ -1,3 +1,5 @@
+gspread
+oauth2client
 pandas
 pyyaml
 tqdm
@@ -13,5 +15,3 @@ pymongo
 openai
 openpyxl
 datasets
-gspread
-oauth2client
