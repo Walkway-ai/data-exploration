@@ -41,15 +41,17 @@ def append_to_google_sheets(credentials_file, results_out):
 
     for line in results_out:
 
-        if isinstance(line[0], list):
+        if line:
 
-            for l_ in line:
+            if isinstance(line[0], list):
 
-                sheet.append_row(l_)
+                for l_ in line:
 
-        else:
+                    sheet.append_row(l_)
 
-            sheet.append_row(line)
+            else:
+
+                sheet.append_row(line)
 
 
 def query_gpt(apikey, text_field, df, df_product):
