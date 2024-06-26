@@ -51,7 +51,7 @@ spec:
                                     -landmarks ${params.landmarks} \
                                     -is_private ${params.is_private} \
                                     -embedding_model ${params.embedding_model} \
-                                    -apikey ${OPENAI_API_KEY}
+                                    -apikey ${OPENAI_API_KEY} \
                                     -experiment_id ${customBuildNumber}
                                 """
                             }
