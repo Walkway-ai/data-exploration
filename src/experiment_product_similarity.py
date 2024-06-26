@@ -7,9 +7,12 @@ import pandas as pd
 import yaml
 
 pd.set_option("display.max_columns", None)
+import argparse
 import subprocess
 from collections import defaultdict
 
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 from openai import OpenAI
 
 from mongodb_lib import *
@@ -22,6 +25,32 @@ db, fs, client = connect_to_mongodb(config)
 gc.collect()
 
 system_role = "You are an expert in online bookings and product matching in the tourism and entertainment industry. Your expertise includes comparing product descriptions to identify highly similar products."
+
+
+def append_to_google_sheets(credentials_file, results_out):
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive",
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_file, scope)
+    client = gspread.authorize(creds)
+
+    # Open the Google Sheet
+    sheet = client.open("WalkwayAI - Product Similarity").sheet1
+
+    # Append data
+
+    for line in results_out:
+
+        if isinstance(line[0], list):
+
+            for l_ in line:
+
+                sheet.append_row(l_)
+
+        else:
+
+            sheet.append_row(line)
 
 
 def query_gpt(apikey, text_field, df, df_product):
@@ -80,6 +109,11 @@ def main():
 
     # Add arguments
     parser.add_argument(
+        "-credentials",
+        required=True,
+        help="Path to Google Sheets credentials JSON file",
+    )
+    parser.add_argument(
         "-product_id", type=str, required=True, help="The ID of the product."
     )
     parser.add_argument(
@@ -110,6 +144,7 @@ def main():
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
+    parser.add_argument("-experiment_id", type=str, required=True, help="Experiment ID")
 
     # Parse the arguments
     args = parser.parse_args()
@@ -125,6 +160,7 @@ def main():
     is_private = args.is_private
     embedding_model = args.embedding_model
     apikey = args.apikey
+    experiment_id = args.experiment_id
 
     object_name = f"product_similarities_{embedding_model}"
     existing_file = fs.find_one({"filename": object_name})
@@ -349,28 +385,6 @@ def main():
 
         subprocess.run(["clear"])
 
-        print(50 * "-")
-        print("")
-        print("EXPERIMENT WITH PARAMETERS:")
-        print(f"City: {city_name}")
-        print(f"Supplier code: {supplier_code}")
-        print(f"Average rating: {average_rating}")
-        print(f"Tour grade code: {tour_grade_code}")
-        print(f"Start year: {start_year}")
-        print(f"Landmarks: {landmarks}")
-        print(f"Private tours: {landmarks}")
-
-        if product_id in list(d_landmarks.keys()):
-
-            print(f"Landmarks list: {d_landmarks[product_id]}")
-
-        else:
-
-            print("Landmarks list: no landmarks found for this product.")
-
-        print(f"Embedding model: {embedding_model}")
-        print("")
-
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
         )
@@ -378,19 +392,13 @@ def main():
             text_field, "Summarized description"
         )
 
-        print(product_features)
-
-        print(50 * "-")
-        print("")
-        print("RESULTS WITHOUT OPENAI:")
-        print("")
-
         df_no_openai = df[:10]
+
+        result_features_wo_openai = list()
 
         for _, row in df_no_openai.iterrows():
 
             df_now = pd.DataFrame(row).T
-            # product_id_now = str(list(df_now[product_field])[0])
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -400,18 +408,7 @@ def main():
                 "Summarized description",
             )
 
-            print(result_features)
-
-            # if product_id_now in list(d_landmarks.keys()):
-
-            #     print(f"Landmarks: {d_landmarks[product_id_now]}")
-
-            print("")
-
-        print(50 * "-")
-        print("")
-        print("RESULTS WITH OPENAI:")
-        print("")
+            result_features_wo_openai.append(result_features.split("\n"))
 
         try:
 
@@ -426,10 +423,11 @@ def main():
 
                 df_openai = df_openai[df_openai[product_field].isin(result)]
 
+                result_features_w_openai = list()
+
                 for _, row in df_openai.iterrows():
 
                     df_now = pd.DataFrame(row).T
-                    # product_id_now = str(list(df_now[product_field])[0])
 
                     result_features = "\n".join(
                         [
@@ -442,21 +440,38 @@ def main():
                         "Summarized description",
                     )
 
-                    print(result_features)
+                    result_features_w_openai.append(result_features.split("\n"))
 
-                    # if product_id_now in list(d_landmarks.keys()):
-
-                    #     print(f"Landmarks: {d_landmarks[product_id_now]}")
-
-                    print("\n")
-
-            else:
-
-                print("No products were found for the combination.")
-
-        except Exception as e:
+        except Exception:
 
             print("No products were found for the combination.")
+
+        results_out = [
+            experiment_id,
+            city_name,
+            supplier_code,
+            average_rating,
+            tour_grade_code,
+            start_year,
+            landmarks,
+            is_private,
+            embedding_model,
+        ]
+
+        results_out = [
+            results_out,
+            product_features.split("\n"),
+            ["*****"],
+            ["SIMILAR PRODUCTS WITHOUT OPENAI"],
+            result_features_wo_openai,
+            ["*****"],
+            ["SIMILAR PRODUCTS WITH OPENAI"],
+            result_features_w_openai,
+            ["*****"],
+            ["*****"],
+        ]
+
+        append_to_google_sheets(args.credentials, results_out)
 
 
 if __name__ == "__main__":

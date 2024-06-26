@@ -17,8 +17,8 @@ spec:
     - cat
     tty: true
 """
-        }
-    }
+}
+}
     parameters {
         string(name: 'product_id', defaultValue: '104357P6', description: 'ID of the product (e.g. 104357P6, 6462P29, 16168P1, 47475P7, 3267P8)')
         choice(name: 'city_name', choices: ['same', 'any', 'different'], description: 'If same, only products from the same city are shown.')
@@ -38,53 +38,25 @@ spec:
                         def customBuildNumber = params.product_id
                         currentBuild.displayName = "${customBuildNumber}"
                         withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
-                            sh """
-                            python3 src/experiment_product_similarity.py \
-                                -product_id ${params.product_id} \
-                                -city_name ${params.city_name} \
-                                -supplier_code ${params.supplier_code} \
-                                -average_rating ${params.average_rating} \
-                                -tour_grade_code ${params.tour_grade_code} \
-                                -start_year ${params.start_year} \
-                                -landmarks ${params.landmarks} \
-                                -is_private ${params.is_private} \
-                                -embedding_model ${params.embedding_model} \
-                                -apikey ${OPENAI_API_KEY}
-                            """
+                            withCredentials([file(credentialsId: 'gcp_service_account_json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                                sh """
+                                python3 src/experiment_product_similarity.py \
+                                    -credentials ${GOOGLE_APPLICATION_CREDENTIALS} \
+                                    -product_id ${params.product_id} \
+                                    -city_name ${params.city_name} \
+                                    -supplier_code ${params.supplier_code} \
+                                    -average_rating ${params.average_rating} \
+                                    -tour_grade_code ${params.tour_grade_code} \
+                                    -start_year ${params.start_year} \
+                                    -landmarks ${params.landmarks} \
+                                    -is_private ${params.is_private} \
+                                    -embedding_model ${params.embedding_model} \
+                                    -apikey ${OPENAI_API_KEY}
+                                    -experiment_id ${customBuildNumber}
+                                """
+                            }
                         }
                     }
-                }
-            }
-        }
-        stage('Write your feedback') {
-            steps {
-                script {
-                    def feedbackMessage = """
-                    Did the results show similar products to the original product?
-                    Were results better with OpenAI?
-                    """
-                    def userFeedback = input message: feedbackMessage, parameters: [string(name: 'feedback', defaultValue: '', description: 'Your feedback')]
-                    currentBuild.description = userFeedback
-                }
-            }
-        }
-        stage('Send Feedback') {
-            steps {
-                script {
-                    def logs = readFile(env.LOG_FILE)
-                    def emailBody = """
-                        ${logs}
-
-                        User Feedback:
-
-                        ${currentBuild.description}
-                    """
-                    emailext(
-                        attachLog: true, 
-                        body: emailBody, 
-                        subject: 'Experiment Feedback', 
-                        to: 'fabio@walkway.ai'
-                    )
                 }
             }
         }

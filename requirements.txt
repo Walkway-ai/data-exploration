@@ -13,3 +13,5 @@ pymongo
 openai
 openpyxl
 datasets
+gspread
+oauth2client
