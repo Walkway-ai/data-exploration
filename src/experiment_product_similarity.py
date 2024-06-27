@@ -345,8 +345,6 @@ def main():
 
         ## SUB-CATEGORY FILTER
 
-        print(subcategories)
-
         if subcategories == "same":
 
             annotated_data = read_object(
