@@ -2,15 +2,11 @@ import argparse
 import ast
 import gc
 import re
-
-import pandas as pd
-import yaml
-
-import argparse
-import subprocess
 from collections import defaultdict
 
 import gspread
+import pandas as pd
+import yaml
 from oauth2client.service_account import ServiceAccountCredentials
 from openai import OpenAI
 
@@ -142,6 +138,12 @@ def main():
         help="Whether the activity is private or not.",
     )
     parser.add_argument(
+        "-subcategories",
+        type=str,
+        required=True,
+        help="Sub-categories of Walkway AI's taxonomy.",
+    )
+    parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
     )
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
@@ -159,6 +161,7 @@ def main():
     start_year = args.start_year
     landmarks = args.landmarks
     is_private = args.is_private
+    subcategories = args.subcategories
     embedding_model = args.embedding_model
     apikey = args.apikey
     experiment_id = args.experiment_id
@@ -221,26 +224,17 @@ def main():
         df = df.sort_values(by="score", ascending=False)
         del df["score"]
 
-        print("")
         print(f"Number of initial candidates: {df.shape[0]}")
+
+        ## CITY FILTER
 
         if city_name == "same":
 
             df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
 
-        if city_name == "different":
-
-            df = df[df[city_feature] != str(list(df_product[city_feature])[0])]
-
-        print("")
         print(f"Number of candidates after the city filter: {df.shape[0]}")
 
-        if supplier_code == "same":
-
-            df = df[
-                df[supplier_code_feature]
-                == str(list(df_product[supplier_code_feature])[0])
-            ]
+        ## SUPPLIER CODE FILTER
 
         if supplier_code == "different":
 
@@ -249,8 +243,9 @@ def main():
                 != str(list(df_product[supplier_code_feature])[0])
             ]
 
-        print("")
         print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
+
+        ## AVERAGE RATING FILTER
 
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
@@ -263,19 +258,9 @@ def main():
 
             df = df[df[avg_rating_feature].isin(possible_values)]
 
-        if average_rating == "different":
-
-            possible_values = (
-                avg_rating_possible_values[: avg_rating_index - 1]
-                + avg_rating_possible_values[avg_rating_index + 2 :]
-            )
-
-            product_avg_rating[: avg_rating_index - 2 : avg_rating_index + 2]
-
-            df = df[df[avg_rating_feature].isin(possible_values)]
-
-        print("")
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
+
+        ## TOUR GRADE CODE FILTER
 
         if tour_grade_code == "same":
 
@@ -290,22 +275,9 @@ def main():
             bools_list = [bool(s) for s in is_present]
             df = df[bools_list]
 
-        if tour_grade_code == "different":
-
-            possible_values = list(df_product[tour_grade_code_feature])[0].split(";")
-
-            df[tour_grade_code_feature] = [
-                x.split(";") for x in df[tour_grade_code_feature]
-            ]
-            is_present = [
-                set(x) & set(possible_values) for x in df[tour_grade_code_feature]
-            ]
-            bools_list = [bool(s) for s in is_present]
-            bools_list = [not value for value in bools_list]
-            df = df[bools_list]
-
-        print("")
         print(f"Number of candidates after the tour grade code filter: {df.shape[0]}")
+
+        ## START YEAR FILTER
 
         if start_year != "any":
 
@@ -315,8 +287,9 @@ def main():
             df = df[df["year"] >= int(start_year)]
             del df["year"]
 
-        print("")
         print(f"Number of candidates after the year filter: {df.shape[0]}")
+
+        ## LANDMARKS FILTER
 
         d_landmarks = {}
 
@@ -360,15 +333,41 @@ def main():
 
                 df = df[df[product_field].isin(final_candidates)]
 
-        print("")
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
+
+        ## PRIVATE OPTION FILTER
 
         if is_private == "same":
 
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
-        print("")
         print(f"Number of candidates after the private filter: {df.shape[0]}")
+
+        ## SUB-CATEGORY FILTER
+
+        print(subcategories)
+
+        if subcategories == "same":
+
+            annotated_data = read_object(
+                fs, "product_textual_lang_summarized_subcategories_walkway"
+            )
+            annotated_data = pd.DataFrame(annotated_data)
+
+            annotated_data = annotated_data.set_index("PRODUCTCODE")[
+                "sub-categories-walkway"
+            ].to_dict()
+            product_subcategories = annotated_data[product_id]
+
+            l_pd = list()
+
+            for prd_ in list(df[product_field]):
+
+                if set(product_subcategories).issubset(set(annotated_data[prd_])):
+
+                    l_pd.append(prd_)
+
+            df = df[df[product_field].isin(l_pd)]
 
         del df[city_feature]
         del df[supplier_code_feature]
@@ -383,8 +382,6 @@ def main():
         del df_product[tour_grade_code_feature]
         del df_product[time_feature]
         del df_product[private_feature]
-
-        subprocess.run(["clear"])
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -448,9 +445,15 @@ def main():
             print("No products were found for the combination.")
 
         columns = [
-            "Experiment ID", "City", "Supplier Code",
-            "Average Rating", "Tour Grade Code", "Start Year", 
-            "Landmarks", "Private", "Embedding Model"
+            "Experiment ID",
+            "City",
+            "Supplier Code",
+            "Average Rating",
+            "Tour Grade Code",
+            "Start Year",
+            "Landmarks",
+            "Private",
+            "Embedding Model",
         ]
 
         results_out = [
