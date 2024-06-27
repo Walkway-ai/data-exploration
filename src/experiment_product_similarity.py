@@ -453,6 +453,7 @@ def main():
             "Start Year",
             "Landmarks",
             "Private",
+            "Subcategories",
             "Embedding Model",
         ]
 
@@ -465,6 +466,7 @@ def main():
             start_year,
             landmarks,
             is_private,
+            subcategories,
             embedding_model,
         ]
 
