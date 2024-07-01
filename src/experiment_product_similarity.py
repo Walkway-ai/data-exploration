@@ -380,7 +380,7 @@ def main():
                     for vo in values_to_be_compared_against:
                         for vc in values_candidate:
 
-                            tolerance = 0.3 * vo
+                            tolerance = 0.1 * vo
                             is_close = abs(vo - vc) <= tolerance
 
                             if is_close:
