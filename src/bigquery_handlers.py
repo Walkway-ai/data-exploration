@@ -5,6 +5,7 @@ import re
 from collections import OrderedDict
 
 from google.cloud import bigquery
+from pandas_gbq import to_gbq
 
 
 class BigQueryDataProcessor:
@@ -82,3 +83,18 @@ class BigQueryDataProcessor:
             self.df[column] = [
                 list(OrderedDict.fromkeys(el).keys()) for el in self.df[column]
             ]
+
+    def write_to_bigquery(self, destination_table_id, project_id, if_exists="replace"):
+        """
+        Write the DataFrame to a BigQuery table.
+
+        Parameters:
+        destination_table_id (str): The destination table ID in BigQuery.
+        project_id (str): The Google Cloud project ID.
+        if_exists (str): What to do if the table exists. Default is 'replace'.
+
+        Returns:
+        None
+        """
+        table_id = f"{self.dataset_id}.{destination_table_id}"
+        to_gbq(self.df, table_id, project_id=project_id, if_exists=if_exists)

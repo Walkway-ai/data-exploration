@@ -5,6 +5,7 @@ import re
 from collections import defaultdict
 
 import gspread
+import numpy as np
 import pandas as pd
 import yaml
 from oauth2client.service_account import ServiceAccountCredentials
@@ -54,6 +55,8 @@ def query_gpt(apikey, text_field, df, df_product):
 
     df = df.astype(str)
     df_product = df_product.astype(str)
+
+    del df_product["Category"]
 
     product_features = "\n".join(
         [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -123,13 +126,13 @@ def main():
         "-average_rating", type=str, required=True, help="Tour average rating."
     )
     parser.add_argument(
-        "-tour_grade_code", type=str, required=True, help="Tour grade code."
-    )
-    parser.add_argument(
         "-start_year", type=str, required=True, help="Star year of products."
     )
     parser.add_argument(
         "-landmarks", type=str, required=True, help="Landmarks of the product."
+    )
+    parser.add_argument(
+        "-prices", type=str, required=True, help="Price ranges of the product."
     )
     parser.add_argument(
         "-is_private",
@@ -138,10 +141,10 @@ def main():
         help="Whether the activity is private or not.",
     )
     parser.add_argument(
-        "-subcategories",
+        "-categories",
         type=str,
         required=True,
-        help="Sub-categories of Walkway AI's taxonomy.",
+        help="Categories of Walkway AI's taxonomy.",
     )
     parser.add_argument(
         "-embedding_model", type=str, required=True, help="Embedding model."
@@ -157,11 +160,11 @@ def main():
     city_name = args.city_name
     supplier_code = args.supplier_code
     average_rating = args.average_rating
-    tour_grade_code = args.tour_grade_code
     start_year = args.start_year
     landmarks = args.landmarks
+    prices = args.prices
     is_private = args.is_private
-    subcategories = args.subcategories
+    categories = args.categories
     embedding_model = args.embedding_model
     apikey = args.apikey
     experiment_id = args.experiment_id
@@ -174,7 +177,6 @@ def main():
         city_feature = "pdt_product_detail_VIDESTINATIONCITY"
         supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
         avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
-        tour_grade_code_feature = "pdt_tourgrades_TOURGRADECODE"
         time_feature = "bookings_MOSTRECENTORDERDATE"
         private_feature = "pdt_product_level_ISPRIVATETOUR"
         text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
@@ -209,7 +211,6 @@ def main():
                 city_feature,
                 supplier_code_feature,
                 avg_rating_feature,
-                tour_grade_code_feature,
                 time_feature,
                 private_feature,
             ]
@@ -225,7 +226,6 @@ def main():
         del df["score"]
 
         print(f"Number of initial candidates: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## CITY FILTER
 
@@ -234,8 +234,6 @@ def main():
             df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
 
         print(f"Number of candidates after the city filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-
 
         ## SUPPLIER CODE FILTER
 
@@ -247,8 +245,6 @@ def main():
             ]
 
         print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-
 
         ## AVERAGE RATING FILTER
 
@@ -264,27 +260,6 @@ def main():
             df = df[df[avg_rating_feature].isin(possible_values)]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-
-
-        ## TOUR GRADE CODE FILTER
-
-        if tour_grade_code == "same":
-
-            possible_values = list(df_product[tour_grade_code_feature])[0].split(";")
-
-            df[tour_grade_code_feature] = [
-                x.split(";") for x in df[tour_grade_code_feature]
-            ]
-            is_present = [
-                set(x) & set(possible_values) for x in df[tour_grade_code_feature]
-            ]
-            bools_list = [bool(s) for s in is_present]
-            df = df[bools_list]
-
-        print(f"Number of candidates after the tour grade code filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-
 
         ## START YEAR FILTER
 
@@ -297,8 +272,6 @@ def main():
             del df["year"]
 
         print(f"Number of candidates after the year filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-
 
         ## LANDMARKS FILTER
 
@@ -345,8 +318,6 @@ def main():
                 df = df[df[product_field].isin(final_candidates)]
 
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-
 
         ## PRIVATE OPTION FILTER
 
@@ -355,50 +326,84 @@ def main():
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-
 
         ## SUB-CATEGORY FILTER
 
-        if subcategories == "same":
+        if categories == "same":
 
             annotated_data = read_object(
-                fs, "product_textual_lang_summarized_subcategories_walkway"
+                fs, "product_textual_lang_summarized_subcategories_categories_walkway"
             )
             annotated_data = pd.DataFrame(annotated_data)
 
-            annotated_data = annotated_data.set_index("PRODUCTCODE")[
-                "sub-categories-walkway"
+            annotated_data = annotated_data[[product_field, "categories-walkway"]]
+
+            annotated_data = annotated_data.set_index(product_field)[
+                "categories-walkway"
             ].to_dict()
-            product_subcategories = annotated_data[product_id]
+
+            product_categories = annotated_data[product_id]
 
             l_pd = list()
 
             for prd_ in list(df[product_field]):
 
-                if set(product_subcategories).issubset(set(annotated_data[prd_])):
+                if set(product_categories).issubset(set(annotated_data[prd_])):
 
                     l_pd.append(prd_)
 
             df = df[df[product_field].isin(l_pd)]
 
-        print(f"Number of candidates after the sub-category filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
+        print(f"Number of candidates after the category filter: {df.shape[0]}")
 
+        ## PRICES FILTER
+
+        if prices != "any":
+
+            price_ranges = read_object(fs, "price_categories_per_product")
+            price_ranges = pd.DataFrame(price_ranges)
+
+            price_product_id = price_ranges[price_ranges[product_field] == product_id]
+            price_product_id = price_product_id[price_product_id["CATEGORY"] == prices]
+
+            values_to_be_compared_against = list(price_product_id["ADULTRETAILPRICE"])
+
+            final_candidates = list()
+
+            for prd in list(df[product_field]):
+
+                sbs = price_ranges[price_ranges[product_field] == prd]
+                sbs = sbs[sbs["CATEGORY"] == prices]
+
+                values_candidate = list(sbs["ADULTRETAILPRICE"])
+
+                for vo in values_to_be_compared_against:
+                    for vc in values_candidate:
+
+                        tolerance = 0.1 * vo
+                        is_close = abs(vo - vc) <= tolerance
+
+                        if is_close:
+
+                            final_candidates.append(prd)
+
+            df = df[df[product_field].isin(final_candidates)]
+
+        print(f"Number of candidates after the price filter: {df.shape[0]}")
 
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
-        del df[tour_grade_code_feature]
         del df[time_feature]
         del df[private_feature]
 
         del df_product[city_feature]
         del df_product[supplier_code_feature]
         del df_product[avg_rating_feature]
-        del df_product[tour_grade_code_feature]
         del df_product[time_feature]
         del df_product[private_feature]
+
+        df_product["Category"] = [annotated_data[product_id]]
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -407,6 +412,26 @@ def main():
             text_field, "Summarized description"
         )
 
+        # Sort candidates by total reviews
+
+        mapping = dict(
+            zip(df_raw[product_field], df_raw["pdt_product_level_TOTALREVIEWCOUNT"])
+        )
+
+        df["reviews"] = [mapping[el] for el in df[product_field]]
+
+        def parse_reviews(review):
+            review = review.replace("(", "[").replace(")", "]")
+            return ast.literal_eval(review)
+
+        df["reviews"] = df["reviews"].apply(parse_reviews)
+        df = df.sort_values(
+            by="reviews", key=lambda x: x.apply(lambda y: y[0]), ascending=False
+        )
+        del df["reviews"]
+
+        # RAW RESULTS
+
         df_no_openai = df[:10]
 
         result_features_wo_openai = list()
@@ -414,6 +439,9 @@ def main():
         for _, row in df_no_openai.iterrows():
 
             df_now = pd.DataFrame(row).T
+
+            product_id = list(df_now[product_field])[0]
+            df_now["Category"] = [annotated_data[product_id]]
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -424,6 +452,8 @@ def main():
             )
 
             result_features_wo_openai.append(result_features.split("\n"))
+
+        result_features_w_openai = list()
 
         try:
 
@@ -438,11 +468,12 @@ def main():
 
                 df_openai = df_openai[df_openai[product_field].isin(result)]
 
-                result_features_w_openai = list()
-
                 for _, row in df_openai.iterrows():
 
                     df_now = pd.DataFrame(row).T
+
+                    product_id = list(df_now[product_field])[0]
+                    df_now["Category"] = [annotated_data[product_id]]
 
                     result_features = "\n".join(
                         [
@@ -466,11 +497,10 @@ def main():
             "City",
             "Supplier Code",
             "Average Rating",
-            "Tour Grade Code",
             "Start Year",
             "Landmarks",
             "Private",
-            "Subcategories",
+            "Categories",
             "Embedding Model",
         ]
 
@@ -479,11 +509,10 @@ def main():
             city_name,
             supplier_code,
             average_rating,
-            tour_grade_code,
             start_year,
             landmarks,
             is_private,
-            subcategories,
+            categories,
             embedding_model,
         ]
 
