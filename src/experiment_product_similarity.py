@@ -338,7 +338,7 @@ def main():
             "categories-walkway"
         ].to_dict()
 
-        if categories == "same":
+        if categories != "any":
 
             product_categories = annotated_data[product_id]
 
@@ -348,9 +348,17 @@ def main():
 
                 for prd_ in list(df[product_field]):
 
-                    if set(product_categories).issubset(set(annotated_data[prd_])):
+                    if categories == "same":
 
-                        l_pd.append(prd_)
+                        if set(product_categories).issubset(set(annotated_data[prd_])):
+
+                            l_pd.append(prd_)
+
+                    if categories == "one":
+
+                        if any(ct in annotated_data[prd_] for ct in product_categories):
+
+                            l_pd.append(prd_)
 
                 df = df[df[product_field].isin(l_pd)]
 
