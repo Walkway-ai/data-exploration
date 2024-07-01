@@ -427,7 +427,7 @@ def main():
         del df_product[time_feature]
         del df_product[private_feature]
 
-        df_product["Category"] = list(set(annotated_data[product_id]))
+        output_product_categories = list(set(annotated_data[product_id]))
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -435,6 +435,8 @@ def main():
         product_features = product_features.replace(
             text_field, "Summarized description"
         )
+
+        product_features = product_features + "\n" + str(output_product_categories)
 
         # RAW RESULTS
 
@@ -447,7 +449,7 @@ def main():
             df_now = pd.DataFrame(row).T
 
             product_id = list(df_now[product_field])[0]
-            df_now["Category"] = list(set(annotated_data[product_id]))
+            no_openai_product_categories = list(set(annotated_data[product_id]))
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -456,6 +458,8 @@ def main():
                 text_field,
                 "Summarized description",
             )
+
+            result_features = result_features + "\n" + str(no_openai_product_categories)
 
             result_features_wo_openai.append(result_features.split("\n"))
 
@@ -479,7 +483,7 @@ def main():
                     df_now = pd.DataFrame(row).T
 
                     product_id = list(df_now[product_field])[0]
-                    df_now["Category"] = list(set(annotated_data[product_id]))
+                    openai_product_categories = list(set(annotated_data[product_id]))
 
                     result_features = "\n".join(
                         [
@@ -491,6 +495,8 @@ def main():
                         text_field,
                         "Summarized description",
                     )
+
+                    result_features = result_features + "\n" + str(openai_product_categories)
 
                     result_features_w_openai.append(result_features.split("\n"))
 
