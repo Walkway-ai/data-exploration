@@ -367,6 +367,8 @@ def main():
 
             df = df[df[product_field].isin(l_pd)]
 
+        print(f"Number of candidates after the sub-category filter: {df.shape[0]}")
+
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
