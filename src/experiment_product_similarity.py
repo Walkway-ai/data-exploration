@@ -364,8 +364,11 @@ def main():
             price_ranges = pd.DataFrame(price_ranges)
 
             price_product_id = price_ranges[price_ranges[product_field] == product_id]
+            print(price_product_id)
             price_product_id = price_product_id[price_product_id["CATEGORY"] == prices]
+            print(price_product_id)
             values_to_be_compared_against = list(price_product_id["ADULTRETAILPRICE"])
+            print(values_to_be_compared_against)
 
             final_candidates = list()
 
@@ -375,7 +378,6 @@ def main():
                 sbs = sbs[sbs["CATEGORY"] == prices]
                 values_candidate = list(sbs["ADULTRETAILPRICE"])
 
-                print(values_to_be_compared_against)
                 print(values_candidate)
 
                 for vo in values_to_be_compared_against:
