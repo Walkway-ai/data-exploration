@@ -25,10 +25,10 @@ spec:
         choice(name: 'supplier_code', choices: ['different', 'any'], description: 'If different, only products from other suppliers are shown.')
         choice(name: 'average_rating', choices: ['any', 'similar'], description: 'If similar, only products with similar average ratings are shown.')
         choice(name: 'start_year', choices: ['any', '2022', '2023', '2024'], description: 'Products older than this year will not be considered.')
-        choice(name: 'landmarks', choices: ['same', 'any'], description: 'If same, only products mentioning the same landmark(s) will be shown.')
+        choice(name: 'landmarks', choices: ['same', 'any'], description: 'If same, only products mentioning the same landmark(s) will be shown. If there are no landmarks in the selected product, this filter will be ignored.')
         choice(name: 'prices', choices: ['standard', 'any'], description: 'If not any, only products with similar standard/premium price ranges will be shown.')
         choice(name: 'is_private', choices: ['any', 'same'], description: 'If same, only products with the same tour type (private/public) will be shown.')
-        choice(name: 'categories', choices: ['same', 'any'], description: 'If same, only products with the same sub-category will be shown.')
+        choice(name: 'categories', choices: ['same', 'any'], description: 'If same, only products with the same sub-category will be shown. If there are no categories in the selected product, this filter will be ignored.')
         choice(name: 'embedding_model', choices: ['mean', 'jina-embeddings-v2-base-en', 'gte-large'], description: 'Embedding model.')
     }
     stages {
