@@ -448,7 +448,7 @@ def main():
             df_now = pd.DataFrame(row).T
 
             product_id = list(df_now[product_field])[0]
-            df_now["Category"] = list(set([annotated_data[product_id]]))
+            df_now["Category"] = list(set(annotated_data[product_id]))
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -480,7 +480,7 @@ def main():
                     df_now = pd.DataFrame(row).T
 
                     product_id = list(df_now[product_field])[0]
-                    df_now["Category"] = list(set([annotated_data[product_id]]))
+                    df_now["Category"] = list(set(annotated_data[product_id]))
 
                     result_features = "\n".join(
                         [
