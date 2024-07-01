@@ -436,7 +436,7 @@ def main():
             text_field, "Summarized description"
         )
 
-        product_features = product_features + "\n" + str(output_product_categories)
+        product_features = product_features + "\n Category: " + str(output_product_categories)
 
         # RAW RESULTS
 
@@ -459,7 +459,7 @@ def main():
                 "Summarized description",
             )
 
-            result_features = result_features + "\n" + str(no_openai_product_categories)
+            result_features = result_features + "\n Category: " + str(no_openai_product_categories)
 
             result_features_wo_openai.append(result_features.split("\n"))
 
@@ -496,7 +496,7 @@ def main():
                         "Summarized description",
                     )
 
-                    result_features = result_features + "\n" + str(openai_product_categories)
+                    result_features = result_features + "\n Category: " + str(openai_product_categories)
 
                     result_features_w_openai.append(result_features.split("\n"))
 
