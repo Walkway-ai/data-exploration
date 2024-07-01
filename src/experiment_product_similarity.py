@@ -391,6 +391,28 @@ def main():
 
         print(f"Number of candidates after the price filter: {df.shape[0]}")
 
+        ## REVIEWS FILTER (sorted)
+
+        mapping = dict(
+            zip(df_raw[product_field], df_raw["pdt_product_level_TOTALREVIEWCOUNT"])
+        )
+
+        df["reviews"] = [mapping[el] for el in df[product_field]]
+
+        def parse_reviews(review):
+            review = review.replace("(", "[").replace(")", "]")
+            return ast.literal_eval(review)
+
+        df = df[df["reviews"] != ""]
+
+        df["reviews"] = df["reviews"].apply(parse_reviews)
+        df = df.sort_values(
+            by="reviews", key=lambda x: x.apply(lambda y: y[0]), ascending=False
+        )
+        del df["reviews"]
+
+        print(f"Number of candidates after the reviews filter: {df.shape[0]}")
+
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
@@ -411,24 +433,6 @@ def main():
         product_features = product_features.replace(
             text_field, "Summarized description"
         )
-
-        # Sort candidates by total reviews
-
-        mapping = dict(
-            zip(df_raw[product_field], df_raw["pdt_product_level_TOTALREVIEWCOUNT"])
-        )
-
-        df["reviews"] = [mapping[el] for el in df[product_field]]
-
-        def parse_reviews(review):
-            review = review.replace("(", "[").replace(")", "]")
-            return ast.literal_eval(review)
-
-        df["reviews"] = df["reviews"].apply(parse_reviews)
-        df = df.sort_values(
-            by="reviews", key=lambda x: x.apply(lambda y: y[0]), ascending=False
-        )
-        del df["reviews"]
 
         # RAW RESULTS
 
