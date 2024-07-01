@@ -342,6 +342,8 @@ def main():
 
             product_categories = annotated_data[product_id]
 
+            print(product_categories)
+
             if product_categories:
 
                 l_pd = list()
