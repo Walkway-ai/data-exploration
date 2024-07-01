@@ -27,6 +27,7 @@ destinations:
       - Manhattan Skyline
       - Metropolitan Museum of Art (The Met)
       - Flatiron Building
+      - One Vanderbilt
   Barcelona:
     landmarks:
       - Sagrada Familia
@@ -41,6 +42,7 @@ destinations:
       - Passeig de Gracia
       - Port Olímpic
       - Las Ramblas
+      - La Boquería
   Austin:
     landmarks:
       - Texas Capitol

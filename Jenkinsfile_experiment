@@ -24,7 +24,7 @@ spec:
         choice(name: 'city_name', choices: ['same', 'any'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'any'], description: 'If different, only products from other suppliers are shown.')
         choice(name: 'average_rating', choices: ['any', 'similar'], description: 'If similar, only products with similar average ratings are shown.')
-        choice(name: 'tour_grade_code', choices: ['same', 'any'], description: 'If same, only products with same tour grade codes are shown.')
+        choice(name: 'tour_grade_code', choices: ['any', 'same'], description: 'If same, only products with same tour grade codes are shown.')
         choice(name: 'start_year', choices: ['any', '2022', '2023', '2024'], description: 'Products older than this year will not be considered.')
         choice(name: 'landmarks', choices: ['same', 'any'], description: 'If same, only products mentioning the same landmark(s) will be shown.')
         choice(name: 'is_private', choices: ['same', 'any'], description: 'If same, only products with the same tour type (private/public) will be shown.')
