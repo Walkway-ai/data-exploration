@@ -325,32 +325,34 @@ def main():
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
 
-        ## SUB-CATEGORY FILTER
+        ## CATEGORY FILTER
+
+        annotated_data = read_object(
+            fs, "product_textual_lang_summarized_subcategories_categories_walkway"
+        )
+        annotated_data = pd.DataFrame(annotated_data)
+
+        annotated_data = annotated_data[[product_field, "categories-walkway"]]
+
+        annotated_data = annotated_data.set_index(product_field)[
+            "categories-walkway"
+        ].to_dict()
 
         if categories == "same":
 
-            annotated_data = read_object(
-                fs, "product_textual_lang_summarized_subcategories_categories_walkway"
-            )
-            annotated_data = pd.DataFrame(annotated_data)
-
-            annotated_data = annotated_data[[product_field, "categories-walkway"]]
-
-            annotated_data = annotated_data.set_index(product_field)[
-                "categories-walkway"
-            ].to_dict()
-
             product_categories = annotated_data[product_id]
 
-            l_pd = list()
+            if product_categories:
 
-            for prd_ in list(df[product_field]):
+                l_pd = list()
 
-                if set(product_categories).issubset(set(annotated_data[prd_])):
+                for prd_ in list(df[product_field]):
 
-                    l_pd.append(prd_)
+                    if set(product_categories).issubset(set(annotated_data[prd_])):
 
-            df = df[df[product_field].isin(l_pd)]
+                        l_pd.append(prd_)
+
+                df = df[df[product_field].isin(l_pd)]
 
         print(f"Number of candidates after the category filter: {df.shape[0]}")
 
