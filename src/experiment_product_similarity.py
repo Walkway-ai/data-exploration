@@ -377,8 +377,6 @@ def main():
                     sbs = sbs[sbs["CATEGORY"] == prices]
                     values_candidate = list(sbs["ADULTRETAILPRICE"])
 
-                    print(values_candidate)
-
                     for vo in values_to_be_compared_against:
                         for vc in values_candidate:
 
