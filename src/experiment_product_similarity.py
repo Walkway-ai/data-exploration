@@ -500,7 +500,9 @@ def main():
 
                     result_features_w_openai.append(result_features.split("\n"))
 
-        except Exception:
+        except Exception as e:
+
+            print(e)
 
             print("No products were found for the combination.")
 
