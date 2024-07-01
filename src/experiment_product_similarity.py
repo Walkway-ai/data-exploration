@@ -364,33 +364,32 @@ def main():
             price_ranges = pd.DataFrame(price_ranges)
 
             price_product_id = price_ranges[price_ranges[product_field] == product_id]
-            print(price_product_id)
             price_product_id = price_product_id[price_product_id["CATEGORY"] == prices]
-            print(price_product_id)
             values_to_be_compared_against = list(price_product_id["ADULTRETAILPRICE"])
-            print(values_to_be_compared_against)
 
-            final_candidates = list()
+            if values_to_be_compared_against:
 
-            for prd in list(df[product_field]):
+                final_candidates = list()
 
-                sbs = price_ranges[price_ranges[product_field] == prd]
-                sbs = sbs[sbs["CATEGORY"] == prices]
-                values_candidate = list(sbs["ADULTRETAILPRICE"])
+                for prd in list(df[product_field]):
 
-                print(values_candidate)
+                    sbs = price_ranges[price_ranges[product_field] == prd]
+                    sbs = sbs[sbs["CATEGORY"] == prices]
+                    values_candidate = list(sbs["ADULTRETAILPRICE"])
 
-                for vo in values_to_be_compared_against:
-                    for vc in values_candidate:
+                    print(values_candidate)
 
-                        tolerance = 0.3 * vo
-                        is_close = abs(vo - vc) <= tolerance
+                    for vo in values_to_be_compared_against:
+                        for vc in values_candidate:
 
-                        if is_close:
+                            tolerance = 0.3 * vo
+                            is_close = abs(vo - vc) <= tolerance
 
-                            final_candidates.append(prd)
+                            if is_close:
 
-            df = df[df[product_field].isin(final_candidates)]
+                                final_candidates.append(prd)
+
+                df = df[df[product_field].isin(final_candidates)]
 
         print(f"Number of candidates after the price filter: {df.shape[0]}")
 
