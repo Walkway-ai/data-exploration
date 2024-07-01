@@ -365,7 +365,6 @@ def main():
 
             price_product_id = price_ranges[price_ranges[product_field] == product_id]
             price_product_id = price_product_id[price_product_id["CATEGORY"] == prices]
-
             values_to_be_compared_against = list(price_product_id["ADULTRETAILPRICE"])
 
             final_candidates = list()
@@ -374,8 +373,10 @@ def main():
 
                 sbs = price_ranges[price_ranges[product_field] == prd]
                 sbs = sbs[sbs["CATEGORY"] == prices]
-
                 values_candidate = list(sbs["ADULTRETAILPRICE"])
+
+                print(values_to_be_compared_against)
+                print(values_candidate)
 
                 for vo in values_to_be_compared_against:
                     for vc in values_candidate:
