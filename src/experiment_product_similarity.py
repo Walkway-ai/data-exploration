@@ -428,7 +428,7 @@ def main():
         del df_product[time_feature]
         del df_product[private_feature]
 
-        df_product["Category"] = list(set([annotated_data[product_id]]))
+        df_product["Category"] = list(set(annotated_data[product_id]))
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
