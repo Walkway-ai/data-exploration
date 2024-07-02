@@ -54,9 +54,9 @@ def append_to_google_sheets(credentials_file, results_out):
 def query_gpt(apikey, text_field, df, df_product, mapping_title):
 
     df = df.astype(str)
-    df["title"] = [mapping_title[x] for x in df["PRODUCTCODE"]]
+    #df["title"] = [mapping_title[x] for x in df["PRODUCTCODE"]]
     df_product = df_product.astype(str)
-    df_product["title"] = [mapping_title[x] for x in df_product["PRODUCTCODE"]]
+    #df_product["title"] = [mapping_title[x] for x in df_product["PRODUCTCODE"]]
 
     product_features = "\n".join(
         [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
