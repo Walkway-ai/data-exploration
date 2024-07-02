@@ -417,6 +417,15 @@ def main():
         
         ## REVIEWS FILTER (sorted)
 
+        reviews = read_object(fs, "product_tables")
+        reviews = pd.DataFrame(reviews)
+
+        print(reviews.columns)
+        print(reviews)
+
+        import sys
+        sys.exit()
+
         mapping = dict(
             zip(df_raw[product_field], df_raw["pdt_product_level_TOTALREVIEWCOUNT"])
         )
