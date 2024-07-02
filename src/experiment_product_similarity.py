@@ -420,33 +420,27 @@ def main():
         reviews = read_object(fs, "product_tables")
         reviews = pd.DataFrame(reviews)
 
-        print(reviews["pdt_product_level_TOTALREVIEWCOUNT"])
-
         reviews["pdt_product_level_TOTALREVIEWCOUNT"] = reviews["pdt_product_level_TOTALREVIEWCOUNT"].apply(lambda x: x if x is not None else [])
         reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [
             max([el for el in x if el is not None]) if len([el for el in x if el is not None]) > 0 else 0
             for x in reviews["pdt_product_level_TOTALREVIEWCOUNT"]
         ]
 
-        print(reviews["pdt_product_level_TOTALREVIEWCOUNT"])
-
-        import sys
-        sys.exit()
 
         mapping = dict(
-            zip(df_raw[product_field], df_raw["pdt_product_level_TOTALREVIEWCOUNT"])
+            zip(reviews[product_field], reviews["pdt_product_level_TOTALREVIEWCOUNT"])
         )
 
-        df["reviews"] = [mapping[el] for el in df[product_field]]
+        reviews["reviews"] = [mapping[el] for el in reviews[product_field]]
 
         def parse_reviews(review):
             review = review.replace("(", "[").replace(")", "]")
             return ast.literal_eval(review)
 
-        df = df[df["reviews"] != ""]
+        reviews = reviews[reviews["reviews"] != ""]
 
-        df["reviews"] = df["reviews"].apply(parse_reviews)
-        df = df.sort_values(
+        reviews["reviews"] = reviews["reviews"].apply(parse_reviews)
+        reviews = reviews.sort_values(
             by="reviews", key=lambda x: x.apply(lambda y: y[0]), ascending=False
         )
 
