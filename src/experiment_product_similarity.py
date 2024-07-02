@@ -419,6 +419,7 @@ def main():
 
         df["reviews"] = [mapping[el] for el in df[product_field]]
         df = df[df["reviews"] != ""]
+        df = df[df["reviews"] == 0]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
