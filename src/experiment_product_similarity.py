@@ -236,6 +236,8 @@ def main():
             df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
 
         print(f"Number of candidates after the city filter: {df.shape[0]}")
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
 
         ## SUPPLIER CODE FILTER
 
@@ -247,6 +249,8 @@ def main():
             ]
 
         print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
 
         ## AVERAGE RATING FILTER
 
@@ -262,7 +266,9 @@ def main():
             df = df[df[avg_rating_feature].isin(possible_values)]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         ## START YEAR FILTER
 
         if start_year != "any":
@@ -274,7 +280,9 @@ def main():
             del df["year"]
 
         print(f"Number of candidates after the year filter: {df.shape[0]}")
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         ## LANDMARKS FILTER
 
         d_landmarks = {}
@@ -320,7 +328,9 @@ def main():
                 df = df[df[product_field].isin(final_candidates)]
 
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         ## PRIVATE OPTION FILTER
 
         if is_private == "same":
@@ -328,7 +338,9 @@ def main():
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         ## CATEGORY FILTER
 
         annotated_data = read_object(
@@ -367,7 +379,9 @@ def main():
                 df = df[df[product_field].isin(l_pd)]
 
         print(f"Number of candidates after the category filter: {df.shape[0]}")
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         ## PRICES FILTER
 
         if prices != "any":
@@ -402,7 +416,9 @@ def main():
                 df = df[df[product_field].isin(final_candidates)]
 
         print(f"Number of candidates after the price filter: {df.shape[0]}")
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         ## REVIEWS FILTER (sorted)
 
         product_table = read_object(fs, "product_tables")
@@ -423,7 +439,9 @@ def main():
         df = df[df["reviews"] != 0]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         # Create dict for product title
 
         product_table["pdt_product_detail_PRODUCTTITLE"] = product_table["pdt_product_detail_PRODUCTTITLE"].apply(lambda x: x if x is not None else [])
@@ -463,7 +481,9 @@ def main():
 
         # RAW RESULTS
         df = df[:20]
-
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        
         df_no_openai = df
 
         result_features_wo_openai = list()
