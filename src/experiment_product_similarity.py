@@ -422,7 +422,6 @@ def main():
         df = df[df["reviews"] != ""]
 
         # Keep top-20 of final candidates
-        df = df[:20]
         df = df.sort_values(by="reviews", ascending=False)
         del df["reviews"]
 
