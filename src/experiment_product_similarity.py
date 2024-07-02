@@ -468,7 +468,7 @@ def main():
         product_features = product_features + "\n Category: " + str(output_product_categories) + "\n Title: " + str(title)
 
         # RAW RESULTS
-        df = df[:30]
+        df = df[:10]
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         df = df.sort_values(by="reviews", ascending=False)
