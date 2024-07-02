@@ -428,7 +428,7 @@ def main():
             for x in reviews["pdt_product_level_TOTALREVIEWCOUNT"]
         ]
 
-        print(reviews)
+        print(reviews["pdt_product_level_TOTALREVIEWCOUNT"])
 
         import sys
         sys.exit()
