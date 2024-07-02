@@ -432,7 +432,7 @@ def main():
 
         df["reviews"] = [mapping[el] for el in df[product_field]]
         df = df[df["reviews"] != ""]
-        df = df.sort_values(by="reviews")
+        df = df.sort_values(by="reviews", ascending=False)
 
         print(df[["PRODUCTCODE", "reviews"]])
         del df["reviews"]
