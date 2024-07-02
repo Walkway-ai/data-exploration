@@ -422,8 +422,13 @@ def main():
 
         print(reviews["pdt_product_level_TOTALREVIEWCOUNT"])
 
-        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [[el if el for el in x] for x in reviews["pdt_product_level_TOTALREVIEWCOUNT"]]
-        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [max(x) for x in list(reviews["pdt_product_level_TOTALREVIEWCOUNT"])]
+        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = reviews["pdt_product_level_TOTALREVIEWCOUNT"].apply(lambda x: x if x is not None else [])
+        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [
+            max([el for el in x if el is not None]) if len([el for el in x if el is not None]) > 0 else 0
+            for x in reviews["pdt_product_level_TOTALREVIEWCOUNT"]
+        ]
+
+        print(reviews)
 
         import sys
         sys.exit()
