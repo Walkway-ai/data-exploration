@@ -426,21 +426,15 @@ def main():
             for x in reviews["pdt_product_level_TOTALREVIEWCOUNT"]
         ]
 
-
         mapping = dict(
             zip(reviews[product_field], reviews["pdt_product_level_TOTALREVIEWCOUNT"])
         )
 
-        reviews["reviews"] = [mapping[el] for el in reviews[product_field]]
+        df["reviews"] = [mapping[el] for el in df[product_field]]
+        df = df[df["reviews"] != ""]
+        df = df.sort_values(by="reviews")
 
-        reviews = reviews[reviews["reviews"] != ""]
-
-        reviews = reviews.sort_values(by="reviews")
-
-        print(mapping["9205P4"])
-        print(mapping["3731P202"])
-
-        print(df)
+        print(df[["PRODUCTCODE", "reviews"]])
         del df["reviews"]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
