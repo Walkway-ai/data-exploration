@@ -501,7 +501,6 @@ def main():
 
                 df_openai = df_openai[df_openai[product_field].isin(result)]
                 df_openai = df_openai.sort_values(by="reviews", ascending=False)
-                del df_openai["reviews"]
 
                 for _, row in df_openai.iterrows():
 
