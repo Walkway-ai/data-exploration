@@ -436,7 +436,9 @@ def main():
         del df["reviews"]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
-
+        print("9205P4" in list(df["PRODUCTCODE"]))
+        print("3731P202" in list(df["PRODUCTCODE"]))
+        
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
