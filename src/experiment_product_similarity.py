@@ -420,8 +420,11 @@ def main():
         reviews = read_object(fs, "product_tables")
         reviews = pd.DataFrame(reviews)
 
-        print(reviews.columns)
-        print(reviews)
+        print(reviews["pdt_product_level_TOTALREVIEWCOUNT"])
+
+        for el in list(reviews["pdt_product_level_TOTALREVIEWCOUNT"]):
+
+            assert len(el) == 1
 
         import sys
         sys.exit()
