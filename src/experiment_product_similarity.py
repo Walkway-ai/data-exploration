@@ -401,17 +401,17 @@ def main():
 
         ## REVIEWS FILTER (sorted)
 
-        reviews = read_object(fs, "product_tables")
-        reviews = pd.DataFrame(reviews)
+        product_table = read_object(fs, "product_tables")
+        product_table = pd.DataFrame(product_table)
 
-        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = reviews["pdt_product_level_TOTALREVIEWCOUNT"].apply(lambda x: x if x is not None else [])
-        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [
+        product_table["pdt_product_level_TOTALREVIEWCOUNT"] = product_table["pdt_product_level_TOTALREVIEWCOUNT"].apply(lambda x: x if x is not None else [])
+        product_table["pdt_product_level_TOTALREVIEWCOUNT"] = [
             max([el for el in x if el is not None]) if len([el for el in x if el is not None]) > 0 else 0
-            for x in reviews["pdt_product_level_TOTALREVIEWCOUNT"]
+            for x in product_table["pdt_product_level_TOTALREVIEWCOUNT"]
         ]
 
         mapping = dict(
-            zip(reviews[product_field], reviews["pdt_product_level_TOTALREVIEWCOUNT"])
+            zip(product_table[product_field], product_table["pdt_product_level_TOTALREVIEWCOUNT"])
         )
 
         df["reviews"] = [mapping[el] for el in df[product_field]]
@@ -420,6 +420,20 @@ def main():
         del df["reviews"]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
+
+        # Create dict for product title
+
+        product_table["pdt_product_detail_PRODUCTTITLE"] = product_table["pdt_product_detail_PRODUCTTITLE"].apply(lambda x: x if x is not None else [])
+        product_table["pdt_product_detail_PRODUCTTITLE"] = [
+            [el for el in x if el is not None][0] if len([el for el in x if el is not None]) > 0 else ""
+            for x in product_table["pdt_product_detail_PRODUCTTITLE"]
+        ]
+
+        mapping_title = dict(
+            zip(product_table[product_field], product_table["pdt_product_detail_PRODUCTTITLE"])
+        )
+
+        print(mapping_title)
 
         del df[city_feature]
         del df[supplier_code_feature]
