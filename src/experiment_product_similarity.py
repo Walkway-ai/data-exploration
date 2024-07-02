@@ -458,8 +458,8 @@ def main():
         product_features = product_features + "\n Category: " + str(output_product_categories) + "\n Title: " + str(title)
 
         # RAW RESULTS
-        df = df[:10]
         df = df.sort_values(by="reviews", ascending=False)
+        df = df[:10]
         del df["reviews"]
 
         df_no_openai = df
