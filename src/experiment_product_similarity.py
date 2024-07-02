@@ -420,6 +420,9 @@ def main():
 
         df["reviews"] = [mapping[el] for el in df[product_field]]
         df = df[df["reviews"] != ""]
+
+        # Keep top-20 of final candidates
+        df = df[:20]
         df = df.sort_values(by="reviews", ascending=False)
         del df["reviews"]
 
@@ -463,7 +466,7 @@ def main():
 
         # RAW RESULTS
 
-        df_no_openai = df[:10]
+        df_no_openai = df
 
         result_features_wo_openai = list()
 
@@ -491,7 +494,7 @@ def main():
 
         try:
 
-            df_openai = df[:30]
+            df_openai = df
             result = query_gpt(apikey, text_field, df_openai, df_product, mapping_title)
             result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
             result = ast.literal_eval(result)
