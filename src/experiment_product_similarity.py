@@ -226,6 +226,7 @@ def main():
         del df["score"]
 
         print(f"Number of initial candidates: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## CITY FILTER
 
@@ -234,6 +235,7 @@ def main():
             df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
 
         print(f"Number of candidates after the city filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## SUPPLIER CODE FILTER
 
@@ -245,6 +247,7 @@ def main():
             ]
 
         print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## AVERAGE RATING FILTER
 
@@ -260,6 +263,7 @@ def main():
             df = df[df[avg_rating_feature].isin(possible_values)]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## START YEAR FILTER
 
@@ -272,6 +276,7 @@ def main():
             del df["year"]
 
         print(f"Number of candidates after the year filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## LANDMARKS FILTER
 
@@ -318,6 +323,7 @@ def main():
                 df = df[df[product_field].isin(final_candidates)]
 
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## PRIVATE OPTION FILTER
 
@@ -326,6 +332,7 @@ def main():
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## CATEGORY FILTER
 
@@ -365,6 +372,7 @@ def main():
                 df = df[df[product_field].isin(l_pd)]
 
         print(f"Number of candidates after the category filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## PRICES FILTER
 
@@ -400,6 +408,7 @@ def main():
                 df = df[df[product_field].isin(final_candidates)]
 
         print(f"Number of candidates after the price filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         ## REVIEWS FILTER (sorted)
 
@@ -420,6 +429,7 @@ def main():
         df = df[df["reviews"] != ""]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
 
         # Create dict for product title
 
@@ -459,6 +469,8 @@ def main():
 
         # RAW RESULTS
         df = df[:20]
+        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
+
         df = df.sort_values(by="reviews", ascending=False)
         del df["reviews"]
 
