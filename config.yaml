@@ -14,6 +14,7 @@ bigquery-to-retrieve:
         - "productcode"
         - "VIDestinationCity"
         - "product_description"
+        - "product_title"
     pdt_product_level:
       dataset_id: "v_extract1"
       fields:

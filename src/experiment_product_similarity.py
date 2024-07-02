@@ -422,6 +422,7 @@ def main():
 
         print(reviews["pdt_product_level_TOTALREVIEWCOUNT"])
 
+        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [[el if el for el in x] for x in reviews["pdt_product_level_TOTALREVIEWCOUNT"]]
         reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [max(x) for x in list(reviews["pdt_product_level_TOTALREVIEWCOUNT"])]
 
         import sys
