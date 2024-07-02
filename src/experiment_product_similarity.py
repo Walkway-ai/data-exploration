@@ -85,7 +85,7 @@ def query_gpt(apikey, text_field, df, df_product):
             {"role": "system", "content": system_role},
             {"role": "user", "content": prompt},
         ],
-        temperature=0.3,
+        temperature=0.1,
     )
 
     return result
