@@ -390,7 +390,7 @@ def main():
                     for vo in values_to_be_compared_against:
                         for vc in values_candidate:
 
-                            tolerance = 0.2 * vo
+                            tolerance = 0.3 * vo
                             is_close = abs(vo - vc) <= tolerance
 
                             if is_close:
@@ -459,7 +459,6 @@ def main():
 
         # RAW RESULTS
         df = df[:10]
-
         df = df.sort_values(by="reviews", ascending=False)
         del df["reviews"]
 
