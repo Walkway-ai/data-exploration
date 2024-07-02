@@ -51,9 +51,10 @@ def append_to_google_sheets(credentials_file, results_out):
                 sheet.append_row(line)
 
 
-def query_gpt(apikey, text_field, df, df_product, mapping_title):
+def query_gpt(apikey, text_field, df, df_product):
 
     df = df.astype(str)
+    del df["reviews"]
     #df["title"] = [mapping_title[x] for x in df["PRODUCTCODE"]]
     df_product = df_product.astype(str)
     #df_product["title"] = [mapping_title[x] for x in df_product["PRODUCTCODE"]]
@@ -459,8 +460,6 @@ def main():
 
         # RAW RESULTS
         df = df[:20]
-        df = df.sort_values(by="reviews", ascending=False)
-        del df["reviews"]
 
         df_no_openai = df
 
@@ -491,7 +490,7 @@ def main():
         try:
 
             df_openai = df
-            result = query_gpt(apikey, text_field, df_openai, df_product, mapping_title)
+            result = query_gpt(apikey, text_field, df_openai, df_product)
             result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
             result = ast.literal_eval(result)
 
@@ -500,6 +499,8 @@ def main():
                 result = result[:10]
 
                 df_openai = df_openai[df_openai[product_field].isin(result)]
+                df_openai = df_openai.sort_values(by="reviews", ascending=False)
+                del df_openai["reviews"]
 
                 for _, row in df_openai.iterrows():
 
