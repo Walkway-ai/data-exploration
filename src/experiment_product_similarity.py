@@ -422,9 +422,7 @@ def main():
 
         print(reviews["pdt_product_level_TOTALREVIEWCOUNT"])
 
-        for el in list(reviews["pdt_product_level_TOTALREVIEWCOUNT"]):
-
-            assert len(el) == 1
+        reviews["pdt_product_level_TOTALREVIEWCOUNT"] = [max(x) for x in list(reviews["pdt_product_level_TOTALREVIEWCOUNT"])]
 
         import sys
         sys.exit()
