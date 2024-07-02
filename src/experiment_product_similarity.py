@@ -450,6 +450,7 @@ def main():
         del df_product[private_feature]
 
         output_product_categories = list(set(annotated_data[product_id]))
+        title = str(mapping_title[product_id])
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -458,7 +459,7 @@ def main():
             text_field, "Summarized description"
         )
 
-        product_features = product_features + "\n Category: " + str(output_product_categories)
+        product_features = product_features + "\n Category: " + str(output_product_categories) + "\n Title: " + str(title)
 
         # RAW RESULTS
 
@@ -472,6 +473,7 @@ def main():
 
             product_id = list(df_now[product_field])[0]
             no_openai_product_categories = list(set(annotated_data[product_id]))
+            title = str(mapping_title[product_id])
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -481,7 +483,7 @@ def main():
                 "Summarized description",
             )
 
-            result_features = result_features + "\n Category: " + str(no_openai_product_categories)
+            result_features = result_features + "\n Category: " + str(no_openai_product_categories) + "\n Title: " + str(title)
 
             result_features_wo_openai.append(result_features.split("\n"))
 
@@ -506,6 +508,7 @@ def main():
 
                     product_id = list(df_now[product_field])[0]
                     openai_product_categories = list(set(annotated_data[product_id]))
+                    title = str(mapping_title[product_id])
 
                     result_features = "\n".join(
                         [
@@ -518,7 +521,7 @@ def main():
                         "Summarized description",
                     )
 
-                    result_features = result_features + "\n Category: " + str(openai_product_categories)
+                    result_features = result_features + "\n Category: " + str(openai_product_categories) + "\n Title: " + str(title)
 
                     result_features_w_openai.append(result_features.split("\n"))
 
