@@ -433,16 +433,9 @@ def main():
 
         reviews["reviews"] = [mapping[el] for el in reviews[product_field]]
 
-        def parse_reviews(review):
-            review = review.replace("(", "[").replace(")", "]")
-            return ast.literal_eval(review)
-
         reviews = reviews[reviews["reviews"] != ""]
 
-        reviews["reviews"] = reviews["reviews"].apply(parse_reviews)
-        reviews = reviews.sort_values(
-            by="reviews", key=lambda x: x.apply(lambda y: y[0]), ascending=False
-        )
+        reviews = reviews.sort_values(by="reviews")
 
         print(mapping["9205P4"])
         print(mapping["3731P202"])
