@@ -450,6 +450,7 @@ def main():
 
         output_product_categories = list(set(annotated_data[product_id]))
         title = str(mapping_title[product_id])
+        n_reviews = str(mapping[product_id])
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -458,7 +459,7 @@ def main():
             text_field, "Summarized description"
         )
 
-        product_features = product_features + "\n Category: " + str(output_product_categories) + "\n Title: " + str(title)
+        product_features = product_features + "\n reviews: " + str(n_reviews) + "\n Category: " + str(output_product_categories) + "\n Title: " + str(title)
 
         # RAW RESULTS
         df = df[:20]
