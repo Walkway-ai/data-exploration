@@ -452,7 +452,7 @@ def main():
         df["reviews"] = [mapping[el] for el in df[product_field]]
         df = df[df["reviews"] != ""]
         df = df[df["reviews"] != 0]
-        df = df[df["reviews"] > np.percentile(list(df["reviews"]), 0.5)]
+        df = df[df["reviews"] > np.percentile(list(df["reviews"]), 75)]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
