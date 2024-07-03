@@ -55,9 +55,9 @@ def query_gpt(apikey, text_field, df, df_product):
 
     df = df.astype(str)
     del df["reviews"]
-    #df["title"] = [mapping_title[x] for x in df["PRODUCTCODE"]]
+    # df["title"] = [mapping_title[x] for x in df["PRODUCTCODE"]]
     df_product = df_product.astype(str)
-    #df_product["title"] = [mapping_title[x] for x in df_product["PRODUCTCODE"]]
+    # df_product["title"] = [mapping_title[x] for x in df_product["PRODUCTCODE"]]
 
     product_features = "\n".join(
         [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -271,7 +271,7 @@ def main():
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         ## START YEAR FILTER
 
         if start_year != "any":
@@ -286,7 +286,7 @@ def main():
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         ## LANDMARKS FILTER
 
         d_landmarks = {}
@@ -335,7 +335,7 @@ def main():
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         ## PRIVATE OPTION FILTER
 
         if is_private == "same":
@@ -346,7 +346,7 @@ def main():
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         ## CATEGORY FILTER
 
         annotated_data = read_object(
@@ -388,7 +388,7 @@ def main():
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         ## PRICES FILTER
 
         if prices != "any":
@@ -426,42 +426,56 @@ def main():
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         ## REVIEWS FILTER (sorted)
 
         product_table = read_object(fs, "product_tables")
         product_table = pd.DataFrame(product_table)
 
-        product_table["pdt_product_level_TOTALREVIEWCOUNT"] = product_table["pdt_product_level_TOTALREVIEWCOUNT"].apply(lambda x: x if x is not None else [])
+        product_table["pdt_product_level_TOTALREVIEWCOUNT"] = product_table[
+            "pdt_product_level_TOTALREVIEWCOUNT"
+        ].apply(lambda x: x if x is not None else [])
         product_table["pdt_product_level_TOTALREVIEWCOUNT"] = [
-            max([el for el in x if el is not None]) if len([el for el in x if el is not None]) > 0 else 0
+            max([el for el in x if el is not None])
+            if len([el for el in x if el is not None]) > 0
+            else 0
             for x in product_table["pdt_product_level_TOTALREVIEWCOUNT"]
         ]
 
         mapping = dict(
-            zip(product_table[product_field], product_table["pdt_product_level_TOTALREVIEWCOUNT"])
+            zip(
+                product_table[product_field],
+                product_table["pdt_product_level_TOTALREVIEWCOUNT"],
+            )
         )
 
         df["reviews"] = [mapping[el] for el in df[product_field]]
         df = df[df["reviews"] != ""]
         df = df[df["reviews"] != 0]
-        df = df[df["reviews"]>np.percentile(list(df["reviews"]), 0.5)]
+        df = df[df["reviews"] > np.percentile(list(df["reviews"]), 0.5)]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         # Create dict for product title
 
-        product_table["pdt_product_detail_PRODUCTTITLE"] = product_table["pdt_product_detail_PRODUCTTITLE"].apply(lambda x: x if x is not None else [])
+        product_table["pdt_product_detail_PRODUCTTITLE"] = product_table[
+            "pdt_product_detail_PRODUCTTITLE"
+        ].apply(lambda x: x if x is not None else [])
         product_table["pdt_product_detail_PRODUCTTITLE"] = [
-            [el for el in x if el is not None][0] if len([el for el in x if el is not None]) > 0 else ""
+            [el for el in x if el is not None][0]
+            if len([el for el in x if el is not None]) > 0
+            else ""
             for x in product_table["pdt_product_detail_PRODUCTTITLE"]
         ]
 
         mapping_title = dict(
-            zip(product_table[product_field], product_table["pdt_product_detail_PRODUCTTITLE"])
+            zip(
+                product_table[product_field],
+                product_table["pdt_product_detail_PRODUCTTITLE"],
+            )
         )
 
         del df[city_feature]
@@ -487,16 +501,25 @@ def main():
             text_field, "Summarized description"
         )
 
-        product_features = product_features + "\n reviews: " + str(n_reviews) + "\n Category: " + str(output_product_categories) + "\n Title: " + str(title)
+        product_features = (
+            product_features
+            + "\n reviews: "
+            + str(n_reviews)
+            + "\n Category: "
+            + str(output_product_categories)
+            + "\n Title: "
+            + str(title)
+        )
 
         # RAW RESULTS
         df = df[:30]
         df = df.sort_values(by="reviews", ascending=False)
+        print(df)
         print("After top 50:")
         print("3731NORMANDY" in list(df["PRODUCTCODE"]))
         print("2050NP" in list(df["PRODUCTCODE"]))
         print("5045P25" in list(df["PRODUCTCODE"]))
-        
+
         df_no_openai = df
 
         result_features_wo_openai = list()
@@ -517,7 +540,13 @@ def main():
                 "Summarized description",
             )
 
-            result_features = result_features + "\n Category: " + str(no_openai_product_categories) + "\n Title: " + str(title)
+            result_features = (
+                result_features
+                + "\n Category: "
+                + str(no_openai_product_categories)
+                + "\n Title: "
+                + str(title)
+            )
 
             result_features_wo_openai.append(result_features.split("\n"))
 
@@ -555,7 +584,13 @@ def main():
                         "Summarized description",
                     )
 
-                    result_features = result_features + "\n Category: " + str(openai_product_categories) + "\n Title: " + str(title)
+                    result_features = (
+                        result_features
+                        + "\n Category: "
+                        + str(openai_product_categories)
+                        + "\n Title: "
+                        + str(title)
+                    )
 
                     result_features_w_openai.append(result_features.split("\n"))
 
