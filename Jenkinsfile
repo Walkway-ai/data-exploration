@@ -59,7 +59,6 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_DATA ? '--overwrite' : ''
                         sh("python3 src/generate_product_data.py ${overwriteArg}")
-                        sh("python3 src/categorize_tabular_data.py ${overwriteArg}")
                     }
                 }
             }

@@ -92,13 +92,19 @@ def main():
             for text in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
         ]
 
-        # Translate non-English product descriptions to English.
-        df["pdt_product_detail_PRODUCTDESCRIPTION_translated"] = df.apply(
-            lambda row: translate_text(row["pdt_product_detail_PRODUCTDESCRIPTION"])
-            if row["language"] != "en"
-            else row["pdt_product_detail_PRODUCTDESCRIPTION"],
-            axis=1,
-        )
+        print(df.columns)
+
+        for col in list(df.columns):
+
+            if not col.isin(["language", "pdt_product_detail_TOURGRADEDESCRIPTION"]):
+
+                # Translate non-English content to English.
+                df[f"{col}_translated"] = df.apply(
+                    lambda row: translate_text(row[col])
+                    if row["language"] != "en"
+                    else row[col],
+                    axis=1,
+                )
 
         # Filter the DataFrame to include only relevant columns.
         df = df[

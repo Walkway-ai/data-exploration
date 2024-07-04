@@ -25,22 +25,15 @@ class DataFrameProcessor:
 
     def preprocess(self):
         self.read_data()
-        print(self.df)
-        import sys
-        sys.exit()
         self.explode_dataframe()
         self.fill_missing_values()
         self.merge_and_remove_empty_cities()
-        self.fill_fixed_duration()
-        self.remove_outliers()
-        self.create_intervals()
         self.aggregate_all_fields()
         self.create_text_dataframe()
         self.preprocess_tabular_fields()
         self.preprocess_text_fields()
         self.assert_sizes()
         self.astypestr()
-        self.normalize_product_type()
 
     def read_data(self):
         self.df = read_object(self.fs, self.data_path)
@@ -80,39 +73,6 @@ class DataFrameProcessor:
 
         self.df = self.df.dropna(subset=[self.location_field])
 
-    def fill_fixed_duration(self):
-        """Compute mean of 'pdt_product_level_MINFLEXIBLEDURATION' and 'pdt_product_level_MAXFLEXIBLEDURATION' and fill 'pdt_product_level_FIXEDDURATION'."""
-
-        def fill_duration(row):
-            if np.isnan(row["pdt_product_level_FIXEDDURATION"]):
-                return (
-                    row["pdt_product_level_MINFLEXIBLEDURATION"]
-                    + row["pdt_product_level_MAXFLEXIBLEDURATION"]
-                ) / 2
-            else:
-                return row["pdt_product_level_FIXEDDURATION"]
-
-        self.df["pdt_product_level_FIXEDDURATION"] = self.df.apply(
-            fill_duration, axis=1
-        )
-
-        del self.df["pdt_product_level_MINFLEXIBLEDURATION"]
-        del self.df["pdt_product_level_MAXFLEXIBLEDURATION"]
-
-    def create_intervals(self):
-        """Create intervals of bins for float and int columns."""
-
-        numerical_cols = [
-            "pdt_product_level_RETAILPRICEFROMUSD",
-            "pdt_product_level_FIXEDDURATION",
-            "pdt_product_level_STOPSCOUNT",
-            "pdt_product_level_STOPSTOTALDURATION",
-            "pdt_product_level_TOTALREVIEWCOUNT",
-            "pdt_product_level_TOTALAVGRATING",
-        ]
-        for numerical_col in tqdm(numerical_cols):
-            self.df = auto_bin_intervals(self.df, numerical_col)
-
     def aggregate_all_fields(self):
         """Aggregate tabular fields in the tabular DataFrame."""
 
@@ -124,13 +84,15 @@ class DataFrameProcessor:
         """Create a separate DataFrame with descriptive content."""
 
         self.df_text = self.df.copy()
-        descriptive_fields = [
+        self.descriptive_fields = [
             "pdt_inclexcl_ENG_CONTENT",
             "pdt_product_detail_PRODUCTDESCRIPTION",
+            "pdt_product_detail_PRODUCTTITLE",
+            "pdt_product_detail_TOURGRADEDESCRIPTION"
         ]
-        self.df_text = self.df_text[[self.key_field] + descriptive_fields]
+        self.df_text = self.df_text[[self.key_field] + self.descriptive_fields]
 
-        for del_col in descriptive_fields:
+        for del_col in self.descriptive_fields:
             del self.df[del_col]
 
     def preprocess_tabular_fields(self):
@@ -162,19 +124,18 @@ class DataFrameProcessor:
                     unique_list.append(item)
                     seen.add(item)
             return unique_list
+        
+        for col in self.descriptive_fields:
 
-        self.df_text["pdt_inclexcl_ENG_CONTENT"] = [
-            "; ".join(unique_preserve_order(el))
-            if len(unique_preserve_order(el)) > 1
-            else unique_preserve_order(el)[0]
-            for el in self.df_text["pdt_inclexcl_ENG_CONTENT"]
-        ]
-        self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"] = [
-            ". ".join(unique_preserve_order(el))
-            if len(unique_preserve_order(el)) > 1
-            else unique_preserve_order(el)[0]
-            for el in self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"]
-        ]
+            self.df_text[col] = [
+                unique_preserve_order(el)
+                for el in self.df_text[col]
+            ]
+
+            if "TOURGRADE" not in col:
+
+                assert [len(el)==1 for el in self.df_text[col]]
+                self.df_text[col] = [el[0] for el in self.df_text[col]]
 
     def assert_sizes(self):
 
@@ -185,9 +146,3 @@ class DataFrameProcessor:
         self.df = self.df.replace("nan", "")
         self.df_text = self.df_text.astype(str)
         self.df_text = self.df_text.replace("nan", "")
-
-    def normalize_product_type(self):
-        self.df["pdt_product_level_VIPRODUCTTYPE"] = [
-            "; ".join(list(sorted(el.split("; "))))
-            for el in self.df["pdt_product_level_VIPRODUCTTYPE"]
-        ]
