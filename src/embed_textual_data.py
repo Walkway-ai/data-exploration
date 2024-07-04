@@ -20,7 +20,7 @@ db, fs, client = connect_to_mongodb(config_infra)
 gc.collect()
 
 
-def get_embeddings(df, text_field, embedding_model, model_name):
+def get_embeddings(texts, field_name, embedding_model, model_name):
     """
     Generate embeddings for a specified text field in the DataFrame.
 
@@ -42,13 +42,13 @@ def get_embeddings(df, text_field, embedding_model, model_name):
     embeddings = []
 
     # Generate embeddings for each text entry in the specified column.
-    for text in tqdm(df[text_field].tolist(), desc=f"Embedding {text_field}"):
+    for text in tqdm(texts):
         embedding = model.encode([text])
         embeddings.append(embedding[0])
 
     # Convert embeddings to a torch tensor and save to file.
     embeddings = torch.tensor(embeddings)
-    object_name = f"embeddings_{text_field}_{model_name}"
+    object_name = f"embeddings_{field_name}_{model_name}"
     remove_object(fs=fs, object_name=object_name)
     save_object(fs=fs, object=embeddings, object_name=object_name)
 
@@ -76,42 +76,70 @@ def main():
     embedding_model = args.embedding_model
     model_name = embedding_model.split("/")[-1]
 
-    field_inclexcl = "pdt_inclexcl_ENG_CONTENT"
-    embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
-    embeddings_inclexcl_existing_file = fs.find_one(
-        {"filename": embeddings_inclexcl_name}
-    )
-
     field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
     embeddings_description_name = f"embeddings_{field_description}_{model_name}"
-    embeddings_description_existing_file = fs.find_one(
+    embeddings_description_file = fs.find_one(
         {"filename": embeddings_description_name}
     )
 
+    field_inclexcl = "pdt_inclexcl_ENG_CONTENT_translated"
+    embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
+    embeddings_inclexcl_file = fs.find_one(
+        {"filename": embeddings_inclexcl_name}
+    )
+
+    field_producttitle = "pdt_product_detail_PRODUCTTITLE_translated"
+    embeddings_producttitle_name = f"embeddings_{field_producttitle}_{model_name}"
+    embeddings_producttitle_file = fs.find_one(
+        {"filename": embeddings_producttitle_name}
+    )
+
+    field_tourgradedescription = "pdt_product_detail_TOURGRADEDESCRIPTION"
+    embeddings_tourgradedescription_name = f"embeddings_{field_tourgradedescription}_{model_name}"
+    embeddings_tourgradedescription_file = fs.find_one(
+        {"filename": embeddings_tourgradedescription_name}
+    )
+
     if (
-        not embeddings_inclexcl_existing_file
-        or not embeddings_description_existing_file
+        not embeddings_description_file
+        or not embeddings_inclexcl_file
+        or not embeddings_producttitle_file
+        or not embeddings_tourgradedescription_file
         or args.overwrite
     ):
         # Load the summarized product textual data from a pickle file.
         df = read_object(fs, "product_textual_lang_summarized")
         df = pd.DataFrame(df)
 
-        # Generate embeddings for the specified text fields if not already present.
-        if not embeddings_inclexcl_existing_file:
-            get_embeddings(
-                df=df,
-                text_field=field_inclexcl,
-                embedding_model=embedding_model,
-                model_name=model_name,
-            )
-        if not embeddings_description_existing_file:
-            get_embeddings(
-                df=df,
-                text_field=field_description,
-                embedding_model=embedding_model,
-                model_name=model_name,
-            )
+        df_cont = read_object(fs, "product_textual_lang")
+        df_cont = pd.DataFrame(df_cont)
+
+        get_embeddings(
+            texts=list(df[field_description]),
+            field_name=field_description,
+            embedding_model=embedding_model,
+            model_name=model_name,
+        )
+
+        get_embeddings(
+            texts=list(df_cont[field_inclexcl]),
+            field_name=field_inclexcl,
+            embedding_model=embedding_model,
+            model_name=model_name,
+        )
+
+        get_embeddings(
+            texts=list(df_cont[field_producttitle]),
+            field_name=field_producttitle,
+            embedding_model=embedding_model,
+            model_name=model_name,
+        )
+
+        # get_embeddings(
+        #     texts=list(df_cont[field_tourgradedescription]),
+        #     embedding_model=embedding_model,
+        #     model_name=model_name,
+        # )
     else:
         print("Skipping embeddings.")
 

@@ -92,28 +92,19 @@ def main():
             for text in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
         ]
 
-        print(df.columns)
+        for col in tqdm(["pdt_inclexcl_ENG_CONTENT", "pdt_product_detail_PRODUCTDESCRIPTION", "pdt_product_detail_PRODUCTTITLE"]):
 
-        for col in list(df.columns):
+            # Translate non-English content to English.
+            df[f"{col}_translated"] = df.apply(
+                lambda row: translate_text(row[col])
+                if row["language"] != "en"
+                else row[col],
+                axis=1,
+            )
 
-            if not col.isin(["language", "pdt_product_detail_TOURGRADEDESCRIPTION"]):
+            del df[col]
 
-                # Translate non-English content to English.
-                df[f"{col}_translated"] = df.apply(
-                    lambda row: translate_text(row[col])
-                    if row["language"] != "en"
-                    else row[col],
-                    axis=1,
-                )
-
-        # Filter the DataFrame to include only relevant columns.
-        df = df[
-            [
-                "PRODUCTCODE",
-                "pdt_inclexcl_ENG_CONTENT",
-                "pdt_product_detail_PRODUCTDESCRIPTION_translated",
-            ]
-        ]
+        del df["language"]
 
         # Save the processed DataFrame to MongoDB.
         remove_object(fs=fs, object_name=object_name)

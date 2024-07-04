@@ -116,26 +116,10 @@ class DataFrameProcessor:
     def preprocess_text_fields(self):
         """Preprocesses text fields in the text DataFrame."""
 
-        def unique_preserve_order(lst):
-            seen = set()
-            unique_list = []
-            for item in lst:
-                if item not in seen:
-                    unique_list.append(item)
-                    seen.add(item)
-            return unique_list
-        
-        for col in self.descriptive_fields:
-
-            self.df_text[col] = [
-                unique_preserve_order(el)
-                for el in self.df_text[col]
-            ]
-
-            if "TOURGRADE" not in col:
-
-                assert [len(el)==1 for el in self.df_text[col]]
-                self.df_text[col] = [el[0] for el in self.df_text[col]]
+        self.df_text["pdt_inclexcl_ENG_CONTENT"] = [". ".join(list(set([str(el) for el in x]))) for x in self.df_text["pdt_inclexcl_ENG_CONTENT"]]
+        self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"] = [". ".join(list(set([str(el) for el in x]))) for x in self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"]]
+        self.df_text["pdt_product_detail_PRODUCTTITLE"] = [". ".join(list(set([str(el) for el in x]))) for x in self.df_text["pdt_product_detail_PRODUCTTITLE"]]
+        self.df_text["pdt_product_detail_TOURGRADEDESCRIPTION"] = [list(set([str(el) for el in x])) for x in self.df_text["pdt_product_detail_TOURGRADEDESCRIPTION"]]
 
     def assert_sizes(self):
 

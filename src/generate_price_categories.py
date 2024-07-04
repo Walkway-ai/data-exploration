@@ -59,39 +59,12 @@ def main():
         df["adult_retail_price"] = df["adult_retail_price"].replace("", np.nan)
         df["adult_retail_price"] = df["adult_retail_price"].astype(float)
 
-        product_stats = df.groupby("ProductCode")["adult_retail_price"].agg(
-            ["mean", "std"]
-        )
-
-        # Function to categorize values
-        def categorize_value(row):
-            product_id = row["ProductCode"]
-            value = row["adult_retail_price"]
-
-            mean = product_stats.loc[product_id, "mean"]
-            std = product_stats.loc[product_id, "std"]
-
-            # Define threshold, e.g., values above mean + 2 * std are out-of-normal
-            threshold = mean + 2 * std
-
-            if value > threshold:
-                return "premium"
-            else:
-                return "standard"
-
-        # Apply categorization function to each row
-        df["category"] = df.apply(categorize_value, axis=1)
-
-        df.columns = [
-            "PRODUCTCODE",
-            "TOURGRADECODE",
-            "SEASONTO",
-            "ADULTRETAILPRICE",
-            "CATEGORY",
-        ]
+        product_stats = df.groupby(["ProductCode", "TourGradeCode"])["adult_retail_price"].agg(
+            ["mean"]
+        ).reset_index()
 
         remove_object(fs=fs, object_name=object_name)
-        save_object(fs=fs, object=df, object_name=object_name)
+        save_object(fs=fs, object=product_stats, object_name=object_name)
 
 
 if __name__ == "__main__":
