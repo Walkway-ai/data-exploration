@@ -236,9 +236,6 @@ def main():
             df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
 
         print(f"Number of candidates after the city filter: {df.shape[0]}")
-        print("3731NORMANDY" in list(df["PRODUCTCODE"]))
-        print("2050NP" in list(df["PRODUCTCODE"]))
-        print("5045P25" in list(df["PRODUCTCODE"]))
 
         ## SUPPLIER CODE FILTER
 

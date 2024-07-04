@@ -15,33 +15,19 @@ bigquery-to-retrieve:
         - "VIDestinationCity"
         - "product_description"
         - "product_title"
+        - "tour_grade_description"
+        - "tour_grade_code"
     pdt_product_level:
       dataset_id: "v_extract1"
       fields:
-        - "VIDestinationCity"
         - "ProductCode"
-        - "VICategory"
-        - "VIProductType"
-        - "RetailPriceFromUSD"
+        - "VIDestinationCity"
         - "IsPrivateTour"
-        - "FixedDuration"
-        - "MinFlexibleDuration"
-        - "MaxFlexibleDuration"
-        - "StopsCount"
-        - "StopsTotalDuration"
         - "TotalReviewCount"
         - "TotalAvgRating"
-        - "PricingUnitType"
-        - "RetailPriceCurrency"
         - "SupplierCode"
     bookings:
       dataset_id: "v_extract1"
       fields:
         - "ProductCode"
         - "OrderDate"
-    pdt_tourgrades:
-      dataset_id: "v_extract1"
-      fields:
-        - "product_code"
-        - "tour_grade_code"
-
