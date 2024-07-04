@@ -3,8 +3,9 @@
 
 import argparse
 import gc
-
+import numpy as np
 import pandas as pd
+import ast
 import torch
 import yaml
 from sentence_transformers import SentenceTransformer
@@ -19,14 +20,32 @@ db, fs, client = connect_to_mongodb(config_infra)
 # Run garbage collection to free up memory.
 gc.collect()
 
+def calculate_embeddings(embeddings, model, text):
 
-def get_embeddings(texts, field_name, embedding_model, model_name):
+    try:
+
+        embedding = model.encode([text], show_progress_bar=False)
+
+    except Exception as e:
+
+        print(text, e)
+
+        text = ""
+        embedding = model.encode([text], show_progress_bar=False)
+        
+    embeddings.append(embedding[0])
+
+    return embeddings
+
+
+def get_embeddings(texts, field_name, embedding_model, model_name, average=False):
     """
     Generate embeddings for a specified text field in the DataFrame.
 
     Parameters:
     df (pd.DataFrame): The DataFrame containing the text data.
     text_field (str): The column name of the text data to embed.
+    average (bool): If True, means of embeddings are taken for multiple values in the same row.
 
     Saves:
     Torch tensor file containing the embeddings for the specified text field.
@@ -42,9 +61,29 @@ def get_embeddings(texts, field_name, embedding_model, model_name):
     embeddings = []
 
     # Generate embeddings for each text entry in the specified column.
-    for text in tqdm(texts):
-        embedding = model.encode([text])
-        embeddings.append(embedding[0])
+    if average:
+
+        for text in tqdm(texts):
+
+            cleaned_text = ast.literal_eval(text)
+            cleaned_text = list(set(cleaned_text))
+
+            intermediary_r = list()
+
+            for el in cleaned_text:
+
+                intermediary_r = calculate_embeddings(intermediary_r, model, el)
+
+            avg_intermediary = np.mean(np.array(intermediary_r), axis=0)
+            embeddings.append(avg_intermediary)
+
+    else:
+
+        texts = ast.literal_eval(texts)
+
+        for text in tqdm(texts):
+
+            embeddings = calculate_embeddings(embeddings, model, text)
 
     # Convert embeddings to a torch tensor and save to file.
     embeddings = torch.tensor(embeddings)
@@ -76,11 +115,11 @@ def main():
     embedding_model = args.embedding_model
     model_name = embedding_model.split("/")[-1]
 
-    field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
-    embeddings_description_name = f"embeddings_{field_description}_{model_name}"
-    embeddings_description_file = fs.find_one(
-        {"filename": embeddings_description_name}
-    )
+    # field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
+    # embeddings_description_name = f"embeddings_{field_description}_{model_name}"
+    # embeddings_description_file = fs.find_one(
+    #     {"filename": embeddings_description_name}
+    # )
 
     field_inclexcl = "pdt_inclexcl_ENG_CONTENT_translated"
     embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
@@ -101,8 +140,9 @@ def main():
     )
 
     if (
-        not embeddings_description_file
-        or not embeddings_inclexcl_file
+        # not embeddings_description_file
+        # or not embeddings_inclexcl_file
+        not embeddings_inclexcl_file
         or not embeddings_producttitle_file
         or not embeddings_tourgradedescription_file
         or args.overwrite
@@ -114,12 +154,12 @@ def main():
         df_cont = read_object(fs, "product_textual_lang")
         df_cont = pd.DataFrame(df_cont)
 
-        get_embeddings(
-            texts=list(df[field_description]),
-            field_name=field_description,
-            embedding_model=embedding_model,
-            model_name=model_name,
-        )
+        # get_embeddings(
+        #     texts=list(df[field_description]),
+        #     field_name=field_description,
+        #     embedding_model=embedding_model,
+        #     model_name=model_name,
+        # )
 
         get_embeddings(
             texts=list(df_cont[field_inclexcl]),
@@ -135,11 +175,13 @@ def main():
             model_name=model_name,
         )
 
-        # get_embeddings(
-        #     texts=list(df_cont[field_tourgradedescription]),
-        #     embedding_model=embedding_model,
-        #     model_name=model_name,
-        # )
+        get_embeddings(
+            texts=list(df_cont[field_tourgradedescription]),
+            field_name=field_tourgradedescription,
+            embedding_model=embedding_model,
+            model_name=model_name,
+            average=True
+        )
     else:
         print("Skipping embeddings.")
 

@@ -42,55 +42,36 @@ def main():
     embedding_model = args.embedding_model
     model_name = embedding_model.split("/")[-1]
 
-    object_name = f"final_embeddings_{model_name}_concatenated_w_tabular"
+    object_name = f"final_embeddings_{model_name}"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
 
-        # Load the categorized tabular data from a pickle file.
-        df_tabular = read_object(fs, "product_tabular_categorized")
-        df_tabular = pd.DataFrame(df_tabular)
-
-        # Load the embeddings for 'pdt_inclexcl_ENG_CONTENT'.
         embeddings1 = read_object(
-            fs, f"embeddings_pdt_inclexcl_ENG_CONTENT_{model_name}"
+            fs, f"embeddings_pdt_inclexcl_ENG_CONTENT_translated_{model_name}"
         )
 
-        # Load the embeddings for 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED'.
         embeddings2 = read_object(
             fs,
-            f"embeddings_pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED_{model_name}",
+            f"embeddings_pdt_product_detail_PRODUCTTITLE_translated_{model_name}",
         )
 
-        # Load the landmark one hot encodings
-        landmarks = read_object(
+        embeddings3 = read_object(
             fs,
-            "one_hot_encoding_landmarks",
+            f"embeddings_pdt_product_detail_TOURGRADEDESCRIPTION_{model_name}",
         )
 
         # Ensure that the embeddings have the same number of rows as the tabular data.
-        if df_tabular.shape[0] != len(embeddings1) or df_tabular.shape[0] != len(
-            embeddings2 or df_tabular.shape[0] != len(landmarks)
-        ):
+        if not len(embeddings1) == len(embeddings2)== len(embeddings3):
             raise ValueError(
-                "Mismatch in the number of rows between tabular data, embeddings and one hot encodings."
+                "Mismatch in the number of rows between embeddings."
             )
-
-        # Concatenate the tabular data with the two sets of embeddings.
-        # final_embeddings = np.concatenate(
-        #     (
-        #         df_tabular.values,
-        #         np.array(embeddings1),
-        #         np.array(embeddings2),
-        #         np.array(landmarks),
-        #     ),
-        #     axis=1,
-        # )
 
         final_embeddings = np.concatenate(
             (
                 np.array(embeddings1),
                 np.array(embeddings2),
+                np.array(embeddings3),
             ),
             axis=1,
         )

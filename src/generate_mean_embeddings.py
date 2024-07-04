@@ -42,7 +42,7 @@ def main():
     embedding_models = args.embedding_models
     embedding_models = embedding_models.split(",")
 
-    object_name = f"final_embeddings_mean_concatenated_w_tabular"
+    object_name = f"final_embeddings_mean"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
@@ -56,7 +56,7 @@ def main():
             model_name = em.split("/")[-1]
 
             em_ = read_object(
-                fs, f"final_embeddings_{model_name}_concatenated_w_tabular"
+                fs, f"final_embeddings_{model_name}"
             )
 
             em_ = np.array(em_)

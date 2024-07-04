@@ -124,7 +124,7 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_EMBED_TEXTUAL_DATA ? '--overwrite' : ''
                         sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'thenlper/gte-large'")
-                        sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'jina-embeddings-v2-base-en'")
+                        sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en'")
                     }
                 }
             }
@@ -135,7 +135,7 @@ spec:
                     script {
                         def overwriteArg = params.OVERWRITE_GENERATE_MODEL_EMBEDDINGS ? '--overwrite' : ''
                         sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'thenlper/gte-large'")
-                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jina-embeddings-v2-base-en'")
+                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en'")
                         sh("python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en'")
                     }
                 }
