@@ -249,9 +249,9 @@ def main():
             
             if product_avg_rating:
 
-                tolerance = 0.3 * product_avg_rating
+                tolerance = 0.1 * product_avg_rating
                 print(tolerance)
-                avg_bool = [abs(product_avg_rating - x) <= tolerance for x in list(df[avg_rating_feature])]
+                avg_bool = [abs(product_avg_rating - float(x)) <= tolerance for x in list(df[avg_rating_feature])]
                 df = df[avg_bool]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
