@@ -25,7 +25,7 @@ def main():
 
     args = parser.parse_args()
 
-    object_name = "price_categories_per_product"
+    object_name = "price_product_tourgrade"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:

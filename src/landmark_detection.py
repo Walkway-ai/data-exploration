@@ -92,7 +92,7 @@ def main():
     ):
 
         df = read_object(fs, "product_tabular")
-        df_text_sum = read_object(fs, "product_textual_lang_summarized")
+        df_text_sum = read_object(fs, "product_textual_english")
 
         df = pd.DataFrame(df)
         df_text_sum = pd.DataFrame(df_text_sum)
@@ -125,7 +125,7 @@ def main():
         for city, text_summarized in tqdm(
             zip(
                 list(df["pdt_product_detail_VIDESTINATIONCITY"]),
-                list(df_text_sum["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]),
+                list(df_text_sum["pdt_product_detail_PRODUCTDESCRIPTION_translated"]),
             ),
             total=len(df),
         ):

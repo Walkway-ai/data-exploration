@@ -1,6 +1,0 @@
-auth:
-  rootUser: walkway
-  rootPassword: walkway
-persistence:
-  enabled: true
-  size: 10Gi

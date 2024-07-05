@@ -20,16 +20,6 @@ spec:
         }
     }
     parameters {
-        booleanParam(name: 'OVERWRITE_RETRIEVE_BIGQUERY_DATA', defaultValue: false, description: 'Overwrite data for retrieve-bigquery-data stage')
-        booleanParam(name: 'OVERWRITE_GENERATE_PRODUCT_DATA', defaultValue: false, description: 'Overwrite data for generate-product-data stage')
-        booleanParam(name: 'OVERWRITE_LANGUAGE_DETECTION', defaultValue: false, description: 'Overwrite data for language-detection stage')
-        booleanParam(name: 'OVERWRITE_TEXT_SUMMARIZATION', defaultValue: false, description: 'Overwrite data for text-summarization stage')
-        booleanParam(name: 'OVERWRITE_LANDMARK_DETECTION', defaultValue: false, description: 'Overwrite data for landmark-detection stage')
-        booleanParam(name: 'OVERWRITE_PRICE_CATEGORIES', defaultValue: false, description: 'Overwrite data for landmark-detection stage')
-        booleanParam(name: 'OVERWRITE_SUBCATEGORIES_ANNOTATION', defaultValue: false, description: 'Overwrite annotation of subcategories with OpenAI')
-        booleanParam(name: 'OVERWRITE_EMBED_TEXTUAL_DATA', defaultValue: false, description: 'Overwrite data for embed-textual-data stage')
-        booleanParam(name: 'OVERWRITE_GENERATE_MODEL_EMBEDDINGS', defaultValue: false, description: 'Overwrite data for generate-model-embeddings stage')
-        booleanParam(name: 'OVERWRITE_GENERATE_PRODUCT_SIMILARITY', defaultValue: false, description: 'Overwrite data for generate-product-similarity stage')
         choice(name: 'embedding_fields', choices: ['title_inclexcl_tgdescription', 'description_title', 'description_inclexcl'], description: 'Fields for the embedding model.')
     }
     stages {
@@ -37,7 +27,6 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_RETRIEVE_BIGQUERY_DATA ? '--overwrite' : ''
                         withCredentials([file(credentialsId: 'gcp_service_account_json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                             sh("apt-get update && apt-get install -y git curl")
                             sh("curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz")
@@ -48,7 +37,7 @@ spec:
                             sh("apt-get clean && rm -rf /var/lib/apt/lists/*")
                             sh("export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS")
                             sh("./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS")
-                            sh("python3 src/retrieve_bigquery_data.py ${overwriteArg}")
+                            sh("python3 src/retrieve_bigquery_data.py --overwrite")
                         }
                     }
                 }
@@ -58,8 +47,7 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_DATA ? '--overwrite' : ''
-                        sh("python3 src/generate_product_data.py ${overwriteArg}")
+                        sh("python3 src/generate_product_data.py --overwrite")
                     }
                 }
             }
@@ -68,8 +56,7 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_LANGUAGE_DETECTION ? '--overwrite' : ''
-                        sh("python3 src/language_detection.py ${overwriteArg}")
+                        sh("python3 src/language_detection.py --overwrite")
                     }
                 }
             }
@@ -78,9 +65,8 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_TEXT_SUMMARIZATION ? '--overwrite' : ''
                         sh("mkdir tmp")
-                        sh("python3 src/text_summarization.py ${overwriteArg} --summarization_model 'facebook/bart-large-cnn'")
+                        sh("python3 src/text_summarization.py --overwrite --summarization_model 'facebook/bart-large-cnn'")
                     }
                 }
             }
@@ -90,7 +76,7 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_LANDMARK_DETECTION ? '--overwrite' : ''
-                        sh("python3 src/landmark_detection.py ${overwriteArg}")
+                        sh("python3 src/landmark_detection.py --overwrite")
                     }
                 }
             }
@@ -99,8 +85,7 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_PRICE_CATEGORIES ? '--overwrite' : ''
-                        sh("python3 src/generate_price_table.py ${overwriteArg}")
+                        sh("python3 src/generate_price_table.py --overwrite")
                     }
                 }
             }
@@ -110,7 +95,7 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_PRICE_CATEGORIES ? '--overwrite' : ''
-                        sh("python3 src/generate_reviews_table.py ${overwriteArg}")
+                        sh("python3 src/generate_reviews_table.py --overwrite")
                     }
                 }
             }

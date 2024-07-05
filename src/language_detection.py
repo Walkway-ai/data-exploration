@@ -74,7 +74,7 @@ def main():
 
     args = parser.parse_args()
 
-    object_name = "product_textual_lang"
+    object_name = "product_textual_english"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:

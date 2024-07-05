@@ -35,7 +35,7 @@ def main():
     model_name = args.model_name
     apikey = args.apikey
 
-    object_name = f"product_textual_lang_summarized_subcategories"
+    object_name = f"product_textual_english_summarized_categories"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
@@ -47,23 +47,21 @@ def main():
         df_categories = taxonomy[
             [
                 "Category",
-                "Description & Keywords",
-                "Sub-category",
-                "Description & Keywords.1",
+                "Description & Keywords"
             ]
         ].drop_duplicates()
 
-        sub_categories = [el.split(": ")[1] for el in df_categories["Sub-category"]]
-        subcategories_descriptions = [
+        categories = [el.split(": ")[1] for el in df_categories["Category"]]
+        categories_descriptions = [
             el.split("\n")[0].replace("- Description: ", "")
-            for el in df_categories["Description & Keywords.1"]
+            for el in df_categories["Description & Keywords"]
         ]
 
-        d = dict(zip(sub_categories, subcategories_descriptions))
+        d = dict(zip(categories, categories_descriptions))
 
         # Import summarized texts
 
-        data = read_object(fs, "product_textual_lang_summarized")
+        data = read_object(fs, "product_textual_english_summarized")
         data = pd.DataFrame(data)
         data.fillna("", inplace=True)
 
@@ -80,11 +78,11 @@ def main():
         ]
 
         initial_prompt = (
-            "You are a multi-label classifier specialized in analyzing product descriptions from online booking platforms, such as tours and activities. Your task is to classify each product description into a maximum of three relevant labels, listed in descending order of relevance. "
+            "You are a multi-label classifier specialized in analyzing product descriptions from online booking platforms, such as tours and activities. Your task is to classify each product description into a maximum of five relevant labels, listed in descending order of relevance. "
             "In the next prompts, I will send you a list of product descriptions, and for each product description, provide a Python-formatted list of the corresponding labels. If a product description has no text or have no corresponding labels, return an empty list for that element. "
             "Your response should only include a Python dictionary where the keys are the product codes, and their values are the labels. Do not include any additional text to your output."
             "Example input: ['100213P12: Saint-Malo - Bayeux Transfer, our professional english speaking drivers guarantee a punctual service available 7 days a week. Let you drive and travel in a luxurious and comfortable minivan Mercedes.', '100213P14: Mont Saint-Michel is located about 4 hours from Paris. The price is all include for a transfer up to 7 people. The service is available 7 days a week.']"
-            "Output: {'100213P12': ['Label 1', 'Label 2', 'Label 3'], '100213P14': ['Label 1', 'Label 2', 'Label 3']}"
+            "Output: {'100213P12': ['Label 1', 'Label 2'], '100213P14': ['Label 1', 'Label 2', 'Label 3', 'Label 4', 'Label 5']}"
             f"Here is a dictionary of the labels and their descriptions: {d}"
             "Are you ready to start?"
         )
@@ -113,7 +111,7 @@ def main():
             r = result.choices[0].message.content
 
             with open(
-                f"{tmp_dir}/batch_{batch_idx}_subcategories_gpt4o.pkl", "wb"
+                f"{tmp_dir}/batch_{batch_idx}_categories_gpt4o.pkl", "wb"
             ) as f:
 
                 pickle.dump(r, f)
@@ -148,7 +146,7 @@ def main():
 
                 l.append([])
 
-        data["sub_categories_gpt4o"] = l
+        data["categories_gpt4o"] = l
 
         remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=data, object_name=object_name)

@@ -48,18 +48,18 @@ def main():
 
     summarization_model = args.summarization_model
 
-    object_name = "product_textual_lang_summarized"
+    object_name = "product_textual_english_summarized"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
 
         # Load the product textual data from a pickle file.
-        df = read_object(fs, "product_textual_lang")
+        df = read_object(fs, "product_textual_english")
         df = pd.DataFrame(df)
         df.fillna("", inplace=True)
 
         # Define the intermediate file path.
-        intermediate_file = "tmp/product_textual_lang_summarized_intermediate.pickle"
+        intermediate_file = "tmp/product_textual_english_summarized_intermediate.pickle"
 
         # Check if an intermediate file exists to resume from.
         if os.path.exists(intermediate_file):
@@ -112,10 +112,6 @@ def main():
         remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=df, object_name=object_name)
         print("Saved final results")
-
-        # Remove the intermediate file if it exists.
-        if os.path.exists(intermediate_file):
-            os.remove(intermediate_file)
 
     else:
         print("Skipping summarization.")
