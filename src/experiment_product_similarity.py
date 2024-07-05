@@ -134,9 +134,6 @@ def main():
         "-landmarks", type=str, required=True, help="Landmarks of the product."
     )
     parser.add_argument(
-        "-prices", type=str, required=True, help="Price ranges of the product."
-    )
-    parser.add_argument(
         "-is_private",
         type=str,
         required=True,
@@ -147,6 +144,9 @@ def main():
         type=str,
         required=True,
         help="Categories of Walkway AI's taxonomy.",
+    )
+    parser.add_argument(
+        "-prices", type=str, required=True, help="Price ranges of the product."
     )
     parser.add_argument(
         "-embedding_fields", type=str, required=True, help="Embedding fields."
