@@ -410,13 +410,10 @@ def main():
             + str(output_product_categories)
         )
 
-        # RAW RESULTS
+        # Create raw results summary
+
         df = df[:30]
         df = df.sort_values(by="TotalReviews", ascending=False)
-
-        print(df)
-        import sys
-        sys.exit()
 
         df_no_openai = df
 
@@ -428,7 +425,6 @@ def main():
 
             product_id = list(df_now[product_field])[0]
             no_openai_product_categories = list(set(annotated_data[product_id]))
-            title = str(mapping_title[product_id])
 
             result_features = "\n".join(
                 [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
@@ -442,11 +438,15 @@ def main():
                 result_features
                 + "\n Category: "
                 + str(no_openai_product_categories)
-                + "\n Title: "
-                + str(title)
             )
 
             result_features_wo_openai.append(result_features.split("\n"))
+
+        print(product_features)
+        print(result_features_wo_openai)
+
+        import sys
+        sys.exit()
 
         result_features_w_openai = list()
 
