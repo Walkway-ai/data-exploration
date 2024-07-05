@@ -54,10 +54,7 @@ def append_to_google_sheets(credentials_file, results_out):
 def query_gpt(apikey, text_field, df, df_product):
 
     df = df.astype(str)
-    del df["reviews"]
-    # df["title"] = [mapping_title[x] for x in df[product_field]]
     df_product = df_product.astype(str)
-    # df_product["title"] = [mapping_title[x] for x in df_product[product_field]]
 
     product_features = "\n".join(
         [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -77,6 +74,7 @@ def query_gpt(apikey, text_field, df, df_product):
 
     prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of {text_field}, and similar products include the same activities (e.g. a tour in the same place, or the same activity). \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
 
+    print(prompt)
     client = OpenAI(api_key=apikey)
 
     result = client.chat.completions.create(
@@ -442,12 +440,6 @@ def main():
 
             result_features_wo_openai.append(result_features.split("\n"))
 
-        print(product_features)
-        print(result_features_wo_openai)
-
-        import sys
-        sys.exit()
-
         result_features_w_openai = list()
 
         try:
@@ -456,6 +448,9 @@ def main():
             result = query_gpt(args.apikey, text_field, df_openai, df_product)
             result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
             result = ast.literal_eval(result)
+
+            import sys
+            sys.exit()
 
             if len(result) > 0:
 
