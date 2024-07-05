@@ -56,6 +56,8 @@ def query_gpt(apikey, text_field, df, df_product):
     df = df.astype(str)
     df_product = df_product.astype(str)
 
+    print(df_product)
+
     product_features = "\n".join(
         [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
     )
@@ -401,7 +403,6 @@ def main():
         product_features = product_features.replace(
             text_field, "Summarized description"
         )
-
         product_features = (
             product_features
             + "\nCategory: "
