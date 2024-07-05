@@ -115,11 +115,11 @@ def main():
     embedding_model = args.embedding_model
     model_name = embedding_model.split("/")[-1]
 
-    # field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
-    # embeddings_description_name = f"embeddings_{field_description}_{model_name}"
-    # embeddings_description_file = fs.find_one(
-    #     {"filename": embeddings_description_name}
-    # )
+    field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
+    embeddings_description_name = f"embeddings_{field_description}_{model_name}"
+    embeddings_description_file = fs.find_one(
+        {"filename": embeddings_description_name}
+    )
 
     field_inclexcl = "pdt_inclexcl_ENG_CONTENT_translated"
     embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
@@ -140,9 +140,8 @@ def main():
     )
 
     if (
-        # not embeddings_description_file
-        # or not embeddings_inclexcl_file
-        not embeddings_inclexcl_file
+        not embeddings_description_file
+        or not embeddings_inclexcl_file
         or not embeddings_producttitle_file
         or not embeddings_tourgradedescription_file
         or args.overwrite
@@ -154,12 +153,12 @@ def main():
         df_cont = read_object(fs, "product_textual_lang")
         df_cont = pd.DataFrame(df_cont)
 
-        # get_embeddings(
-        #     texts=list(df[field_description]),
-        #     field_name=field_description,
-        #     embedding_model=embedding_model,
-        #     model_name=model_name,
-        # )
+        get_embeddings(
+            texts=list(df[field_description]),
+            field_name=field_description,
+            embedding_model=embedding_model,
+            model_name=model_name,
+        )
 
         get_embeddings(
             texts=list(df_cont[field_inclexcl]),

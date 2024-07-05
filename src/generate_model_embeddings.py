@@ -35,43 +35,41 @@ def main():
     parser.add_argument(
         "--embedding_model", type=str, required=True, help="The embedding model."
     )
+    parser.add_argument(
+        "--embedding_fields", type=str, required=True, help="Embedding fields."
+    )
 
     args = parser.parse_args()
 
     embedding_model = args.embedding_model
     model_name = embedding_model.split("/")[-1]
 
-    object_name = f"final_embeddings_{model_name}"
+    embedding_fields = args.embedding_fields
+
+    object_name = f"final_embeddings_{model_name}_{embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
 
-        embeddings1 = read_object(
-            fs, f"embeddings_pdt_inclexcl_ENG_CONTENT_translated_{model_name}"
-        )
+        embeddings = list()
 
-        embeddings2 = read_object(
-            fs,
-            f"embeddings_pdt_product_detail_PRODUCTTITLE_translated_{model_name}",
-        )
+        if embedding_fields in ["description_title", "description_inclexcl"]:
 
-        embeddings3 = read_object(
-            fs,
-            f"embeddings_pdt_product_detail_TOURGRADEDESCRIPTION_{model_name}",
-        )
+            embeddings.append(np.array(read_object(fs, f"embeddings_pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED_{model_name}")))
 
-        # Ensure that the embeddings have the same number of rows as the tabular data.
-        if not len(embeddings1) == len(embeddings2) == len(embeddings3):
-            raise ValueError("Mismatch in the number of rows between embeddings.")
+        if embedding_fields in ["title_inclexcl_tgdescription", "description_inclexcl"]:
 
-        final_embeddings = np.concatenate(
-            (
-                np.array(embeddings1),
-                np.array(embeddings2),
-                np.array(embeddings3),
-            ),
-            axis=1,
-        )
+            embeddings.append(np.array(read_object(fs, f"embeddings_pdt_inclexcl_ENG_CONTENT_translated_{model_name}")))
+
+        if embedding_fields in ["title_inclexcl_tgdescription", "description_title"]:
+
+            embeddings.append(np.array(read_object(fs, f"embeddings_pdt_product_detail_PRODUCTTITLE_translated_{model_name}")))
+
+        if embedding_fields in ["title_inclexcl_tgdescription"]:
+
+            embeddings.append(np.array(read_object(fs, f"embeddings_pdt_product_detail_TOURGRADEDESCRIPTION_{model_name}")))
+
+        final_embeddings = np.concatenate(embeddings,axis=1)
 
         # Save the model concatenated embeddings as a pickle file.
         remove_object(fs=fs, object_name=object_name)

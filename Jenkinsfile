@@ -30,6 +30,7 @@ spec:
         booleanParam(name: 'OVERWRITE_EMBED_TEXTUAL_DATA', defaultValue: false, description: 'Overwrite data for embed-textual-data stage')
         booleanParam(name: 'OVERWRITE_GENERATE_MODEL_EMBEDDINGS', defaultValue: false, description: 'Overwrite data for generate-model-embeddings stage')
         booleanParam(name: 'OVERWRITE_GENERATE_PRODUCT_SIMILARITY', defaultValue: false, description: 'Overwrite data for generate-product-similarity stage')
+        choice(name: 'embedding_fields', choices: ['title_inclexcl_tgdescription', 'description_title', 'description_inclexcl'], description: 'Fields for the embedding model.')
     }
     stages {
         stage('retrieve-bigquery-data') {
@@ -144,9 +145,9 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_GENERATE_MODEL_EMBEDDINGS ? '--overwrite' : ''
-                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'thenlper/gte-large'")
-                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en'")
-                        sh("python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en'")
+                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'thenlper/gte-large' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
                     }
                 }
             }

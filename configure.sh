@@ -19,7 +19,7 @@ kubectl expose service jenkins --type=LoadBalancer --name=jenkins-lb
 #admin/walkway
 
 # Install MongoDB
-helm install mongo oci://registry-1.docker.io/bitnamicharts/mongodb --set auth.rootUser=walkway --set auth.rootPassword=walkway
+helm install mongo oci://registry-1.docker.io/bitnamicharts/mongodb --set auth.rootUser=walkway --set auth.rootPassword=walkway --set persistence.size=20Gi
 kubectl expose service mongo-mongodb --type=LoadBalancer --name=mongodb-lb
 
 # Install Mongo Express
