@@ -233,27 +233,25 @@ def main():
 
         print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
 
+        ## AVERAGE RATING FILTER
+
+        product_avg_rating = str(list(df_product[avg_rating_feature])[0])
+
+        if args.average_rating == "similar":
+
+            print(product_avg_rating)
+
+            print(df[avg_rating_feature])
+
+            #df = df[df[avg_rating_feature].isin(possible_values)]
+
+        print(f"Number of candidates after the average rating filter: {df.shape[0]}")
+
         print(list(df_product[text_field]))
         print(list(df[text_field])[:5])
 
         import sys
         sys.exit()
-
-
-        ## AVERAGE RATING FILTER
-
-        product_avg_rating = str(list(df_product[avg_rating_feature])[0])
-        avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
-
-        if args.average_rating == "similar":
-
-            possible_values = avg_rating_possible_values[
-                avg_rating_index - 1 : avg_rating_index + 2
-            ]
-
-            df = df[df[avg_rating_feature].isin(possible_values)]
-
-        print(f"Number of candidates after the average rating filter: {df.shape[0]}")
 
         ## START YEAR FILTER
 
