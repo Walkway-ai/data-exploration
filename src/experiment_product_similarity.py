@@ -222,12 +222,6 @@ def main():
 
         print(f"Number of candidates after the city filter: {df.shape[0]}")
 
-        print(list(df_product[text_field]))
-        print(list(df[text_field])[:5])
-
-        import sys
-        sys.exit()
-
         ## SUPPLIER CODE FILTER
 
         if args.supplier_code == "different":
@@ -238,6 +232,13 @@ def main():
             ]
 
         print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
+
+        print(list(df_product[text_field]))
+        print(list(df[text_field])[:5])
+
+        import sys
+        sys.exit()
+
 
         ## AVERAGE RATING FILTER
 
