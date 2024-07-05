@@ -197,11 +197,6 @@ def main():
 
         df_raw_possible = df_raw[df_raw[product_field].isin(all_products)]
 
-        print(df_raw_possible)
-
-        import sys
-        sys.exit()
-
         df_text = read_object(fs, "product_textual_lang_summarized")
         df_text = pd.DataFrame(df_text)
         df_text_possible = df_text[df_text[product_field].isin(all_products)]
@@ -223,6 +218,12 @@ def main():
         # Product features
         df_product = df[df[product_field] == product_id]
         df = df[df[product_field] != product_id]
+
+        print(df_product)
+        print(df)
+
+        import sys
+        sys.exit()
 
         # Sort by scores
         df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
