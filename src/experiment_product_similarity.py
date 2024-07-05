@@ -243,7 +243,7 @@ def main():
                 product_avg_rating = float(list(df_product[avg_rating_feature])[0])
 
             except:
-                
+
                 product_avg_rating = np.nan
             
             if product_avg_rating:
@@ -318,6 +318,8 @@ def main():
         ## PRIVATE OPTION FILTER
 
         if args.is_private == "same":
+
+            print(str(list(df_product[private_feature])[0]))
 
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
