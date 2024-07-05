@@ -243,6 +243,9 @@ def main():
                 product_avg_rating = float(list(df_product[avg_rating_feature])[0])
             except:
                 product_avg_rating = np.nan
+
+            print(list(df_product[avg_rating_feature])[0])
+            print(product_avg_rating)
             
             if product_avg_rating:
 
