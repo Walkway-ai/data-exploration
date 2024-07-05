@@ -382,10 +382,8 @@ def main():
         df["AVGRating"] = [mapping_2_avgrating[el] for el in df[product_field]]
         df = df.loc[~((df['TotalReviews'] == 0) & (df['AVGRating'] == 0))]
 
-        print(df)
-        import sys
-        sys.exit()
-        df = df[df["reviews"] > np.percentile(list(df["reviews"]), 75)]
+        df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 75)]
+        df = df[df["AVGRating"] > np.percentile(list(df["AVGRating"]), 75)]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
