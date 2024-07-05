@@ -224,8 +224,8 @@ def main():
         df = df.sort_values(by="score", ascending=False)
         del df["score"]
 
-        print(df_product)
-        print(df)
+        print(df_product[text_field])
+        print(df[text_field])
 
         import sys
         sys.exit()
