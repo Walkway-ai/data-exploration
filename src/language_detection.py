@@ -92,7 +92,13 @@ def main():
             for text in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
         ]
 
-        for col in tqdm(["pdt_inclexcl_ENG_CONTENT", "pdt_product_detail_PRODUCTDESCRIPTION", "pdt_product_detail_PRODUCTTITLE"]):
+        for col in tqdm(
+            [
+                "pdt_inclexcl_ENG_CONTENT",
+                "pdt_product_detail_PRODUCTDESCRIPTION",
+                "pdt_product_detail_PRODUCTTITLE",
+            ]
+        ):
 
             # Translate non-English content to English.
             df[f"{col}_translated"] = df.apply(

@@ -59,9 +59,11 @@ def main():
         df["adult_retail_price"] = df["adult_retail_price"].replace("", np.nan)
         df["adult_retail_price"] = df["adult_retail_price"].astype(float)
 
-        product_stats = df.groupby(["ProductCode", "TourGradeCode"])["adult_retail_price"].agg(
-            ["mean"]
-        ).reset_index()
+        product_stats = (
+            df.groupby(["ProductCode", "TourGradeCode"])["adult_retail_price"]
+            .agg(["mean"])
+            .reset_index()
+        )
 
         remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=product_stats, object_name=object_name)

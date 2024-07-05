@@ -78,9 +78,7 @@ def main():
         df = pd.DataFrame(df)
 
         # Load the combined embeddings from MongoDB.
-        combined_embeddings = read_object(
-            fs, f"final_embeddings_{model_name}"
-        )
+        combined_embeddings = read_object(fs, f"final_embeddings_{model_name}")
 
         combined_embeddings = np.array(combined_embeddings)
 

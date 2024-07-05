@@ -5,7 +5,6 @@ import argparse
 import gc
 
 import numpy as np
-import pandas as pd
 import yaml
 
 from mongodb_lib import *
@@ -62,10 +61,8 @@ def main():
         )
 
         # Ensure that the embeddings have the same number of rows as the tabular data.
-        if not len(embeddings1) == len(embeddings2)== len(embeddings3):
-            raise ValueError(
-                "Mismatch in the number of rows between embeddings."
-            )
+        if not len(embeddings1) == len(embeddings2) == len(embeddings3):
+            raise ValueError("Mismatch in the number of rows between embeddings.")
 
         final_embeddings = np.concatenate(
             (

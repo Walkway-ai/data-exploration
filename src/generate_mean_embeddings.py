@@ -55,9 +55,7 @@ def main():
 
             model_name = em.split("/")[-1]
 
-            em_ = read_object(
-                fs, f"final_embeddings_{model_name}"
-            )
+            em_ = read_object(fs, f"final_embeddings_{model_name}")
 
             em_ = np.array(em_)
             l.append(em_)

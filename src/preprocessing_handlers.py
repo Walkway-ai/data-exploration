@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from mongodb_lib import *
 
+
 class DataFrameProcessor:
     def __init__(self, data_path, key_field, location_field, fs):
         """
@@ -88,7 +89,7 @@ class DataFrameProcessor:
             "pdt_inclexcl_ENG_CONTENT",
             "pdt_product_detail_PRODUCTDESCRIPTION",
             "pdt_product_detail_PRODUCTTITLE",
-            "pdt_product_detail_TOURGRADEDESCRIPTION"
+            "pdt_product_detail_TOURGRADEDESCRIPTION",
         ]
         self.df_text = self.df_text[[self.key_field] + self.descriptive_fields]
 
@@ -116,10 +117,22 @@ class DataFrameProcessor:
     def preprocess_text_fields(self):
         """Preprocesses text fields in the text DataFrame."""
 
-        self.df_text["pdt_inclexcl_ENG_CONTENT"] = [". ".join(list(set([str(el) for el in x]))) for x in self.df_text["pdt_inclexcl_ENG_CONTENT"]]
-        self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"] = [". ".join(list(set([str(el) for el in x]))) for x in self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"]]
-        self.df_text["pdt_product_detail_PRODUCTTITLE"] = [". ".join(list(set([str(el) for el in x]))) for x in self.df_text["pdt_product_detail_PRODUCTTITLE"]]
-        self.df_text["pdt_product_detail_TOURGRADEDESCRIPTION"] = [list(set([str(el) for el in x])) for x in self.df_text["pdt_product_detail_TOURGRADEDESCRIPTION"]]
+        self.df_text["pdt_inclexcl_ENG_CONTENT"] = [
+            ". ".join(list(set([str(el) for el in x])))
+            for x in self.df_text["pdt_inclexcl_ENG_CONTENT"]
+        ]
+        self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"] = [
+            ". ".join(list(set([str(el) for el in x])))
+            for x in self.df_text["pdt_product_detail_PRODUCTDESCRIPTION"]
+        ]
+        self.df_text["pdt_product_detail_PRODUCTTITLE"] = [
+            ". ".join(list(set([str(el) for el in x])))
+            for x in self.df_text["pdt_product_detail_PRODUCTTITLE"]
+        ]
+        self.df_text["pdt_product_detail_TOURGRADEDESCRIPTION"] = [
+            list(set([str(el) for el in x]))
+            for x in self.df_text["pdt_product_detail_TOURGRADEDESCRIPTION"]
+        ]
 
     def assert_sizes(self):
 

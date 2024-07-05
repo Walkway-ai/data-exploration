@@ -2,10 +2,11 @@
 # coding: utf-8
 
 import argparse
+import ast
 import gc
+
 import numpy as np
 import pandas as pd
-import ast
 import torch
 import yaml
 from sentence_transformers import SentenceTransformer
@@ -20,6 +21,7 @@ db, fs, client = connect_to_mongodb(config_infra)
 # Run garbage collection to free up memory.
 gc.collect()
 
+
 def calculate_embeddings(embeddings, model, text):
 
     try:
@@ -32,7 +34,7 @@ def calculate_embeddings(embeddings, model, text):
 
         text = ""
         embedding = model.encode([text], show_progress_bar=False)
-        
+
     embeddings.append(embedding[0])
 
     return embeddings
@@ -121,9 +123,7 @@ def main():
 
     field_inclexcl = "pdt_inclexcl_ENG_CONTENT_translated"
     embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
-    embeddings_inclexcl_file = fs.find_one(
-        {"filename": embeddings_inclexcl_name}
-    )
+    embeddings_inclexcl_file = fs.find_one({"filename": embeddings_inclexcl_name})
 
     field_producttitle = "pdt_product_detail_PRODUCTTITLE_translated"
     embeddings_producttitle_name = f"embeddings_{field_producttitle}_{model_name}"
@@ -132,7 +132,9 @@ def main():
     )
 
     field_tourgradedescription = "pdt_product_detail_TOURGRADEDESCRIPTION"
-    embeddings_tourgradedescription_name = f"embeddings_{field_tourgradedescription}_{model_name}"
+    embeddings_tourgradedescription_name = (
+        f"embeddings_{field_tourgradedescription}_{model_name}"
+    )
     embeddings_tourgradedescription_file = fs.find_one(
         {"filename": embeddings_tourgradedescription_name}
     )
@@ -178,7 +180,7 @@ def main():
             field_name=field_tourgradedescription,
             embedding_model=embedding_model,
             model_name=model_name,
-            average=True
+            average=True,
         )
     else:
         print("Skipping embeddings.")

@@ -243,15 +243,20 @@ def main():
                 zip(
                     reviews_table["ProductCode"],
                     reviews_table["AVGRating"],
-                )
+                ),
             )
 
             product_avg_rating = mapping_2_avgrating[args.product_id]
 
-            df[avg_rating_feature] = [mapping_2_avgrating[el] for el in list(df[product_field])]
+            df[avg_rating_feature] = [
+                mapping_2_avgrating[el] for el in list(df[product_field])
+            ]
 
             tolerance = 0.1 * product_avg_rating
-            avg_bool = [abs(product_avg_rating - float(x)) <= tolerance for x in list(df[avg_rating_feature])]
+            avg_bool = [
+                abs(product_avg_rating - float(x)) <= tolerance
+                for x in list(df[avg_rating_feature])
+            ]
             df = df[avg_bool]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
@@ -369,11 +374,11 @@ def main():
             zip(
                 reviews_table["ProductCode"],
                 reviews_table["TotalReviews"],
-            )
+            ),
         )
 
         df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
-        df = df[df["TotalReviews"]!=0]
+        df = df[df["TotalReviews"] != 0]
         df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 75)]
 
         df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
@@ -403,9 +408,7 @@ def main():
             text_field, "Summarized description"
         )
         product_features = (
-            product_features
-            + "\nCategory: "
-            + str(output_product_categories)
+            product_features + "\nCategory: " + str(output_product_categories)
         )
 
         # Create raw results summary
@@ -433,9 +436,7 @@ def main():
             )
 
             result_features = (
-                result_features
-                + "\n Category: "
-                + str(no_openai_product_categories)
+                result_features + "\n Category: " + str(no_openai_product_categories)
             )
 
             result_features_wo_openai.append(result_features.split("\n"))
@@ -485,12 +486,6 @@ def main():
 
             print("No products were found for the combination.")
 
-        print(result_features_w_openai)
-
-        import sys
-        sys.exit()
-
-
         columns = [
             "Experiment ID",
             "City",
@@ -500,10 +495,9 @@ def main():
             "Landmarks",
             "Private",
             "Categories",
-            "Embedding Model",
         ]
 
-        results_out = [
+        exp_params = [
             args.experiment_id,
             args.city_name,
             args.supplier_code,
@@ -512,12 +506,11 @@ def main():
             args.landmarks,
             args.is_private,
             args.categories,
-            embedding_model,
         ]
 
         results_out = [
             columns,
-            results_out,
+            exp_params,
             product_features.split("\n"),
             ["SIMILAR PRODUCTS WITHOUT OPENAI"],
             result_features_wo_openai,
