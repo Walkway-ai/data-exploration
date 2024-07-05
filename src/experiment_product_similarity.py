@@ -359,29 +359,28 @@ def main():
 
         ## REVIEWS FILTER (sorted)
 
-        product_table = read_object(fs, "product_tables")
-        product_table = pd.DataFrame(product_table)
+        reviews_table = read_object(fs, "reviews_per_product")
+        reviews_table = pd.DataFrame(reviews_table)
 
-        product_table["pdt_product_level_TOTALREVIEWCOUNT"] = product_table[
-            "pdt_product_level_TOTALREVIEWCOUNT"
-        ].apply(lambda x: x if x is not None else [])
-        product_table["pdt_product_level_TOTALREVIEWCOUNT"] = [
-            max([el for el in x if el is not None])
-            if len([el for el in x if el is not None]) > 0
-            else 0
-            for x in product_table["pdt_product_level_TOTALREVIEWCOUNT"]
-        ]
-
-        mapping = dict(
+        mapping_2_totalreviews = dict(
             zip(
-                product_table[product_field],
-                product_table["pdt_product_level_TOTALREVIEWCOUNT"],
+                reviews_table["ProductCode"],
+                reviews_table["TotalReviews"],
             )
         )
 
-        df["reviews"] = [mapping[el] for el in df[product_field]]
-        df = df[df["reviews"] != ""]
-        df = df[df["reviews"] != 0]
+        mapping_2_avgrating = dict(
+            zip(
+                reviews_table["ProductCode"],
+                reviews_table["AVGRating"],
+            )
+        )
+
+        df["totalreviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
+        df["totalreviews"] = [mapping_2_avgrating[el] for el in df[product_field]]
+        print(df)
+        import sys
+        sys.exit()
         df = df[df["reviews"] > np.percentile(list(df["reviews"]), 75)]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
