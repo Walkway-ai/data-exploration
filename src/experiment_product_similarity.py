@@ -405,8 +405,6 @@ def main():
 
         product_features = (
             product_features
-            + "\n Number of reviews: "
-            + str(n_reviews)
             + "\n Category: "
             + str(output_product_categories)
         )
