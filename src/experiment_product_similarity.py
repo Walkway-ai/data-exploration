@@ -241,7 +241,9 @@ def main():
 
             try:
                 product_avg_rating = float(list(df_product[avg_rating_feature])[0])
+
             except:
+                
                 product_avg_rating = np.nan
             
             if product_avg_rating:
@@ -313,12 +315,6 @@ def main():
 
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
 
-        print(list(df_product[text_field]))
-        print(list(df[text_field])[:5])
-
-        import sys
-        sys.exit()
-
         ## PRIVATE OPTION FILTER
 
         if args.is_private == "same":
@@ -326,6 +322,12 @@ def main():
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
+
+        print(list(df_product[text_field]))
+        print(list(df[text_field])[:5])
+
+        import sys
+        sys.exit()
 
         ## CATEGORY FILTER
 
