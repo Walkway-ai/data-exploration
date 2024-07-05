@@ -76,7 +76,6 @@ def query_gpt(apikey, text_field, df, df_product):
 
     prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of {text_field}, and similar products include the same activities (e.g. a tour in the same place, or the same activity). \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
 
-    print(prompt)
     client = OpenAI(api_key=apikey)
 
     result = client.chat.completions.create(
@@ -450,12 +449,7 @@ def main():
             result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
             result = ast.literal_eval(result)
 
-            import sys
-            sys.exit()
-
             if len(result) > 0:
-
-                result = result[:10]
 
                 df_openai = df_openai[df_openai[product_field].isin(result)]
 
@@ -465,7 +459,6 @@ def main():
 
                     product_id = list(df_now[product_field])[0]
                     openai_product_categories = list(set(annotated_data[product_id]))
-                    title = str(mapping_title[product_id])
 
                     result_features = "\n".join(
                         [
@@ -482,8 +475,6 @@ def main():
                         result_features
                         + "\n Category: "
                         + str(openai_product_categories)
-                        + "\n Title: "
-                        + str(title)
                     )
 
                     result_features_w_openai.append(result_features.split("\n"))
@@ -493,6 +484,12 @@ def main():
             print(e)
 
             print("No products were found for the combination.")
+
+        print(result_features_w_openai)
+
+        import sys
+        sys.exit()
+
 
         columns = [
             "Experiment ID",
