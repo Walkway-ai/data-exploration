@@ -267,12 +267,6 @@ def main():
 
         print(f"Number of candidates after the year filter: {df.shape[0]}")
 
-        print(list(df_product[text_field]))
-        print(list(df[text_field])[:5])
-
-        import sys
-        sys.exit()
-
         ## LANDMARKS FILTER
 
         d_landmarks = {}
@@ -318,6 +312,12 @@ def main():
                 df = df[df[product_field].isin(final_candidates)]
 
         print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
+
+        print(list(df_product[text_field]))
+        print(list(df[text_field])[:5])
+
+        import sys
+        sys.exit()
 
         ## PRIVATE OPTION FILTER
 
