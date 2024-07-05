@@ -55,9 +55,9 @@ def query_gpt(apikey, text_field, df, df_product):
 
     df = df.astype(str)
     del df["reviews"]
-    # df["title"] = [mapping_title[x] for x in df["PRODUCTCODE"]]
+    # df["title"] = [mapping_title[x] for x in df[product_field]]
     df_product = df_product.astype(str)
-    # df_product["title"] = [mapping_title[x] for x in df_product["PRODUCTCODE"]]
+    # df_product["title"] = [mapping_title[x] for x in df_product[product_field]]
 
     product_features = "\n".join(
         [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -154,24 +154,12 @@ def main():
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
     parser.add_argument("-experiment_id", type=str, required=True, help="Experiment ID")
 
-    # Parse the arguments
     args = parser.parse_args()
 
     # Access the arguments
     product_id = args.product_id
-    city_name = args.city_name
-    supplier_code = args.supplier_code
-    average_rating = args.average_rating
-    start_year = args.start_year
-    landmarks = args.landmarks
-    prices = args.prices
-    is_private = args.is_private
-    categories = args.categories
-    embedding_fields = args.embedding_fields
-    apikey = args.apikey
-    experiment_id = args.experiment_id
 
-    object_name = f"product_similarities_mean_{embedding_fields}"
+    object_name = f"product_similarities_mean_{args.embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
 
     if existing_file:
@@ -185,12 +173,12 @@ def main():
         product_field = "PRODUCTCODE"
 
         similarity_dict = read_object(fs, object_name)
-        similar_products = similarity_dict[product_id]
+        similar_products = similarity_dict[args.product_id]
         id_score = defaultdict(lambda: 0)
         id_score.update({key: value for key, value in similar_products})
 
         all_products = list(id_score.keys())
-        all_products.append(product_id)
+        all_products.append(args.product_id)
 
         df_raw = read_object(fs, "product_tabular")
         df_raw = pd.DataFrame(df_raw)
@@ -216,13 +204,23 @@ def main():
         ]
 
         # Product features
-        df_product = df[df[product_field] == product_id]
-        df = df[df[product_field] != product_id]
+        df_product = df[df[product_field] == args.product_id]
+        df = df[df[product_field] != args.product_id]
 
         # Sort by scores
         df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
         df = df.sort_values(by="score", ascending=False)
         del df["score"]
+
+        print(f"Number of initial candidates: {df.shape[0]}")
+
+        ## CITY FILTER
+
+        if args.city_name == "same":
+
+            df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
+
+        print(f"Number of candidates after the city filter: {df.shape[0]}")
 
         print(df_product[text_field])
         print(df[text_field])
@@ -230,19 +228,9 @@ def main():
         import sys
         sys.exit()
 
-        print(f"Number of initial candidates: {df.shape[0]}")
-
-        ## CITY FILTER
-
-        if city_name == "same":
-
-            df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
-
-        print(f"Number of candidates after the city filter: {df.shape[0]}")
-
         ## SUPPLIER CODE FILTER
 
-        if supplier_code == "different":
+        if args.supplier_code == "different":
 
             df = df[
                 df[supplier_code_feature]
@@ -256,7 +244,7 @@ def main():
         product_avg_rating = str(list(df_product[avg_rating_feature])[0])
         avg_rating_index = avg_rating_possible_values.index(product_avg_rating)
 
-        if average_rating == "similar":
+        if args.average_rating == "similar":
 
             possible_values = avg_rating_possible_values[
                 avg_rating_index - 1 : avg_rating_index + 2
@@ -268,12 +256,12 @@ def main():
 
         ## START YEAR FILTER
 
-        if start_year != "any":
+        if args.start_year != "any":
 
             df["year"] = pd.to_datetime(df[time_feature], unit="ms")
             df["year"] = df["year"].dt.year
 
-            df = df[df["year"] >= int(start_year)]
+            df = df[df["year"] >= int(args.start_year)]
             del df["year"]
 
         print(f"Number of candidates after the year filter: {df.shape[0]}")
@@ -286,7 +274,7 @@ def main():
         name_landmarks = read_object(fs, "name_landmarks")
         list_products = list(df_raw[product_field])
 
-        idx_product = list_products.index(product_id)
+        idx_product = list_products.index(args.product_id)
         which_landmarks = one_hot_encoding[idx_product]
         which_landmarks = [bool(x) for x in which_landmarks]
         names_landmarks_product = [
@@ -295,9 +283,9 @@ def main():
 
         if names_landmarks_product:
 
-            d_landmarks[product_id] = names_landmarks_product
+            d_landmarks[args.product_id] = names_landmarks_product
 
-            if landmarks == "same":
+            if args.landmarks == "same":
 
                 final_candidates = list()
 
@@ -326,7 +314,7 @@ def main():
 
         ## PRIVATE OPTION FILTER
 
-        if is_private == "same":
+        if args.is_private == "same":
 
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
@@ -345,9 +333,9 @@ def main():
             "categories-walkway"
         ].to_dict()
 
-        if categories != "any":
+        if args.categories != "any":
 
-            product_categories = annotated_data[product_id]
+            product_categories = annotated_data[args.product_id]
 
             if product_categories:
 
@@ -355,13 +343,13 @@ def main():
 
                 for prd_ in list(df[product_field]):
 
-                    if categories == "same":
+                    if args.categories == "same":
 
                         if set(product_categories).issubset(set(annotated_data[prd_])):
 
                             l_pd.append(prd_)
 
-                    if categories == "one":
+                    if args.categories == "one":
 
                         if any(ct in annotated_data[prd_] for ct in product_categories):
 
@@ -373,13 +361,13 @@ def main():
 
         ## PRICES FILTER
 
-        if prices != "any":
+        if args.prices != "any":
 
             price_ranges = read_object(fs, "price_categories_per_product")
             price_ranges = pd.DataFrame(price_ranges)
 
-            price_product_id = price_ranges[price_ranges[product_field] == product_id]
-            price_product_id = price_product_id[price_product_id["CATEGORY"] == prices]
+            price_product_id = price_ranges[price_ranges[product_field] == args.product_id]
+            price_product_id = price_product_id[price_product_id["CATEGORY"] == args.prices]
             values_to_be_compared_against = list(price_product_id["ADULTRETAILPRICE"])
 
             if values_to_be_compared_against:
@@ -389,7 +377,7 @@ def main():
                 for prd in list(df[product_field]):
 
                     sbs = price_ranges[price_ranges[product_field] == prd]
-                    sbs = sbs[sbs["CATEGORY"] == prices]
+                    sbs = sbs[sbs["CATEGORY"] == args.prices]
                     values_candidate = list(sbs["ADULTRETAILPRICE"])
 
                     for vo in values_to_be_compared_against:
@@ -466,9 +454,9 @@ def main():
         del df_product[time_feature]
         del df_product[private_feature]
 
-        output_product_categories = list(set(annotated_data[product_id]))
-        title = str(mapping_title[product_id])
-        n_reviews = str(mapping[product_id])
+        output_product_categories = list(set(annotated_data[args.product_id]))
+        title = str(mapping_title[args.product_id])
+        n_reviews = str(mapping[args.product_id])
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -526,7 +514,7 @@ def main():
         try:
 
             df_openai = df
-            result = query_gpt(apikey, text_field, df_openai, df_product)
+            result = query_gpt(args.apikey, text_field, df_openai, df_product)
             result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
             result = ast.literal_eval(result)
 
@@ -585,15 +573,15 @@ def main():
         ]
 
         results_out = [
-            experiment_id,
-            city_name,
-            supplier_code,
-            average_rating,
-            start_year,
-            landmarks,
-            prices,
-            is_private,
-            categories,
+            args.experiment_id,
+            args.city_name,
+            args.supplier_code,
+            args.average_rating,
+            args.start_year,
+            args.landmarks,
+            args.prices,
+            args.is_private,
+            args.categories,
             embedding_model,
         ]
 
