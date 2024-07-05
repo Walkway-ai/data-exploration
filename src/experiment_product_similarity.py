@@ -375,7 +375,7 @@ def main():
 
         df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
         df = df[df["TotalReviews"]!=0]
-        df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 50)]
+        df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 75)]
 
         df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
 
