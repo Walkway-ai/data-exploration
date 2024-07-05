@@ -32,22 +32,22 @@ def main():
     model_name = args.model_name
     apikey = args.apikey
 
-    object_name = f"product_textual_lang_summarized_subcategories_walkway"
+    object_name = f"product_textual_lang_summarized_categories_walkway"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
 
         taxonomy = pd.read_excel("Categories.xlsx")
 
-        possible_values = list(taxonomy["Sub-category"])
+        possible_values = list(taxonomy["Category"])
         possible_values = list(set([el.split(": ")[1] for el in possible_values]))
 
         annotated_data = read_object(
-            fs, "product_textual_lang_summarized_subcategories"
+            fs, "product_textual_lang_summarized_categories"
         )
         annotated_data = pd.DataFrame(annotated_data)
-        annotated_data = annotated_data.explode("sub_categories_gpt4o")
-        gpt_fields = list(set(annotated_data["sub_categories_gpt4o"]))
+        annotated_data = annotated_data.explode("categories_gpt4o")
+        gpt_fields = list(set(annotated_data["categories_gpt4o"]))
 
         same_fields = [el for el in gpt_fields if el in possible_values]
         pctg = len(same_fields) * 100 / len(possible_values)
