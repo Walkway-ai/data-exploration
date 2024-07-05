@@ -195,6 +195,11 @@ def main():
         df_raw = read_object(fs, "product_tabular")
         df_raw = pd.DataFrame(df_raw)
 
+        print(df_raw)
+
+        import sys
+        sys.exit()
+
         avg_rating_possible_values = sorted(
             list(set(df_raw[avg_rating_feature])), key=range_to_tuple
         )
