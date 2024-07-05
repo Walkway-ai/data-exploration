@@ -393,25 +393,6 @@ def main():
         import sys
         sys.exit()
 
-        # Create dict for product title
-
-        product_table["pdt_product_detail_PRODUCTTITLE"] = product_table[
-            "pdt_product_detail_PRODUCTTITLE"
-        ].apply(lambda x: x if x is not None else [])
-        product_table["pdt_product_detail_PRODUCTTITLE"] = [
-            [el for el in x if el is not None][0]
-            if len([el for el in x if el is not None]) > 0
-            else ""
-            for x in product_table["pdt_product_detail_PRODUCTTITLE"]
-        ]
-
-        mapping_title = dict(
-            zip(
-                product_table[product_field],
-                product_table["pdt_product_detail_PRODUCTTITLE"],
-            )
-        )
-
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
