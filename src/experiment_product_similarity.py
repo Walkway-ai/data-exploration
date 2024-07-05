@@ -195,15 +195,15 @@ def main():
         df_raw = read_object(fs, "product_tabular")
         df_raw = pd.DataFrame(df_raw)
 
-        print(df_raw)
-
-        import sys
-        sys.exit()
-
         avg_rating_possible_values = sorted(
             list(set(df_raw[avg_rating_feature])), key=range_to_tuple
         )
         df_raw_possible = df_raw[df_raw[product_field].isin(all_products)]
+
+        print(df_raw_possible)
+
+        import sys
+        sys.exit()
 
         df_text = read_object(fs, "product_textual_lang_summarized")
         df_text = pd.DataFrame(df_text)
