@@ -387,12 +387,6 @@ def main():
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
-        print(list(df_product[text_field]))
-        print(list(df[text_field])[:5])
-
-        import sys
-        sys.exit()
-
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
@@ -404,6 +398,12 @@ def main():
         del df_product[avg_rating_feature]
         del df_product[time_feature]
         del df_product[private_feature]
+
+        print(df)
+        print(df_product)
+
+        import sys
+        sys.exit()
 
         output_product_categories = list(set(annotated_data[args.product_id]))
         title = str(mapping_title[args.product_id])
