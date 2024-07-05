@@ -377,6 +377,8 @@ def main():
         df = df[df["TotalReviews"]!=0]
         df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 50)]
 
+        df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
+
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
         del df[city_feature]
@@ -394,10 +396,6 @@ def main():
         output_product_categories = list(set(annotated_data[args.product_id]))
         n_reviews = str(mapping_2_totalreviews[args.product_id])
 
-        print(df.columns)
-        import sys
-        sys.exit()
-
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
         )
@@ -414,6 +412,10 @@ def main():
             + "\n Title: "
             + str(title)
         )
+
+        print(product_features)
+        import sys
+        sys.exit()
 
         # RAW RESULTS
         df = df[:30]
