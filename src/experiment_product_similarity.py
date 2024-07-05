@@ -149,7 +149,7 @@ def main():
         help="Categories of Walkway AI's taxonomy.",
     )
     parser.add_argument(
-        "-embedding_model", type=str, required=True, help="Embedding model."
+        "-embedding_fields", type=str, required=True, help="Embedding fields."
     )
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
     parser.add_argument("-experiment_id", type=str, required=True, help="Experiment ID")
@@ -167,11 +167,11 @@ def main():
     prices = args.prices
     is_private = args.is_private
     categories = args.categories
-    embedding_model = args.embedding_model
+    embedding_fields = args.embedding_fields
     apikey = args.apikey
     experiment_id = args.experiment_id
 
-    object_name = f"product_similarities_{embedding_model}"
+    object_name = f"product_similarities_mean_{embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
 
     if existing_file:

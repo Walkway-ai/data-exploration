@@ -68,7 +68,7 @@ def main():
     embedding_model = args.embedding_model
     model_name = embedding_model.split("/")[-1]
 
-    object_name = f"product_similarities_{model_name}"
+    object_name = f"product_similarities_{model_name}_title_inclexcl_tgdescription"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
@@ -79,8 +79,9 @@ def main():
 
         # Load the combined embeddings from MongoDB.
         combined_embeddings = read_object(
-            fs, f"final_embeddings_{model_name}_concatenated_w_tabular"
+            fs, f"final_embeddings_{model_name}"
         )
+
         combined_embeddings = np.array(combined_embeddings)
 
         similarity_dict = {}

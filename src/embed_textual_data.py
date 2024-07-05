@@ -79,8 +79,6 @@ def get_embeddings(texts, field_name, embedding_model, model_name, average=False
 
     else:
 
-        texts = ast.literal_eval(texts)
-
         for text in tqdm(texts):
 
             embeddings = calculate_embeddings(embeddings, model, text)
