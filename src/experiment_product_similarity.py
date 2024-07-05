@@ -205,6 +205,8 @@ def main():
 
         # Product features
         df_product = df[df[product_field] == args.product_id]
+
+        # Candidate features
         df = df[df[product_field] != args.product_id]
 
         # Sort by scores
@@ -235,15 +237,19 @@ def main():
 
         ## AVERAGE RATING FILTER
 
-        product_avg_rating = str(list(df_product[avg_rating_feature])[0])
-
         if args.average_rating == "similar":
 
-            print(product_avg_rating)
+            try:
+                product_avg_rating = float(list(df_product[avg_rating_feature])[0])
+            except:
+                product_avg_rating = np.nan
+            
+            if product_avg_rating:
 
-            print(df[avg_rating_feature])
-
-            #df = df[df[avg_rating_feature].isin(possible_values)]
+                tolerance = 0.3 * product_avg_rating
+                print(tolerance)
+                avg_bool = [abs(product_avg_rating - x) <= tolerance for x in list(df[avg_rating_feature])]
+                df = df[avg_bool]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
 
