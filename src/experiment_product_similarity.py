@@ -249,6 +249,7 @@ def main():
             
             if product_avg_rating:
 
+                df[avg_rating_feature] = df[avg_rating_feature].replace("", np.nan)
                 df[avg_rating_feature] = df[avg_rating_feature].fillna(np.nan)
 
                 tolerance = 0.1 * product_avg_rating
