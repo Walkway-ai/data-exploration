@@ -31,14 +31,9 @@ def main():
 
         client = bigquery.Client()
 
-        query = f"SELECT * FROM ww-da-ingestion.v_extract1.pdt_reviews_v2"
+        query = f"SELECT * FROM ww-da-ingestion.v_extract1.pdt_reviews_aggregated"
 
         df = client.query(query).to_dataframe()
-
-        df = df.groupby("ProductCode").agg(
-            TotalReviews=('TotalReviews', 'sum'),
-            AVGRating=('AVGRating', 'mean')
-        ).reset_index()
 
         remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=df, object_name=object_name)

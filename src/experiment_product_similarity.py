@@ -377,7 +377,7 @@ def main():
         )
 
         df["totalreviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
-        df["totalreviews"] = [mapping_2_avgrating[el] for el in df[product_field]]
+        df["avgrating"] = [mapping_2_avgrating[el] for el in df[product_field]]
         print(df)
         import sys
         sys.exit()
