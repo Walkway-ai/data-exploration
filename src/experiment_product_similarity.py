@@ -222,8 +222,8 @@ def main():
 
         print(f"Number of candidates after the city filter: {df.shape[0]}")
 
-        print(df_product[text_field])
-        print(df[text_field])
+        print(list(df_product[text_field]))
+        print(list(df[text_field])[:5])
 
         import sys
         sys.exit()
