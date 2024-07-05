@@ -393,8 +393,9 @@ def main():
         del df_product[time_feature]
         del df_product[private_feature]
 
+        # Create selected product summary
+
         output_product_categories = list(set(annotated_data[args.product_id]))
-        n_reviews = str(mapping_2_totalreviews[args.product_id])
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -405,17 +406,17 @@ def main():
 
         product_features = (
             product_features
-            + "\n Category: "
+            + "\nCategory: "
             + str(output_product_categories)
         )
 
-        print(product_features)
-        import sys
-        sys.exit()
-
         # RAW RESULTS
         df = df[:30]
-        df = df.sort_values(by="reviews", ascending=False)
+        df = df.sort_values(by="TotalReviews", ascending=False)
+
+        print(df)
+        import sys
+        sys.exit()
 
         df_no_openai = df
 
