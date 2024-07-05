@@ -383,7 +383,7 @@ def main():
         df = df.loc[~((df['TotalReviews'] == 0) & (df['AVGRating'] == 0))]
 
         df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 50)]
-        df = df[df["AVGRating"] > np.percentile(list(df["AVGRating"]), 50)]
+        #df = df[df["AVGRating"] > np.percentile(list(df["AVGRating"]), 50)]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
