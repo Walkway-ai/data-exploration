@@ -146,9 +146,6 @@ def main():
         help="Categories of Walkway AI's taxonomy.",
     )
     parser.add_argument(
-        "-prices", type=str, required=True, help="Price ranges of the product."
-    )
-    parser.add_argument(
         "-embedding_fields", type=str, required=True, help="Embedding fields."
     )
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
@@ -360,47 +357,6 @@ def main():
 
         print(f"Number of candidates after the category filter: {df.shape[0]}")
 
-        print(list(df_product[text_field]))
-        print(list(df[text_field])[:5])
-
-        import sys
-        sys.exit()
-
-        ## PRICES FILTER
-
-        if args.prices != "any":
-
-            price_ranges = read_object(fs, "price_categories_per_product")
-            price_ranges = pd.DataFrame(price_ranges)
-
-            price_product_id = price_ranges[price_ranges[product_field] == args.product_id]
-            price_product_id = price_product_id[price_product_id["CATEGORY"] == args.prices]
-            values_to_be_compared_against = list(price_product_id["ADULTRETAILPRICE"])
-
-            if values_to_be_compared_against:
-
-                final_candidates = list()
-
-                for prd in list(df[product_field]):
-
-                    sbs = price_ranges[price_ranges[product_field] == prd]
-                    sbs = sbs[sbs["CATEGORY"] == args.prices]
-                    values_candidate = list(sbs["ADULTRETAILPRICE"])
-
-                    for vo in values_to_be_compared_against:
-                        for vc in values_candidate:
-
-                            tolerance = 0.3 * vo
-                            is_close = abs(vo - vc) <= tolerance
-
-                            if is_close:
-
-                                final_candidates.append(prd)
-
-                df = df[df[product_field].isin(final_candidates)]
-
-        print(f"Number of candidates after the price filter: {df.shape[0]}")
-
         ## REVIEWS FILTER (sorted)
 
         product_table = read_object(fs, "product_tables")
@@ -429,6 +385,12 @@ def main():
         df = df[df["reviews"] > np.percentile(list(df["reviews"]), 75)]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
+
+        print(list(df_product[text_field]))
+        print(list(df[text_field])[:5])
+
+        import sys
+        sys.exit()
 
         # Create dict for product title
 
@@ -573,7 +535,6 @@ def main():
             "Average Rating",
             "Start Year",
             "Landmarks",
-            "Price",
             "Private",
             "Categories",
             "Embedding Model",
@@ -586,7 +547,6 @@ def main():
             args.average_rating,
             args.start_year,
             args.landmarks,
-            args.prices,
             args.is_private,
             args.categories,
             embedding_model,

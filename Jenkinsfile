@@ -94,12 +94,22 @@ spec:
                 }
             }
         }
-        stage('generate-price-categories') { 
+        stage('generate-price-table') { 
             steps {
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_PRICE_CATEGORIES ? '--overwrite' : ''
-                        sh("python3 src/generate_price_categories.py ${overwriteArg}")
+                        sh("python3 src/generate_price_table.py ${overwriteArg}")
+                    }
+                }
+            }
+        }
+        stage('generate-reviews-table') { 
+            steps {
+                container('python') {
+                    script {
+                        def overwriteArg = params.OVERWRITE_PRICE_CATEGORIES ? '--overwrite' : ''
+                        sh("python3 src/generate_reviews_table.py ${overwriteArg}")
                     }
                 }
             }
