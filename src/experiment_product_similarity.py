@@ -236,21 +236,24 @@ def main():
 
         if args.average_rating == "similar":
 
-            try:
-                product_avg_rating = float(list(df_product[avg_rating_feature])[0])
+            reviews_table = read_object(fs, "reviews_per_product")
+            reviews_table = pd.DataFrame(reviews_table)
 
-            except:
+            mapping_2_avgrating = defaultdict(
+                lambda: 0,
+                zip(
+                    reviews_table["ProductCode"],
+                    reviews_table["AVGRating"],
+                )
+            )
 
-                product_avg_rating = np.nan
-            
-            if product_avg_rating:
+            product_avg_rating = mapping_2_avgrating[args.product_id]
 
-                df[avg_rating_feature] = df[avg_rating_feature].replace("", np.nan)
-                df[avg_rating_feature] = df[avg_rating_feature].fillna(np.nan)
+            df[avg_rating_feature] = [mapping_2_avgrating[el] for el in list(df[product_field])]
 
-                tolerance = 0.1 * product_avg_rating
-                avg_bool = [abs(product_avg_rating - float(x)) <= tolerance for x in list(df[avg_rating_feature])]
-                df = df[avg_bool]
+            tolerance = 0.1 * product_avg_rating
+            avg_bool = [abs(product_avg_rating - float(x)) <= tolerance for x in list(df[avg_rating_feature])]
+            df = df[avg_bool]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
 
@@ -370,20 +373,15 @@ def main():
             )
         )
 
-        mapping_2_avgrating = defaultdict(
-            lambda: 0,
-            zip(
-                reviews_table["ProductCode"],
-                reviews_table["AVGRating"],
-            )
-        )
-
         df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
-        df["AVGRating"] = [mapping_2_avgrating[el] for el in df[product_field]]
-        df = df.loc[~((df['TotalReviews'] == 0) & (df['AVGRating'] == 0))]
+        df = df[df["TotalReviews"]!=0]
 
-        #df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 50)]
-        #df = df[df["AVGRating"] > np.percentile(list(df["AVGRating"]), 50)]
+        df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 50)]
+
+        print(df)
+
+        import sys
+        sys.exit()
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
@@ -399,15 +397,9 @@ def main():
         del df_product[time_feature]
         del df_product[private_feature]
 
-        print(df)
-        print(df_product)
-
-        import sys
-        sys.exit()
-
         output_product_categories = list(set(annotated_data[args.product_id]))
-        title = str(mapping_title[args.product_id])
-        n_reviews = str(mapping[args.product_id])
+        n_reviews = str(mapping_2_totalreviews[args.product_id])
+        avg_reviews = str(mapping_2_avgrating[args.product_id])
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -418,7 +410,9 @@ def main():
 
         product_features = (
             product_features
-            + "\n reviews: "
+            + "\n Number of reviews: "
+            + str(n_reviews)
+            + "\n Average of reviews: "
             + str(n_reviews)
             + "\n Category: "
             + str(output_product_categories)
