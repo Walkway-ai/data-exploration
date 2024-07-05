@@ -362,22 +362,26 @@ def main():
         reviews_table = read_object(fs, "reviews_per_product")
         reviews_table = pd.DataFrame(reviews_table)
 
-        mapping_2_totalreviews = dict(
+        mapping_2_totalreviews = defaultdict(
+            lambda: 0,
             zip(
                 reviews_table["ProductCode"],
                 reviews_table["TotalReviews"],
             )
         )
 
-        mapping_2_avgrating = dict(
+        mapping_2_avgrating = defaultdict(
+            lambda: 0,
             zip(
                 reviews_table["ProductCode"],
                 reviews_table["AVGRating"],
             )
         )
 
-        df["totalreviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
-        df["avgrating"] = [mapping_2_avgrating[el] for el in df[product_field]]
+        df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
+        df["AVGRating"] = [mapping_2_avgrating[el] for el in df[product_field]]
+        df = df.loc[~((df['TotalReviews'] == 0) & (df['AVGRating'] == 0))]
+
         print(df)
         import sys
         sys.exit()
