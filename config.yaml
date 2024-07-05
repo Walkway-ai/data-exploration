@@ -23,8 +23,6 @@ bigquery-to-retrieve:
         - "ProductCode"
         - "VIDestinationCity"
         - "IsPrivateTour"
-        - "TotalReviewCount"
-        - "TotalAvgRating"
         - "SupplierCode"
     bookings:
       dataset_id: "v_extract1"

@@ -375,13 +375,7 @@ def main():
 
         df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
         df = df[df["TotalReviews"]!=0]
-
         df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 50)]
-
-        print(df)
-
-        import sys
-        sys.exit()
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
@@ -399,7 +393,10 @@ def main():
 
         output_product_categories = list(set(annotated_data[args.product_id]))
         n_reviews = str(mapping_2_totalreviews[args.product_id])
-        avg_reviews = str(mapping_2_avgrating[args.product_id])
+
+        print(df.columns)
+        import sys
+        sys.exit()
 
         product_features = "\n".join(
             [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -411,8 +408,6 @@ def main():
         product_features = (
             product_features
             + "\n Number of reviews: "
-            + str(n_reviews)
-            + "\n Average of reviews: "
             + str(n_reviews)
             + "\n Category: "
             + str(output_product_categories)
