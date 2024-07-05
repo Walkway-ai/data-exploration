@@ -319,17 +319,9 @@ def main():
 
         if args.is_private == "same":
 
-            print(str(list(df_product[private_feature])[0]))
-
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
-
-        print(list(df_product[text_field]))
-        print(list(df[text_field])[:5])
-
-        import sys
-        sys.exit()
 
         ## CATEGORY FILTER
 
@@ -337,9 +329,7 @@ def main():
             fs, "product_textual_lang_summarized_subcategories_categories_walkway"
         )
         annotated_data = pd.DataFrame(annotated_data)
-
         annotated_data = annotated_data[[product_field, "categories-walkway"]]
-
         annotated_data = annotated_data.set_index(product_field)[
             "categories-walkway"
         ].to_dict()
@@ -369,6 +359,12 @@ def main():
                 df = df[df[product_field].isin(l_pd)]
 
         print(f"Number of candidates after the category filter: {df.shape[0]}")
+
+        print(list(df_product[text_field]))
+        print(list(df[text_field])[:5])
+
+        import sys
+        sys.exit()
 
         ## PRICES FILTER
 
