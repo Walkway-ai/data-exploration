@@ -219,16 +219,16 @@ def main():
         df_product = df[df[product_field] == product_id]
         df = df[df[product_field] != product_id]
 
+        # Sort by scores
+        df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
+        df = df.sort_values(by="score", ascending=False)
+        del df["score"]
+
         print(df_product)
         print(df)
 
         import sys
         sys.exit()
-
-        # Sort by scores
-        df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
-        df = df.sort_values(by="score", ascending=False)
-        del df["score"]
 
         print(f"Number of initial candidates: {df.shape[0]}")
 
