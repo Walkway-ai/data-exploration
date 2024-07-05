@@ -243,9 +243,6 @@ def main():
                 product_avg_rating = float(list(df_product[avg_rating_feature])[0])
             except:
                 product_avg_rating = np.nan
-
-            print(list(df_product[avg_rating_feature])[0])
-            print(product_avg_rating)
             
             if product_avg_rating:
 
@@ -253,17 +250,10 @@ def main():
                 df[avg_rating_feature] = df[avg_rating_feature].fillna(np.nan)
 
                 tolerance = 0.1 * product_avg_rating
-                print(tolerance)
                 avg_bool = [abs(product_avg_rating - float(x)) <= tolerance for x in list(df[avg_rating_feature])]
                 df = df[avg_bool]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
-
-        print(list(df_product[text_field]))
-        print(list(df[text_field])[:5])
-
-        import sys
-        sys.exit()
 
         ## START YEAR FILTER
 
@@ -276,6 +266,12 @@ def main():
             del df["year"]
 
         print(f"Number of candidates after the year filter: {df.shape[0]}")
+
+        print(list(df_product[text_field]))
+        print(list(df[text_field])[:5])
+
+        import sys
+        sys.exit()
 
         ## LANDMARKS FILTER
 
