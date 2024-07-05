@@ -409,8 +409,6 @@ def main():
             + str(n_reviews)
             + "\n Category: "
             + str(output_product_categories)
-            + "\n Title: "
-            + str(title)
         )
 
         print(product_features)
