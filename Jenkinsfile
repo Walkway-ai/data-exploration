@@ -108,7 +108,6 @@ spec:
                             def overwriteArg = params.OVERWRITE_SUBCATEGORIES_ANNOTATION ? '--overwrite' : ''
                             sh("python3 src/annotate_categories_gpt.py ${overwriteArg} --model_name 'gpt-4o' --apikey ${OPENAI_API_KEY}")
                             sh("python3 src/map_gpt_categories_to_taxonomy.py ${overwriteArg} --model_name 'gpt-4o' --apikey ${OPENAI_API_KEY}")
-                            sh("python3 src/extend_taxonomy_db.py ${overwriteArg}")
                         }
                     }
                 }

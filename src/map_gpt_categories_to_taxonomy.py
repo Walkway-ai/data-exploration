@@ -32,7 +32,7 @@ def main():
     model_name = args.model_name
     apikey = args.apikey
 
-    object_name = f"product_textual_lang_summarized_categories_walkway"
+    object_name = f"product_textual_english_summarized_categories_walkway"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
@@ -43,7 +43,7 @@ def main():
         possible_values = list(set([el.split(": ")[1] for el in possible_values]))
 
         annotated_data = read_object(
-            fs, "product_textual_lang_summarized_categories"
+            fs, "product_textual_english_summarized_categories"
         )
         annotated_data = pd.DataFrame(annotated_data)
         annotated_data = annotated_data.explode("categories_gpt4o")
@@ -65,14 +65,14 @@ def main():
 
         initial_prompt = (
             "You are an expert in the tourism industry with a deep understanding of activity and tour taxonomy. "
-            "I will provide you with two lists: one containing sub-categories from an internal taxonomy (INTERNAL) "
-            "and another containing sub-categories from an external taxonomy (EXTERNAL). "
-            "Your task is to map each sub-category from the INTERNAL list to one element in the EXTERNAL list. "
+            "I will provide you with two lists: one containing categories from an internal taxonomy (INTERNAL) "
+            "and another containing categories from an external taxonomy (EXTERNAL). "
+            "Your task is to map each category from the INTERNAL list to one element in the EXTERNAL list. "
             "Your output should be a Python dictionary that adheres to the following criteria: "
             "1. Each key in the dictionary should be an element from the INTERNAL list. "
             "2. Each value should be the corresponding synonym from the EXTERNAL list. "
-            "3. Mappings should be conservative. For example, 'Drawing Classes' can be mapped to 'Painting, Drawing & Modeling Courses' (since 'Drawing Classes' fits within this category). "
-            "However, 'Classes & Workshops' should not be mapped to 'Adult Evening Classes' (as not all classes and workshops are for adults). "
+            "3. Mappings should be conservative. For example, 'Entertaining' can be mapped to 'Entertainment' "
+            "and 'Photography Tours' can be mapped to 'Cultural Tours'. "
             "4. If a key from the INTERNAL list has no similar element in the EXTERNAL list, do not add this key to the dictionary. "
             "5. Ensure that all keys belong to the INTERNAL list and all values belong to the EXTERNAL list. "
             "Return only a Python-formatted dictionary with no additional text. "
@@ -107,26 +107,26 @@ def main():
 
                 gpt2taxonomy[key] = result[key]
 
-        annotated_data["sub-categories-walkway"] = [
+        annotated_data["categories-walkway"] = [
             gpt2taxonomy[el] if el in list(gpt2taxonomy.keys()) else el
-            for el in list(annotated_data["sub_categories_gpt4o"])
+            for el in list(annotated_data["categories_gpt4o"])
         ]
-        annotated_data["sub-categories-walkway"] = [
+        annotated_data["categories-walkway"] = [
             el if el in possible_values else ""
-            for el in list(annotated_data["sub-categories-walkway"])
+            for el in list(annotated_data["categories-walkway"])
         ]
 
         annotated_data = annotated_data[
             [
                 "PRODUCTCODE",
                 "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED",
-                "sub-categories-walkway",
+                "categories-walkway",
             ]
         ]
         annotated_data = (
             annotated_data.groupby(
                 ["PRODUCTCODE", "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"]
-            )["sub-categories-walkway"]
+            )["categories-walkway"]
             .apply(list)
             .reset_index()
         )

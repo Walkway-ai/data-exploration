@@ -78,12 +78,12 @@ def main():
         ]
 
         initial_prompt = (
-            "You are a multi-label classifier specialized in analyzing product descriptions from online booking platforms, such as tours and activities. Your task is to classify each product description into a maximum of five relevant labels, listed in descending order of relevance. "
+            "You are a multi-label classifier specialized in analyzing product descriptions from online booking platforms, such as tours and activities. Your task is to classify each product description into a maximum of three relevant labels, listed in descending order of relevance. "
             "In the next prompts, I will send you a list of product descriptions, and for each product description, provide a Python-formatted list of the corresponding labels. If a product description has no text or have no corresponding labels, return an empty list for that element. "
             "Your response should only include a Python dictionary where the keys are the product codes, and their values are the labels. Do not include any additional text to your output."
-            "Example input: ['100213P12: Saint-Malo - Bayeux Transfer, our professional english speaking drivers guarantee a punctual service available 7 days a week. Let you drive and travel in a luxurious and comfortable minivan Mercedes.', '100213P14: Mont Saint-Michel is located about 4 hours from Paris. The price is all include for a transfer up to 7 people. The service is available 7 days a week.']"
-            "Output: {'100213P12': ['Label 1', 'Label 2'], '100213P14': ['Label 1', 'Label 2', 'Label 3', 'Label 4', 'Label 5']}"
-            f"Here is a dictionary of the labels and their descriptions: {d}"
+            "Example input: ['100213P12: Saint-Malo - Bayeux Transfer, our professional english speaking drivers guarantee a punctual service available 7 days a week. Let you drive and travel in a luxurious and comfortable minivan Mercedes.', '100213P14: Mont Saint-Michel is located about 4 hours from Paris. The price is all include for a transfer up to 7 people. The service is available 7 days a week.']. "
+            "Output: {'100213P12': ['Label 1', 'Label 2'], '100213P14': ['Label 1', 'Label 2', 'Label 3', 'Label 4', 'Label 5']}. "
+            f"Here is a dictionary of the labels and their descriptions: {d}. "
             "Are you ready to start?"
         )
 

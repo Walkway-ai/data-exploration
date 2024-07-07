@@ -88,8 +88,8 @@ def get_embeddings(texts, field_name, embedding_model, model_name, average=False
     # Convert embeddings to a torch tensor and save to file.
     embeddings = torch.tensor(embeddings)
     object_name = f"embeddings_{field_name}_{model_name}"
-    remove_object(fs=fs, object_name=object_name)
-    save_object(fs=fs, object=embeddings, object_name=object_name)
+    #remove_object(fs=fs, object_name=object_name)
+    #save_object(fs=fs, object=embeddings, object_name=object_name)
 
 
 def main():
@@ -147,10 +147,10 @@ def main():
         or args.overwrite
     ):
         # Load the summarized product textual data from a pickle file.
-        df = read_object(fs, "product_textual_lang_summarized")
+        df = read_object(fs, "product_textual_english_summarized")
         df = pd.DataFrame(df)
 
-        df_cont = read_object(fs, "product_textual_lang")
+        df_cont = read_object(fs, "product_textual_english")
         df_cont = pd.DataFrame(df_cont)
 
         get_embeddings(
