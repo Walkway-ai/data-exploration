@@ -642,7 +642,7 @@ def main():
                 args.credentials, results_scores, "Scores - Product Similarity"
             )
 
-            time.sleep(20)
+            #time.sleep(20)
 
 
 if __name__ == "__main__":
