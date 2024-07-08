@@ -204,13 +204,14 @@ def main():
         # Candidate features
         df = df[df[product_field] != args.product_id]
 
-        print(df_product)
-
-        print(df)
-
         # Sort by scores
         df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
+        df["score"] = df["score"].astype(float)
         df = df.sort_values(by="score", ascending=False)
+
+        print(df)
+        import sys
+        sys.exit()
         del df["score"]
 
         print(f"Number of initial candidates: {df.shape[0]}")
