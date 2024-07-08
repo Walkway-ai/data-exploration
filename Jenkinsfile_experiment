@@ -20,7 +20,7 @@ spec:
 }
 }
     parameters {
-        string(name: 'product_id', defaultValue: '7249P9,7845P10,77354P1,3763GATEWAY,16168P1,16168P10,252750P2,7812P106', description: 'List of IDs of the products (e.g. 7249P9, 7845P10, 77354P1, 3763GATEWAY, 16168P1, 16168P10, 252750P2, 7812P106)')
+        string(name: 'product_id', defaultValue: '7249P9,7845P10,77354P1,3763GATEWAY,16168P1,16168P10,252750P2,7812P106', description: 'List of IDs of the products (e.g. 7249P9,7845P10,77354P1,3763GATEWAY,16168P1,16168P10,252750P2,7812P106)')
         choice(name: 'city_name', choices: ['same', 'any'], description: 'If same, only products from the same city are shown.')
         choice(name: 'supplier_code', choices: ['different', 'any'], description: 'If different, only products from other suppliers are shown.')
         choice(name: 'average_rating', choices: ['any', 'similar'], description: 'If similar, only products with similar average ratings are shown.')
