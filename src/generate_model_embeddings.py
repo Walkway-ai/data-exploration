@@ -9,6 +9,7 @@ import numpy as np
 
 gc.collect()
 
+
 def read_embedding(path):
 
     with open(path, "rb") as file:

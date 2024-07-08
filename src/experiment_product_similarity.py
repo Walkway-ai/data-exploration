@@ -2,8 +2,9 @@ import argparse
 import ast
 import gc
 import re
-from collections import defaultdict
 import time
+from collections import defaultdict
+
 import gspread
 import numpy as np
 import pandas as pd
@@ -23,7 +24,7 @@ gc.collect()
 system_role = "You are an expert in online bookings and product matching in the tourism and entertainment industry. Your expertise includes comparing product descriptions to identify highly similar products."
 
 
-def append_to_google_sheets(credentials_file, results_out):
+def append_to_google_sheets(credentials_file, results_out, file_name):
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive",
@@ -32,7 +33,7 @@ def append_to_google_sheets(credentials_file, results_out):
     client = gspread.authorize(creds)
 
     # Open the Google Sheet
-    sheet = client.open("WalkwayAI - Product Similarity").sheet1
+    sheet = client.open(file_name).sheet1
 
     # Append data
 
@@ -156,7 +157,9 @@ def main():
 
         args.embedding_fields = "description_title"
 
-    elif args.embedding_fields == "Product Title, Incl/Excl Text, Tour Grade Description":
+    elif (
+        args.embedding_fields == "Product Title, Incl/Excl Text, Tour Grade Description"
+    ):
 
         args.embedding_fields = "title_inclexcl_tgdescription"
 
@@ -164,7 +167,10 @@ def main():
 
         args.embedding_fields = "description_inclexcl"
 
-    elif args.embedding_fields == "Product Description, Product Title, Incl/Excl Text, Tour Grade Description":
+    elif (
+        args.embedding_fields
+        == "Product Description, Product Title, Incl/Excl Text, Tour Grade Description"
+    ):
 
         args.embedding_fields = "title_inclexcl_tgdescription_description"
 
@@ -179,6 +185,8 @@ def main():
     private_feature = "pdt_product_level_ISPRIVATETOUR"
     text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
     product_field = "PRODUCTCODE"
+
+    test_products = yaml.load(open("test-products.yaml"), Loader=yaml.FullLoader)
 
     object_name = f"product_similarities_mean_{args.embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
@@ -208,7 +216,9 @@ def main():
             df_text = pd.DataFrame(df_text)
             df_text_possible = df_text[df_text[product_field].isin(all_products)]
 
-            df = pd.merge(df_raw_possible, df_text_possible, on=product_field, how="outer")
+            df = pd.merge(
+                df_raw_possible, df_text_possible, on=product_field, how="outer"
+            )
 
             df = df[
                 [
@@ -283,7 +293,9 @@ def main():
                 df = df[avg_bool]
                 del df[avg_rating_feature]
 
-            print(f"Number of candidates after the average rating filter: {df.shape[0]}")
+            print(
+                f"Number of candidates after the average rating filter: {df.shape[0]}"
+            )
 
             ## START YEAR FILTER
 
@@ -347,7 +359,9 @@ def main():
 
             if args.is_private == "same":
 
-                df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
+                df = df[
+                    df[private_feature] == str(list(df_product[private_feature])[0])
+                ]
 
             print(f"Number of candidates after the private filter: {df.shape[0]}")
 
@@ -374,20 +388,23 @@ def main():
 
                         if args.categories == "same":
 
-                            if set(product_categories).issubset(set(annotated_data[prd_])):
+                            if set(product_categories).issubset(
+                                set(annotated_data[prd_])
+                            ):
 
                                 l_pd.append(prd_)
 
                         if args.categories == "one":
 
-                            if any(ct in annotated_data[prd_] for ct in product_categories):
+                            if any(
+                                ct in annotated_data[prd_] for ct in product_categories
+                            ):
 
                                 l_pd.append(prd_)
 
                     df = df[df[product_field].isin(l_pd)]
 
             print(f"Number of candidates after the category filter: {df.shape[0]}")
-
 
             ## REVIEWS FILTER (sorted)
 
@@ -402,7 +419,9 @@ def main():
                 ),
             )
 
-            df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
+            df["TotalReviews"] = [
+                mapping_2_totalreviews[el] for el in df[product_field]
+            ]
             df = df[df["TotalReviews"] != 0]
             df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 75)]
 
@@ -425,7 +444,10 @@ def main():
             output_product_categories = list(set(annotated_data[args.product_id]))
 
             product_features = "\n".join(
-                [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
+                [
+                    f"{col}: {list(df_product[col])[0]}"
+                    for col in list(df_product.columns)
+                ]
             )
             product_features = product_features.replace(
                 text_field, "Summarized description"
@@ -459,7 +481,9 @@ def main():
                 )
 
                 result_features = (
-                    result_features + "\n Category: " + str(no_openai_product_categories)
+                    result_features
+                    + "\n Category: "
+                    + str(no_openai_product_categories)
                 )
 
                 result_features_wo_openai.append(result_features.split("\n"))
@@ -484,7 +508,9 @@ def main():
                         df_now = pd.DataFrame(row).T
 
                         product_id = list(df_now[product_field])[0]
-                        openai_product_categories = list(set(annotated_data[product_id]))
+                        openai_product_categories = list(
+                            set(annotated_data[product_id])
+                        )
 
                         result_features = "\n".join(
                             [
@@ -511,7 +537,7 @@ def main():
 
                 print("No products were found for the combination.")
 
-            columns = [
+            columns_results = [
                 "Experiment ID",
                 "City",
                 "Supplier Code",
@@ -520,7 +546,7 @@ def main():
                 "Landmarks",
                 "Private",
                 "Categories",
-                "Embedding fields"
+                "Embedding fields",
             ]
 
             exp_params = [
@@ -532,11 +558,11 @@ def main():
                 args.landmarks,
                 args.is_private,
                 args.categories,
-                args.embedding_fields
+                args.embedding_fields,
             ]
 
             results_out = [
-                columns,
+                columns_results,
                 exp_params,
                 product_features.split("\n"),
                 ["SIMILAR PRODUCTS WITHOUT OPENAI"],
@@ -546,10 +572,52 @@ def main():
                 ["*****"],
             ]
 
-            append_to_google_sheets(args.credentials, results_out)
+            append_to_google_sheets(
+                args.credentials, results_out, "WalkwayAI - Product Similarity"
+            )
 
-            time.sleep(10)
-        
+            # Calculate score for this product
+            mandatory_similar_products = test_products[args.product_id]
+            n = len(mandatory_similar_products)
+
+            str_wo_openai = "".join(result_features_wo_openai)
+            str_w_openai = "".join(result_features_w_openai)
+
+            c_wo_openai, c_w_openai = 0, 0
+
+            for msp in mandatory_similar_products:
+
+                if msp in str_wo_openai:
+
+                    c_wo_openai += 1
+
+                if msp in str_w_openai:
+
+                    c_w_openai += 1
+
+            pctg_wo_openai = c_wo_openai * 100 / n
+            pctg_w_openai = c_w_openai * 100 / n
+
+            results_scores = [
+                args.experiment_id,
+                args.city_name,
+                args.supplier_code,
+                args.average_rating,
+                args.start_year,
+                args.landmarks,
+                args.is_private,
+                args.categories,
+                args.embedding_fields,
+                pctg_wo_openai,
+                pctg_w_openai,
+            ]
+
+            append_to_google_sheets(
+                args.credentials, results_scores, "WalkwayAI - Product Similarity"
+            )
+
+            time.sleep(20)
+
 
 if __name__ == "__main__":
     main()
