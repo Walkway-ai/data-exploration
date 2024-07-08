@@ -186,8 +186,10 @@ def main():
     if existing_file:
 
         product_ids = [el.strip() for el in args.product_id.split(",")]
-        
+
         for product_id in product_ids:
+
+            args.product_id = product_id
 
             similarity_dict = read_object(fs, object_name)
             similar_products = similarity_dict[args.product_id]
