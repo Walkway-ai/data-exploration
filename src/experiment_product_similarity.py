@@ -195,7 +195,7 @@ def main():
 
         product_ids = [el.strip() for el in args.product_id.split(",")]
 
-        columns_results = [
+        columns_results = [[
             "Product ID",
             "City",
             "Supplier Code",
@@ -207,7 +207,7 @@ def main():
             "Embedding fields",
             "% wo OpenAI",
             "% w OpenAI",
-        ]
+        ]]
 
         append_to_google_sheets(
             args.credentials, columns_results, "Scores - Product Similarity"
