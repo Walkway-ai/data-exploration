@@ -598,8 +598,22 @@ def main():
             pctg_wo_openai = c_wo_openai * 100 / n
             pctg_w_openai = c_w_openai * 100 / n
 
-            results_scores = [
-                args.experiment_id,
+            columns_results = [
+                "Product ID",
+                "City",
+                "Supplier Code",
+                "Average Rating",
+                "Start Year",
+                "Landmarks",
+                "Private",
+                "Categories",
+                "Embedding fields",
+                "% wo OpenAI",
+                "% w OpenAI",
+            ]
+
+            exp_params = [
+                args.product_id,
                 args.city_name,
                 args.supplier_code,
                 args.average_rating,
@@ -610,6 +624,11 @@ def main():
                 args.embedding_fields,
                 pctg_wo_openai,
                 pctg_w_openai,
+            ]
+
+            results_scores = [
+                columns_results,
+                exp_params,
             ]
 
             append_to_google_sheets(
