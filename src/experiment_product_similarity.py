@@ -3,7 +3,7 @@ import ast
 import gc
 import re
 from collections import defaultdict
-
+import time
 import gspread
 import numpy as np
 import pandas as pd
@@ -547,6 +547,8 @@ def main():
             ]
 
             append_to_google_sheets(args.credentials, results_out)
+
+            time.sleep(10)
         
 
 if __name__ == "__main__":
