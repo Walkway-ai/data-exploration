@@ -389,13 +389,11 @@ def main():
 
         del df[city_feature]
         del df[supplier_code_feature]
-        del df[avg_rating_feature]
         del df[time_feature]
         del df[private_feature]
 
         del df_product[city_feature]
         del df_product[supplier_code_feature]
-        del df_product[avg_rating_feature]
         del df_product[time_feature]
         del df_product[private_feature]
 
