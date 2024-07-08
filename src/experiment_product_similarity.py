@@ -2,7 +2,6 @@ import argparse
 import ast
 import gc
 import re
-import time
 from collections import defaultdict
 
 import gspread
@@ -604,9 +603,9 @@ def main():
                     ["*****"],
                 ]
 
-                # append_to_google_sheets(
-                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
-                # )
+                append_to_google_sheets(
+                    args.credentials, results_out, "WalkwayAI - Product Similarity"
+                )
 
                 # Calculate score for this product
                 mandatory_similar_products = test_products[args.product_id]
@@ -653,8 +652,6 @@ def main():
                 append_to_google_sheets(
                     args.credentials, results_scores, "Scores - Product Similarity"
                 )
-
-                # time.sleep(20)
 
             except Exception as e:
 
