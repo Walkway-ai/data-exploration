@@ -50,7 +50,7 @@ spec:
                                     -landmarks ${params.landmarks} \
                                     -is_private ${params.is_private} \
                                     -categories ${params.categories} \
-                                    -embedding_fields ${params.embedding_fields} \
+                                    -embedding_fields '${params.embedding_fields}' \
                                     -apikey ${OPENAI_API_KEY} \
                                     -experiment_id ${customBuildNumber}
                                 """
