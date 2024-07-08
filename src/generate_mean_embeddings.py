@@ -6,7 +6,9 @@ import pickle
 
 import numpy as np
 from sklearn.decomposition import PCA
+
 from generate_model_embeddings import read_embedding
+
 
 def reduce_dimension(concatenated_array, target_dim=1000):
     """
@@ -48,7 +50,9 @@ def main():
 
             model_name = em.split("/")[-1]
 
-            em_ = read_embedding(f"tmp/model_embeddings_{model_name}_{embedding_fields}")
+            em_ = read_embedding(
+                f"tmp/model_embeddings_{model_name}_{embedding_fields}"
+            )
 
             em_ = np.array(em_)
             l.append(em_)

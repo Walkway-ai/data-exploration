@@ -6,8 +6,8 @@ import pandas as pd
 import yaml
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
-from generate_model_embeddings import read_embedding
 
+from generate_model_embeddings import read_embedding
 from mongodb_lib import *
 
 # Load configuration from yaml file for MongoDB connection.
@@ -83,7 +83,9 @@ def main():
         df = read_object(fs, "product_textual_english_summarized")
         df = pd.DataFrame(df)
 
-        combined_embeddings = read_embedding(f"tmp/model_embeddings_{model_name}_{embedding_fields}")
+        combined_embeddings = read_embedding(
+            f"tmp/model_embeddings_{model_name}_{embedding_fields}"
+        )
         combined_embeddings = np.array(combined_embeddings)
 
         similarity_dict = {}

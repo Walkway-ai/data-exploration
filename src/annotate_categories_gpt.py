@@ -45,10 +45,7 @@ def main():
         taxonomy = pd.read_excel("Categories.xlsx")
 
         df_categories = taxonomy[
-            [
-                "Category",
-                "Description & Keywords"
-            ]
+            ["Category", "Description & Keywords"]
         ].drop_duplicates()
 
         categories = [el.split(": ")[1] for el in df_categories["Category"]]
@@ -110,9 +107,7 @@ def main():
 
             r = result.choices[0].message.content
 
-            with open(
-                f"{tmp_dir}/batch_{batch_idx}_categories_gpt4o.pkl", "wb"
-            ) as f:
+            with open(f"{tmp_dir}/batch_{batch_idx}_categories_gpt4o.pkl", "wb") as f:
 
                 pickle.dump(r, f)
 

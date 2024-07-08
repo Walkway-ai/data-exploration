@@ -4,12 +4,14 @@
 import argparse
 import gc
 import pickle
+
 import numpy as np
-import yaml
+
+gc.collect()
 
 def read_embedding(path):
 
-    with open(path, 'rb') as file:
+    with open(path, "rb") as file:
 
         data = pickle.load(file)
 
@@ -52,23 +54,62 @@ def main():
 
         embeddings = list()
 
-        if embedding_fields in ["description_title", "description_inclexcl", "title_inclexcl_tgdescription_description"]:
+        if embedding_fields in [
+            "description_title",
+            "description_inclexcl",
+            "title_inclexcl_tgdescription_description",
+        ]:
 
-            embeddings.append(np.array(read_embedding(f"tmp/embeddings_pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED_{model_name}")))
+            embeddings.append(
+                np.array(
+                    read_embedding(
+                        f"tmp/embeddings_pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED_{model_name}"
+                    )
+                )
+            )
 
-        if embedding_fields in ["title_inclexcl_tgdescription", "description_inclexcl", "title_inclexcl_tgdescription_description"]:
+        if embedding_fields in [
+            "title_inclexcl_tgdescription",
+            "description_inclexcl",
+            "title_inclexcl_tgdescription_description",
+        ]:
 
-            embeddings.append(np.array(read_embedding(f"tmp/embeddings_pdt_inclexcl_ENG_CONTENT_translated_{model_name}")))
+            embeddings.append(
+                np.array(
+                    read_embedding(
+                        f"tmp/embeddings_pdt_inclexcl_ENG_CONTENT_translated_{model_name}"
+                    )
+                )
+            )
 
-        if embedding_fields in ["title_inclexcl_tgdescription", "description_title", "title_inclexcl_tgdescription_description"]:
+        if embedding_fields in [
+            "title_inclexcl_tgdescription",
+            "description_title",
+            "title_inclexcl_tgdescription_description",
+        ]:
 
-            embeddings.append(np.array(read_embedding(f"tmp/embeddings_pdt_product_detail_PRODUCTTITLE_translated_{model_name}")))
+            embeddings.append(
+                np.array(
+                    read_embedding(
+                        f"tmp/embeddings_pdt_product_detail_PRODUCTTITLE_translated_{model_name}"
+                    )
+                )
+            )
 
-        if embedding_fields in ["title_inclexcl_tgdescription", "title_inclexcl_tgdescription_description"]:
+        if embedding_fields in [
+            "title_inclexcl_tgdescription",
+            "title_inclexcl_tgdescription_description",
+        ]:
 
-            embeddings.append(np.array(read_embedding(f"tmp/embeddings_pdt_product_detail_TOURGRADEDESCRIPTION_{model_name}")))
+            embeddings.append(
+                np.array(
+                    read_embedding(
+                        f"tmp/embeddings_pdt_product_detail_TOURGRADEDESCRIPTION_{model_name}"
+                    )
+                )
+            )
 
-        final_embeddings = np.concatenate(embeddings,axis=1)
+        final_embeddings = np.concatenate(embeddings, axis=1)
 
         with open(f"tmp/{object_name}", "wb") as f:
 

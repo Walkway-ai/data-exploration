@@ -5,6 +5,7 @@ import argparse
 import ast
 import gc
 import pickle
+
 import numpy as np
 import pandas as pd
 import torch
@@ -119,9 +120,7 @@ def main():
 
     field_description = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
     embeddings_description_name = f"embeddings_{field_description}_{model_name}"
-    embeddings_description_file = fs.find_one(
-        {"filename": embeddings_description_name}
-    )
+    embeddings_description_file = fs.find_one({"filename": embeddings_description_name})
 
     field_inclexcl = "pdt_inclexcl_ENG_CONTENT_translated"
     embeddings_inclexcl_name = f"embeddings_{field_inclexcl}_{model_name}"
