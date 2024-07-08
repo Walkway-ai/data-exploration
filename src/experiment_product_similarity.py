@@ -580,11 +580,13 @@ def main():
             mandatory_similar_products = test_products[args.product_id]
             n = len(mandatory_similar_products)
 
-            print(mandatory_similar_products)
-            str_wo_openai = [el[0] for el in result_features_wo_openai]
+            str_wo_openai = [el[0].split(":")[1].strip() for el in result_features_wo_openai]
             str_w_openai = [el[0] for el in result_features_w_openai]
             print(str_wo_openai)
             print(str_w_openai)
+
+            import sys
+            sys.exit()
 
             c_wo_openai, c_w_openai = 0, 0
 
