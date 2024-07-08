@@ -28,7 +28,7 @@ spec:
         choice(name: 'landmarks', choices: ['any', 'same'], description: 'If same, only products mentioning the same landmark(s) will be shown. If there are no landmarks in the selected product, this filter will be ignored.')
         choice(name: 'is_private', choices: ['any', 'same'], description: 'If same, only products with the same tour type (private/public) will be shown.')
         choice(name: 'categories', choices: ['one', 'any', 'same'], description: 'If same, only products with the same sub-category will be shown. If there are no categories in the selected product, this filter will be ignored.')
-        choice(name: 'embedding_fields', choices: ['title_inclexcl_tgdescription', 'description_title', 'description_inclexcl', 'title_inclexcl_tgdescription_description'], description: 'Fields for the embedding model.')
+        choice(name: 'embedding_fields', choices: ['description_title', 'title_inclexcl_tgdescription', 'description_inclexcl', 'title_inclexcl_tgdescription_description'], description: 'Fields for the embedding model.')
     }
     stages {
         stage('Experiment Results') {
