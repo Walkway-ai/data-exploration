@@ -193,7 +193,6 @@ def main():
                 text_field,
                 city_feature,
                 supplier_code_feature,
-                avg_rating_feature,
                 time_feature,
                 private_feature,
             ]

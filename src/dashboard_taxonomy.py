@@ -17,16 +17,16 @@ db, fs, client = connect_to_mongodb(config_infra)
 # Run garbage collection to free up memory.
 gc.collect()
 
-df = read_object(fs, "product_textual_lang_summarized_subcategories_walkway")
+df = read_object(fs, "product_textual_english_summarized_categories_walkway")
 df = pd.DataFrame(df)
-df = df[["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "sub-categories-walkway"]]
-df = df.explode("sub-categories-walkway")
+df = df[["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED", "categories-walkway"]]
+df = df.explode("categories-walkway")
 
 # Ensure the sub_categories_gpt4o column is of type string
-df["sub-categories-walkway"] = df["sub-categories-walkway"].astype(str)
+df["categories-walkway"] = df["categories-walkway"].astype(str)
 
 # Get unique subcategories
-unique_categories = df["sub-categories-walkway"].unique()
+unique_categories = df["categories-walkway"].unique()
 
 # Create dropdown options
 dropdown_options = [{"label": cat, "value": cat} for cat in unique_categories]
@@ -40,13 +40,13 @@ app = dash.Dash(__name__)
 # Layout of the app
 app.layout = html.Div(
     [
-        html.H1("Sub Categories Distribution and Descriptions"),
+        html.H1("Categories Distribution and Descriptions"),
         html.Div(
             [
                 dcc.Dropdown(
                     id="category-filter",
                     options=dropdown_options,  # Use the validated dropdown options
-                    placeholder="Select a Sub Category",
+                    placeholder="Select a Category",
                 ),
                 html.Div(id="description-examples"),
             ]
@@ -60,15 +60,15 @@ app.layout = html.Div(
     Output("category-distribution", "figure"), Input("category-filter", "value")
 )
 def update_graph(selected_category):
-    category_counts = df["sub-categories-walkway"].value_counts().reset_index()
-    category_counts.columns = ["Sub Category", "Count"]
+    category_counts = df["categories-walkway"].value_counts().reset_index()
+    category_counts.columns = ["Category", "Count"]
     category_counts = category_counts[category_counts["Count"] > 50]
-    category_counts = category_counts[category_counts["Sub Category"] != "nan"]
+    category_counts = category_counts[category_counts["Category"] != "nan"]
     fig = px.bar(
         category_counts,
-        x="Sub Category",  # Ensure this is set to your categorical variable
+        x="Category",  # Ensure this is set to your categorical variable
         y="Count",  # Ensure this is set to the count of occurrences
-        title="Distribution of Sub Categories",
+        title="Distribution of Categories",
         orientation="v",  # Explicitly set the orientation to 'v' for vertical
     )
     return fig
@@ -82,7 +82,7 @@ def update_descriptions(selected_category):
     if selected_category is None:
         return html.Div()
 
-    filtered_df = df[df["sub-categories-walkway"] == selected_category]
+    filtered_df = df[df["categories-walkway"] == selected_category]
     examples = filtered_df["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"].tolist()
 
     return html.Ul([html.Li(example) for example in examples])
