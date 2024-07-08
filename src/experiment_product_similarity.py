@@ -364,14 +364,10 @@ def main():
 
         print(f"Number of candidates after the category filter: {df.shape[0]}")
 
-        print(df)
-        import sys
-        sys.exit()
-
 
         ## REVIEWS FILTER (sorted)
 
-        reviews_table = read_object(fs, "reviews_per_product")
+        reviews_table = read_object(fs, "reviews_product")
         reviews_table = pd.DataFrame(reviews_table)
 
         mapping_2_totalreviews = defaultdict(
@@ -389,6 +385,10 @@ def main():
         df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
+
+        print(df)
+        import sys
+        sys.exit()
 
         del df[city_feature]
         del df[supplier_code_feature]
