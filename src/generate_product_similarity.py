@@ -104,11 +104,11 @@ def main():
             similar_products = [
                 df["PRODUCTCODE"].iloc[el] for el in most_similar_indices
             ]
+            similarity_scores = [str(x) for x in similarity_scores]
+
             similarity_dict[df["PRODUCTCODE"].iloc[given_product_index]] = list(
                 zip(similar_products, similarity_scores)
             )
-
-        print(similarity_dict)
 
         # Save the similarity dictionary to MongoDB.
         remove_object(fs=fs, object_name=object_name)

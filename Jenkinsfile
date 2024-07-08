@@ -20,7 +20,7 @@ spec:
         }
     }
     parameters {
-        choice(name: 'embedding_fields', choices: ['title_inclexcl_tgdescription', 'description_title', 'description_inclexcl', 'title_inclexcl_tgdescription_description'], description: 'Fields for the embedding model.')
+        choice(name: 'embedding_fields', choices: ['description_inclexcl', 'description_title', 'title_inclexcl_tgdescription', 'title_inclexcl_tgdescription_description'], description: 'Fields for the embedding model.')
     }
     stages {
         stage('retrieve-bigquery-data') {

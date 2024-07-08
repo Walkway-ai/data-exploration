@@ -39,12 +39,9 @@ def save_object(fs, object, object_name):
         # Serializing object to JSON
         if "embeddings" in object_name and "product_similarities" not in object_name:
             model_bytes = json.dumps(object.tolist()).encode()
-        elif "product_similarities" in object_name:
-            model_bytes = json.dumps(object).encode()
         elif "one_hot" in object_name:
-            my_list = object.tolist()
-            model_bytes = json.dumps(my_list).encode()
-        elif "name_landmarks" in object_name:
+            model_bytes = json.dumps(object.tolist()).encode()
+        elif "product_similarities" in object_name or "name_landmarks" in object_name:
             model_bytes = json.dumps(object).encode()
         else:
             model_bytes = object.to_json().encode()

@@ -181,7 +181,7 @@ def main():
 
         df_raw_possible = df_raw[df_raw[product_field].isin(all_products)]
 
-        df_text = read_object(fs, "product_textual_lang_summarized")
+        df_text = read_object(fs, "product_textual_english_summarized")
         df_text = pd.DataFrame(df_text)
         df_text_possible = df_text[df_text[product_field].isin(all_products)]
 
