@@ -42,7 +42,7 @@ spec:
                                 sh """
                                 python3 src/experiment_product_similarity.py \
                                     -credentials ${GOOGLE_APPLICATION_CREDENTIALS} \
-                                    -product_id ${params.product_id} \
+                                    -product_id '${params.product_id}' \
                                     -city_name ${params.city_name} \
                                     -supplier_code ${params.supplier_code} \
                                     -average_rating ${params.average_rating} \
