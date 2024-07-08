@@ -572,19 +572,19 @@ def main():
                 ["*****"],
             ]
 
-            append_to_google_sheets(
-                args.credentials, results_out, "WalkwayAI - Product Similarity"
-            )
+            # append_to_google_sheets(
+            #     args.credentials, results_out, "WalkwayAI - Product Similarity"
+            # )
 
             # Calculate score for this product
             mandatory_similar_products = test_products[args.product_id]
             n = len(mandatory_similar_products)
 
             print(mandatory_similar_products)
-            print(result_features_wo_openai)
-            print(result_features_w_openai)
-            str_wo_openai = "".join(result_features_wo_openai)
-            str_w_openai = "".join(result_features_w_openai)
+            str_wo_openai = [el[0] for el in result_features_wo_openai]
+            str_w_openai = [el[0] for el in result_features_w_openai]
+            print(str_wo_openai)
+            print(str_w_openai)
 
             c_wo_openai, c_w_openai = 0, 0
 
