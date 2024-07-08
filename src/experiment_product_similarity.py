@@ -258,6 +258,7 @@ def main():
                 for x in list(df[avg_rating_feature])
             ]
             df = df[avg_bool]
+            del df[avg_rating_feature]
 
         print(f"Number of candidates after the average rating filter: {df.shape[0]}")
 
