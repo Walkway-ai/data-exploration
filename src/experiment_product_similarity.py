@@ -238,6 +238,8 @@ def main():
             reviews_table = read_object(fs, "reviews_per_product")
             reviews_table = pd.DataFrame(reviews_table)
 
+            print(reviews_table.columns)
+
             mapping_2_avgrating = defaultdict(
                 lambda: 0,
                 zip(
@@ -327,14 +329,10 @@ def main():
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
 
-        print(df)
-        import sys
-        sys.exit()
-
         ## CATEGORY FILTER
 
         annotated_data = read_object(
-            fs, "product_textual_lang_summarized_subcategories_categories_walkway"
+            fs, "product_textual_english_summarized_categories_walkway"
         )
         annotated_data = pd.DataFrame(annotated_data)
         annotated_data = annotated_data[[product_field, "categories-walkway"]]
@@ -367,6 +365,11 @@ def main():
                 df = df[df[product_field].isin(l_pd)]
 
         print(f"Number of candidates after the category filter: {df.shape[0]}")
+
+        print(df)
+        import sys
+        sys.exit()
+
 
         ## REVIEWS FILTER (sorted)
 
