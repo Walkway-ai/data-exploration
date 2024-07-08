@@ -580,6 +580,9 @@ def main():
             mandatory_similar_products = test_products[args.product_id]
             n = len(mandatory_similar_products)
 
+            print(mandatory_similar_products)
+            print(result_features_wo_openai)
+            print(result_features_w_openai)
             str_wo_openai = "".join(result_features_wo_openai)
             str_w_openai = "".join(result_features_w_openai)
 
