@@ -152,6 +152,26 @@ def main():
 
     args = parser.parse_args()
 
+    if args.embedding_fields == "Product Description, Product Title":
+
+        args.embedding_fields = "description_title"
+
+    elif args.embedding_fields == "Product Title, Incl/Excl Text, Tour Grade Description":
+
+        args.embedding_fields = "title_inclexcl_tgdescription"
+
+    elif args.embedding_fields == "Product Description, Incl/Excl Text":
+
+        args.embedding_fields = "description_inclexcl"
+
+    elif args.embedding_fields == "Product Description, Product Title, Incl/Excl Text, Tour Grade Description":
+
+        args.embedding_fields = "title_inclexcl_tgdescription_description"
+
+    else:
+
+        ValueError("Option not valid.")
+
     # Access the arguments
     product_id = args.product_id
 
