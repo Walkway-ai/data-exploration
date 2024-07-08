@@ -208,10 +208,6 @@ def main():
         df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
         df["score"] = df["score"].astype(float)
         df = df.sort_values(by="score", ascending=False)
-
-        print(df)
-        import sys
-        sys.exit()
         del df["score"]
 
         print(f"Number of initial candidates: {df.shape[0]}")
@@ -330,6 +326,10 @@ def main():
             df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
 
         print(f"Number of candidates after the private filter: {df.shape[0]}")
+
+        print(df)
+        import sys
+        sys.exit()
 
         ## CATEGORY FILTER
 
