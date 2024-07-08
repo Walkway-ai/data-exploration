@@ -63,8 +63,6 @@ def main():
         # Reduce dimensions to the target dimension
         reduced_array = reduce_dimension(concatenated_array=concatenated_array)
 
-        print(reduced_array.shape)
-
         with open(f"tmp/{object_name}", "wb") as f:
 
             pickle.dump(reduced_array, f)
