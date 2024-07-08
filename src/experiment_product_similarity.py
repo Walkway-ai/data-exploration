@@ -186,7 +186,7 @@ def main():
     text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
     product_field = "PRODUCTCODE"
 
-    test_products = yaml.load(open("test-products.yaml"), Loader=yaml.FullLoader)
+    test_products = yaml.load(open("test_products.yaml"), Loader=yaml.FullLoader)
 
     object_name = f"product_similarities_mean_{args.embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
