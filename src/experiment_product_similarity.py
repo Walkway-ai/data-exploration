@@ -195,6 +195,24 @@ def main():
 
         product_ids = [el.strip() for el in args.product_id.split(",")]
 
+        columns_results = [
+            "Product ID",
+            "City",
+            "Supplier Code",
+            "Average Rating",
+            "Start Year",
+            "Landmarks",
+            "Private",
+            "Categories",
+            "Embedding fields",
+            "% wo OpenAI",
+            "% w OpenAI",
+        ]
+
+        append_to_google_sheets(
+            args.credentials, columns_results, "Scores - Product Similarity"
+        )
+
         for product_id in product_ids:
 
             args.product_id = product_id
@@ -583,10 +601,6 @@ def main():
             str_wo_openai = [el[0].split(":")[1].strip() for el in result_features_wo_openai]
             str_w_openai = [el[0].split(":")[1].strip() for el in result_features_w_openai]
 
-            print(str_wo_openai)
-            print(str_w_openai)
-            print(mandatory_similar_products)
-
             c_wo_openai, c_w_openai = 0, 0
 
             for msp in mandatory_similar_products:
@@ -602,27 +616,7 @@ def main():
             pctg_wo_openai = c_wo_openai * 100 / n
             pctg_w_openai = c_w_openai * 100 / n
 
-            print(pctg_wo_openai)
-            print(pctg_w_openai)
-
-            import sys
-            sys.exit()
-
-            columns_results = [
-                "Product ID",
-                "City",
-                "Supplier Code",
-                "Average Rating",
-                "Start Year",
-                "Landmarks",
-                "Private",
-                "Categories",
-                "Embedding fields",
-                "% wo OpenAI",
-                "% w OpenAI",
-            ]
-
-            exp_params = [
+            results_scores = [
                 args.product_id,
                 args.city_name,
                 args.supplier_code,
@@ -634,11 +628,6 @@ def main():
                 args.embedding_fields,
                 pctg_wo_openai,
                 pctg_w_openai,
-            ]
-
-            results_scores = [
-                columns_results,
-                exp_params,
             ]
 
             append_to_google_sheets(
