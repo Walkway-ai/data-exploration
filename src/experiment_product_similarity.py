@@ -238,8 +238,6 @@ def main():
             reviews_table = read_object(fs, "reviews_product")
             reviews_table = pd.DataFrame(reviews_table)
 
-            print(reviews_table.columns)
-
             mapping_2_avgrating = defaultdict(
                 lambda: 0,
                 zip(
