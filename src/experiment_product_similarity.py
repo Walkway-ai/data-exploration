@@ -411,14 +411,15 @@ def main():
             product_features + "\nCategory: " + str(output_product_categories)
         )
 
-        print(product_features)
-        import sys
-        sys.exit()
-
         # Create raw results summary
 
         df = df[:30]
         df = df.sort_values(by="TotalReviews", ascending=False)
+
+
+        print(df)
+        import sys
+        sys.exit()
 
         df_no_openai = df
 
