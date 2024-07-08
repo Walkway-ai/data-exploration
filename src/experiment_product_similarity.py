@@ -581,12 +581,11 @@ def main():
             n = len(mandatory_similar_products)
 
             str_wo_openai = [el[0].split(":")[1].strip() for el in result_features_wo_openai]
-            str_w_openai = [el[0] for el in result_features_w_openai]
+            str_w_openai = [el[0].split(":")[1].strip() for el in result_features_w_openai]
+
             print(str_wo_openai)
             print(str_w_openai)
-
-            import sys
-            sys.exit()
+            print(mandatory_similar_products)
 
             c_wo_openai, c_w_openai = 0, 0
 
@@ -602,6 +601,12 @@ def main():
 
             pctg_wo_openai = c_wo_openai * 100 / n
             pctg_w_openai = c_w_openai * 100 / n
+
+            print(pctg_wo_openai)
+            print(pctg_w_openai)
+
+            import sys
+            sys.exit()
 
             columns_results = [
                 "Product ID",
