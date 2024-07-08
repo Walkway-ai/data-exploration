@@ -655,7 +655,25 @@ def main():
 
             except Exception as e:
 
-                print(e)
+                results_scores = [
+                    [
+                        args.product_id,
+                        args.city_name,
+                        args.supplier_code,
+                        args.average_rating,
+                        args.start_year,
+                        args.landmarks,
+                        args.is_private,
+                        args.categories,
+                        args.embedding_fields,
+                        0,
+                        0,
+                    ]
+                ]
+
+                append_to_google_sheets(
+                    args.credentials, results_scores, "Scores - Product Similarity"
+                )
 
 
 if __name__ == "__main__":
