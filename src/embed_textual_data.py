@@ -4,7 +4,7 @@
 import argparse
 import ast
 import gc
-
+import pickle
 import numpy as np
 import pandas as pd
 import torch
@@ -88,8 +88,10 @@ def get_embeddings(texts, field_name, embedding_model, model_name, average=False
     # Convert embeddings to a torch tensor and save to file.
     embeddings = torch.tensor(embeddings)
     object_name = f"embeddings_{field_name}_{model_name}"
-    #remove_object(fs=fs, object_name=object_name)
-    #save_object(fs=fs, object=embeddings, object_name=object_name)
+
+    with open(f"tmp/{object_name}", "wb") as f:
+
+        pickle.dump(embeddings, f)
 
 
 def main():

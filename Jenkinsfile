@@ -20,7 +20,7 @@ spec:
         }
     }
     parameters {
-        choice(name: 'embedding_fields', choices: ['title_inclexcl_tgdescription', 'description_title', 'description_inclexcl'], description: 'Fields for the embedding model.')
+        choice(name: 'embedding_fields', choices: ['title_inclexcl_tgdescription', 'description_title', 'description_inclexcl', 'title_inclexcl_tgdescription_description'], description: 'Fields for the embedding model.')
     }
     stages {
         stage('retrieve-bigquery-data') {
@@ -118,8 +118,11 @@ spec:
                 container('python') {
                     script {
                         def overwriteArg = params.OVERWRITE_EMBED_TEXTUAL_DATA ? '--overwrite' : ''
+                        sh("mkdir tmp")
                         sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'thenlper/gte-large'")
                         sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en'")
+                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'thenlper/gte-large' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
                     }
                 }
             }
