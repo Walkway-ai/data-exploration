@@ -517,6 +517,7 @@ def main():
             "Landmarks",
             "Private",
             "Categories",
+            "Embedding fields"
         ]
 
         exp_params = [
@@ -528,6 +529,7 @@ def main():
             args.landmarks,
             args.is_private,
             args.categories,
+            args.embedding_fields
         ]
 
         results_out = [
