@@ -416,11 +416,6 @@ def main():
         df = df[:30]
         df = df.sort_values(by="TotalReviews", ascending=False)
 
-
-        print(df)
-        import sys
-        sys.exit()
-
         df_no_openai = df
 
         result_features_wo_openai = list()
@@ -445,6 +440,11 @@ def main():
             )
 
             result_features_wo_openai.append(result_features.split("\n"))
+
+        print(product_features)
+        print(result_features_wo_openai)
+        import sys
+        sys.exit()
 
         # Filter results with OpenAI
 
