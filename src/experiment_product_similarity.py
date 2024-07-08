@@ -172,379 +172,380 @@ def main():
 
         ValueError("Option not valid.")
 
-    # Access the arguments
-    product_id = args.product_id
+    city_feature = "pdt_product_detail_VIDESTINATIONCITY"
+    supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
+    avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
+    time_feature = "bookings_MOSTRECENTORDERDATE"
+    private_feature = "pdt_product_level_ISPRIVATETOUR"
+    text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
+    product_field = "PRODUCTCODE"
 
     object_name = f"product_similarities_mean_{args.embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
 
     if existing_file:
 
-        city_feature = "pdt_product_detail_VIDESTINATIONCITY"
-        supplier_code_feature = "pdt_product_level_SUPPLIERCODE"
-        avg_rating_feature = "pdt_product_level_TOTALAVGRATING"
-        time_feature = "bookings_MOSTRECENTORDERDATE"
-        private_feature = "pdt_product_level_ISPRIVATETOUR"
-        text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
-        product_field = "PRODUCTCODE"
+        product_ids = [el.strip() for el in args.product_id.split(",")]
+        
+        for product_id in product_ids:
 
-        similarity_dict = read_object(fs, object_name)
-        similar_products = similarity_dict[args.product_id]
-        id_score = defaultdict(lambda: 0)
-        id_score.update({key: value for key, value in similar_products})
+            similarity_dict = read_object(fs, object_name)
+            similar_products = similarity_dict[args.product_id]
+            id_score = defaultdict(lambda: 0)
+            id_score.update({key: value for key, value in similar_products})
 
-        all_products = list(id_score.keys())
-        all_products.append(args.product_id)
+            all_products = list(id_score.keys())
+            all_products.append(args.product_id)
 
-        df_raw = read_object(fs, "product_tabular")
-        df_raw = pd.DataFrame(df_raw)
+            df_raw = read_object(fs, "product_tabular")
+            df_raw = pd.DataFrame(df_raw)
 
-        df_raw_possible = df_raw[df_raw[product_field].isin(all_products)]
+            df_raw_possible = df_raw[df_raw[product_field].isin(all_products)]
 
-        df_text = read_object(fs, "product_textual_english_summarized")
-        df_text = pd.DataFrame(df_text)
-        df_text_possible = df_text[df_text[product_field].isin(all_products)]
+            df_text = read_object(fs, "product_textual_english_summarized")
+            df_text = pd.DataFrame(df_text)
+            df_text_possible = df_text[df_text[product_field].isin(all_products)]
 
-        df = pd.merge(df_raw_possible, df_text_possible, on=product_field, how="outer")
-
-        df = df[
-            [
-                product_field,
-                text_field,
-                city_feature,
-                supplier_code_feature,
-                time_feature,
-                private_feature,
-            ]
-        ]
-
-        # Product features
-        df_product = df[df[product_field] == args.product_id]
-
-        # Candidate features
-        df = df[df[product_field] != args.product_id]
-
-        # Sort by scores
-        df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
-        df["score"] = df["score"].astype(float)
-        df = df.sort_values(by="score", ascending=False)
-        del df["score"]
-
-        print(f"Number of initial candidates: {df.shape[0]}")
-
-        ## CITY FILTER
-
-        if args.city_name == "same":
-
-            df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
-
-        print(f"Number of candidates after the city filter: {df.shape[0]}")
-
-        ## SUPPLIER CODE FILTER
-
-        if args.supplier_code == "different":
+            df = pd.merge(df_raw_possible, df_text_possible, on=product_field, how="outer")
 
             df = df[
-                df[supplier_code_feature]
-                != str(list(df_product[supplier_code_feature])[0])
+                [
+                    product_field,
+                    text_field,
+                    city_feature,
+                    supplier_code_feature,
+                    time_feature,
+                    private_feature,
+                ]
             ]
 
-        print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
+            # Product features
+            df_product = df[df[product_field] == args.product_id]
 
-        ## AVERAGE RATING FILTER
+            # Candidate features
+            df = df[df[product_field] != args.product_id]
 
-        if args.average_rating == "similar":
+            # Sort by scores
+            df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
+            df["score"] = df["score"].astype(float)
+            df = df.sort_values(by="score", ascending=False)
+            del df["score"]
+
+            print(f"Number of initial candidates: {df.shape[0]}")
+
+            ## CITY FILTER
+
+            if args.city_name == "same":
+
+                df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
+
+            print(f"Number of candidates after the city filter: {df.shape[0]}")
+
+            ## SUPPLIER CODE FILTER
+
+            if args.supplier_code == "different":
+
+                df = df[
+                    df[supplier_code_feature]
+                    != str(list(df_product[supplier_code_feature])[0])
+                ]
+
+            print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
+
+            ## AVERAGE RATING FILTER
+
+            if args.average_rating == "similar":
+
+                reviews_table = read_object(fs, "reviews_product")
+                reviews_table = pd.DataFrame(reviews_table)
+
+                mapping_2_avgrating = defaultdict(
+                    lambda: 0,
+                    zip(
+                        reviews_table["ProductCode"],
+                        reviews_table["AVGRating"],
+                    ),
+                )
+
+                product_avg_rating = mapping_2_avgrating[args.product_id]
+
+                df[avg_rating_feature] = [
+                    mapping_2_avgrating[el] for el in list(df[product_field])
+                ]
+
+                tolerance = 0.1 * product_avg_rating
+                avg_bool = [
+                    abs(product_avg_rating - float(x)) <= tolerance
+                    for x in list(df[avg_rating_feature])
+                ]
+                df = df[avg_bool]
+                del df[avg_rating_feature]
+
+            print(f"Number of candidates after the average rating filter: {df.shape[0]}")
+
+            ## START YEAR FILTER
+
+            if args.start_year != "any":
+
+                df["year"] = pd.to_datetime(df[time_feature], unit="ms")
+                df["year"] = df["year"].dt.year
+
+                df = df[df["year"] >= int(args.start_year)]
+                del df["year"]
+
+            print(f"Number of candidates after the year filter: {df.shape[0]}")
+
+            ## LANDMARKS FILTER
+
+            d_landmarks = {}
+
+            one_hot_encoding = read_object(fs, "one_hot_encoding_landmarks")
+            name_landmarks = read_object(fs, "name_landmarks")
+            list_products = list(df_raw[product_field])
+
+            idx_product = list_products.index(args.product_id)
+            which_landmarks = one_hot_encoding[idx_product]
+            which_landmarks = [bool(x) for x in which_landmarks]
+            names_landmarks_product = [
+                elem for elem, flag in zip(name_landmarks, which_landmarks) if flag
+            ]
+
+            if names_landmarks_product:
+
+                d_landmarks[args.product_id] = names_landmarks_product
+
+                if args.landmarks == "same":
+
+                    final_candidates = list()
+
+                    for candidate in list(df[product_field]):
+
+                        idx_candidate = list_products.index(candidate)
+                        which_landmarks = one_hot_encoding[idx_candidate]
+                        which_landmarks = [bool(x) for x in which_landmarks]
+                        names_landmarks_candidate = [
+                            elem
+                            for elem, flag in zip(name_landmarks, which_landmarks)
+                            if flag
+                        ]
+                        result = landmarks_are_the_same(
+                            names_landmarks_product, names_landmarks_candidate
+                        )
+
+                        if result:
+
+                            final_candidates.append(candidate)
+                            d_landmarks[candidate] = names_landmarks_candidate
+
+                    df = df[df[product_field].isin(final_candidates)]
+
+            print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
+
+            ## PRIVATE OPTION FILTER
+
+            if args.is_private == "same":
+
+                df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
+
+            print(f"Number of candidates after the private filter: {df.shape[0]}")
+
+            ## CATEGORY FILTER
+
+            annotated_data = read_object(
+                fs, "product_textual_english_summarized_categories_walkway"
+            )
+            annotated_data = pd.DataFrame(annotated_data)
+            annotated_data = annotated_data[[product_field, "categories-walkway"]]
+            annotated_data = annotated_data.set_index(product_field)[
+                "categories-walkway"
+            ].to_dict()
+
+            if args.categories != "any":
+
+                product_categories = annotated_data[args.product_id]
+
+                if product_categories:
+
+                    l_pd = list()
+
+                    for prd_ in list(df[product_field]):
+
+                        if args.categories == "same":
+
+                            if set(product_categories).issubset(set(annotated_data[prd_])):
+
+                                l_pd.append(prd_)
+
+                        if args.categories == "one":
+
+                            if any(ct in annotated_data[prd_] for ct in product_categories):
+
+                                l_pd.append(prd_)
+
+                    df = df[df[product_field].isin(l_pd)]
+
+            print(f"Number of candidates after the category filter: {df.shape[0]}")
+
+
+            ## REVIEWS FILTER (sorted)
 
             reviews_table = read_object(fs, "reviews_product")
             reviews_table = pd.DataFrame(reviews_table)
 
-            mapping_2_avgrating = defaultdict(
+            mapping_2_totalreviews = defaultdict(
                 lambda: 0,
                 zip(
                     reviews_table["ProductCode"],
-                    reviews_table["AVGRating"],
+                    reviews_table["TotalReviews"],
                 ),
             )
 
-            product_avg_rating = mapping_2_avgrating[args.product_id]
+            df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
+            df = df[df["TotalReviews"] != 0]
+            df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 75)]
 
-            df[avg_rating_feature] = [
-                mapping_2_avgrating[el] for el in list(df[product_field])
+            df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
+
+            print(f"Number of candidates after the reviews filter: {df.shape[0]}")
+
+            del df[city_feature]
+            del df[supplier_code_feature]
+            del df[time_feature]
+            del df[private_feature]
+
+            del df_product[city_feature]
+            del df_product[supplier_code_feature]
+            del df_product[time_feature]
+            del df_product[private_feature]
+
+            # Create selected product summary
+
+            output_product_categories = list(set(annotated_data[args.product_id]))
+
+            product_features = "\n".join(
+                [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
+            )
+            product_features = product_features.replace(
+                text_field, "Summarized description"
+            )
+            product_features = (
+                product_features + "\nCategory: " + str(output_product_categories)
+            )
+
+            # Create raw results summary
+
+            df = df[:30]
+            df = df.sort_values(by="TotalReviews", ascending=False)
+
+            df_no_openai = df
+
+            result_features_wo_openai = list()
+
+            for _, row in df_no_openai.iterrows():
+
+                df_now = pd.DataFrame(row).T
+
+                product_id = list(df_now[product_field])[0]
+                no_openai_product_categories = list(set(annotated_data[product_id]))
+
+                result_features = "\n".join(
+                    [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
+                )
+                result_features = result_features.replace(
+                    text_field,
+                    "Summarized description",
+                )
+
+                result_features = (
+                    result_features + "\n Category: " + str(no_openai_product_categories)
+                )
+
+                result_features_wo_openai.append(result_features.split("\n"))
+
+            # Filter results with OpenAI
+
+            result_features_w_openai = list()
+
+            try:
+
+                df_openai = df
+                result = query_gpt(args.apikey, text_field, df_openai, df_product)
+                result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
+                result = ast.literal_eval(result)
+
+                if len(result) > 0:
+
+                    df_openai = df_openai[df_openai[product_field].isin(result)]
+
+                    for _, row in df_openai.iterrows():
+
+                        df_now = pd.DataFrame(row).T
+
+                        product_id = list(df_now[product_field])[0]
+                        openai_product_categories = list(set(annotated_data[product_id]))
+
+                        result_features = "\n".join(
+                            [
+                                f"{col}: {list(df_now[col])[0]}"
+                                for col in list(df_now.columns)
+                            ]
+                        )
+                        result_features = result_features.replace(
+                            text_field,
+                            "Summarized description",
+                        )
+
+                        result_features = (
+                            result_features
+                            + "\n Category: "
+                            + str(openai_product_categories)
+                        )
+
+                        result_features_w_openai.append(result_features.split("\n"))
+
+            except Exception as e:
+
+                print(e)
+
+                print("No products were found for the combination.")
+
+            columns = [
+                "Experiment ID",
+                "City",
+                "Supplier Code",
+                "Average Rating",
+                "Start Year",
+                "Landmarks",
+                "Private",
+                "Categories",
+                "Embedding fields"
             ]
 
-            tolerance = 0.1 * product_avg_rating
-            avg_bool = [
-                abs(product_avg_rating - float(x)) <= tolerance
-                for x in list(df[avg_rating_feature])
+            exp_params = [
+                args.experiment_id,
+                args.city_name,
+                args.supplier_code,
+                args.average_rating,
+                args.start_year,
+                args.landmarks,
+                args.is_private,
+                args.categories,
+                args.embedding_fields
             ]
-            df = df[avg_bool]
-            del df[avg_rating_feature]
 
-        print(f"Number of candidates after the average rating filter: {df.shape[0]}")
-
-        ## START YEAR FILTER
-
-        if args.start_year != "any":
-
-            df["year"] = pd.to_datetime(df[time_feature], unit="ms")
-            df["year"] = df["year"].dt.year
-
-            df = df[df["year"] >= int(args.start_year)]
-            del df["year"]
-
-        print(f"Number of candidates after the year filter: {df.shape[0]}")
-
-        ## LANDMARKS FILTER
-
-        d_landmarks = {}
-
-        one_hot_encoding = read_object(fs, "one_hot_encoding_landmarks")
-        name_landmarks = read_object(fs, "name_landmarks")
-        list_products = list(df_raw[product_field])
-
-        idx_product = list_products.index(args.product_id)
-        which_landmarks = one_hot_encoding[idx_product]
-        which_landmarks = [bool(x) for x in which_landmarks]
-        names_landmarks_product = [
-            elem for elem, flag in zip(name_landmarks, which_landmarks) if flag
-        ]
-
-        if names_landmarks_product:
-
-            d_landmarks[args.product_id] = names_landmarks_product
-
-            if args.landmarks == "same":
-
-                final_candidates = list()
-
-                for candidate in list(df[product_field]):
-
-                    idx_candidate = list_products.index(candidate)
-                    which_landmarks = one_hot_encoding[idx_candidate]
-                    which_landmarks = [bool(x) for x in which_landmarks]
-                    names_landmarks_candidate = [
-                        elem
-                        for elem, flag in zip(name_landmarks, which_landmarks)
-                        if flag
-                    ]
-                    result = landmarks_are_the_same(
-                        names_landmarks_product, names_landmarks_candidate
-                    )
-
-                    if result:
-
-                        final_candidates.append(candidate)
-                        d_landmarks[candidate] = names_landmarks_candidate
-
-                df = df[df[product_field].isin(final_candidates)]
-
-        print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
-
-        ## PRIVATE OPTION FILTER
-
-        if args.is_private == "same":
-
-            df = df[df[private_feature] == str(list(df_product[private_feature])[0])]
-
-        print(f"Number of candidates after the private filter: {df.shape[0]}")
-
-        ## CATEGORY FILTER
-
-        annotated_data = read_object(
-            fs, "product_textual_english_summarized_categories_walkway"
-        )
-        annotated_data = pd.DataFrame(annotated_data)
-        annotated_data = annotated_data[[product_field, "categories-walkway"]]
-        annotated_data = annotated_data.set_index(product_field)[
-            "categories-walkway"
-        ].to_dict()
-
-        if args.categories != "any":
-
-            product_categories = annotated_data[args.product_id]
-
-            if product_categories:
-
-                l_pd = list()
-
-                for prd_ in list(df[product_field]):
-
-                    if args.categories == "same":
-
-                        if set(product_categories).issubset(set(annotated_data[prd_])):
-
-                            l_pd.append(prd_)
-
-                    if args.categories == "one":
-
-                        if any(ct in annotated_data[prd_] for ct in product_categories):
-
-                            l_pd.append(prd_)
-
-                df = df[df[product_field].isin(l_pd)]
-
-        print(f"Number of candidates after the category filter: {df.shape[0]}")
-
-
-        ## REVIEWS FILTER (sorted)
-
-        reviews_table = read_object(fs, "reviews_product")
-        reviews_table = pd.DataFrame(reviews_table)
-
-        mapping_2_totalreviews = defaultdict(
-            lambda: 0,
-            zip(
-                reviews_table["ProductCode"],
-                reviews_table["TotalReviews"],
-            ),
-        )
-
-        df["TotalReviews"] = [mapping_2_totalreviews[el] for el in df[product_field]]
-        df = df[df["TotalReviews"] != 0]
-        df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 75)]
-
-        df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
-
-        print(f"Number of candidates after the reviews filter: {df.shape[0]}")
-
-        del df[city_feature]
-        del df[supplier_code_feature]
-        del df[time_feature]
-        del df[private_feature]
-
-        del df_product[city_feature]
-        del df_product[supplier_code_feature]
-        del df_product[time_feature]
-        del df_product[private_feature]
-
-        # Create selected product summary
-
-        output_product_categories = list(set(annotated_data[args.product_id]))
-
-        product_features = "\n".join(
-            [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
-        )
-        product_features = product_features.replace(
-            text_field, "Summarized description"
-        )
-        product_features = (
-            product_features + "\nCategory: " + str(output_product_categories)
-        )
-
-        # Create raw results summary
-
-        df = df[:30]
-        df = df.sort_values(by="TotalReviews", ascending=False)
-
-        df_no_openai = df
-
-        result_features_wo_openai = list()
-
-        for _, row in df_no_openai.iterrows():
-
-            df_now = pd.DataFrame(row).T
-
-            product_id = list(df_now[product_field])[0]
-            no_openai_product_categories = list(set(annotated_data[product_id]))
-
-            result_features = "\n".join(
-                [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
-            )
-            result_features = result_features.replace(
-                text_field,
-                "Summarized description",
-            )
-
-            result_features = (
-                result_features + "\n Category: " + str(no_openai_product_categories)
-            )
-
-            result_features_wo_openai.append(result_features.split("\n"))
-
-        # Filter results with OpenAI
-
-        result_features_w_openai = list()
-
-        try:
-
-            df_openai = df
-            result = query_gpt(args.apikey, text_field, df_openai, df_product)
-            result = re.findall(r"\[.*?\]", result.choices[0].message.content)[0]
-            result = ast.literal_eval(result)
-
-            if len(result) > 0:
-
-                df_openai = df_openai[df_openai[product_field].isin(result)]
-
-                for _, row in df_openai.iterrows():
-
-                    df_now = pd.DataFrame(row).T
-
-                    product_id = list(df_now[product_field])[0]
-                    openai_product_categories = list(set(annotated_data[product_id]))
-
-                    result_features = "\n".join(
-                        [
-                            f"{col}: {list(df_now[col])[0]}"
-                            for col in list(df_now.columns)
-                        ]
-                    )
-                    result_features = result_features.replace(
-                        text_field,
-                        "Summarized description",
-                    )
-
-                    result_features = (
-                        result_features
-                        + "\n Category: "
-                        + str(openai_product_categories)
-                    )
-
-                    result_features_w_openai.append(result_features.split("\n"))
-
-        except Exception as e:
-
-            print(e)
-
-            print("No products were found for the combination.")
-
-        columns = [
-            "Experiment ID",
-            "City",
-            "Supplier Code",
-            "Average Rating",
-            "Start Year",
-            "Landmarks",
-            "Private",
-            "Categories",
-            "Embedding fields"
-        ]
-
-        exp_params = [
-            args.experiment_id,
-            args.city_name,
-            args.supplier_code,
-            args.average_rating,
-            args.start_year,
-            args.landmarks,
-            args.is_private,
-            args.categories,
-            args.embedding_fields
-        ]
-
-        results_out = [
-            columns,
-            exp_params,
-            product_features.split("\n"),
-            ["SIMILAR PRODUCTS WITHOUT OPENAI"],
-            result_features_wo_openai,
-            ["SIMILAR PRODUCTS WITH OPENAI"],
-            result_features_w_openai,
-            ["*****"],
-        ]
-
-        append_to_google_sheets(args.credentials, results_out)
-
+            results_out = [
+                columns,
+                exp_params,
+                product_features.split("\n"),
+                ["SIMILAR PRODUCTS WITHOUT OPENAI"],
+                result_features_wo_openai,
+                ["SIMILAR PRODUCTS WITH OPENAI"],
+                result_features_w_openai,
+                ["*****"],
+            ]
+
+            append_to_google_sheets(args.credentials, results_out)
+        
 
 if __name__ == "__main__":
     main()
