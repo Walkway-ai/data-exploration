@@ -441,11 +441,6 @@ def main():
 
             result_features_wo_openai.append(result_features.split("\n"))
 
-        print(product_features)
-        print(result_features_wo_openai)
-        import sys
-        sys.exit()
-
         # Filter results with OpenAI
 
         result_features_w_openai = list()
