@@ -616,7 +616,7 @@ def main():
             pctg_wo_openai = c_wo_openai * 100 / n
             pctg_w_openai = c_w_openai * 100 / n
 
-            results_scores = [
+            results_scores = [[
                 args.product_id,
                 args.city_name,
                 args.supplier_code,
@@ -628,7 +628,7 @@ def main():
                 args.embedding_fields,
                 pctg_wo_openai,
                 pctg_w_openai,
-            ]
+            ]]
 
             append_to_google_sheets(
                 args.credentials, results_scores, "Scores - Product Similarity"
