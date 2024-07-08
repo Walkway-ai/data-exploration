@@ -386,10 +386,6 @@ def main():
 
         print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
-        print(df)
-        import sys
-        sys.exit()
-
         del df[city_feature]
         del df[supplier_code_feature]
         del df[avg_rating_feature]
@@ -415,6 +411,10 @@ def main():
         product_features = (
             product_features + "\nCategory: " + str(output_product_categories)
         )
+
+        print(product_features)
+        import sys
+        sys.exit()
 
         # Create raw results summary
 
