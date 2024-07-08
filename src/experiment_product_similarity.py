@@ -441,6 +441,8 @@ def main():
 
             result_features_wo_openai.append(result_features.split("\n"))
 
+        # Filter results with OpenAI
+
         result_features_w_openai = list()
 
         try:

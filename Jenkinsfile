@@ -75,26 +75,16 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_LANDMARK_DETECTION ? '--overwrite' : ''
                         sh("python3 src/landmark_detection.py --overwrite")
                     }
                 }
             }
         }
-        stage('generate-price-table') { 
+        stage('generate-auxiliary-tables') { 
             steps {
                 container('python') {
                     script {
                         sh("python3 src/generate_price_table.py --overwrite")
-                    }
-                }
-            }
-        }
-        stage('generate-reviews-table') { 
-            steps {
-                container('python') {
-                    script {
-                        def overwriteArg = params.OVERWRITE_PRICE_CATEGORIES ? '--overwrite' : ''
                         sh("python3 src/generate_reviews_table.py --overwrite")
                     }
                 }
@@ -105,9 +95,8 @@ spec:
                 container('python') {
                     script {
                         withCredentials([string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')]) {
-                            def overwriteArg = params.OVERWRITE_SUBCATEGORIES_ANNOTATION ? '--overwrite' : ''
-                            sh("python3 src/annotate_categories_gpt.py ${overwriteArg} --model_name 'gpt-4o' --apikey ${OPENAI_API_KEY}")
-                            sh("python3 src/map_gpt_categories_to_taxonomy.py ${overwriteArg} --model_name 'gpt-4o' --apikey ${OPENAI_API_KEY}")
+                            sh("python3 src/annotate_categories_gpt.py --overwrite --model_name 'gpt-4o' --apikey ${OPENAI_API_KEY}")
+                            sh("python3 src/map_gpt_categories_to_taxonomy.py --overwrite --model_name 'gpt-4o' --apikey ${OPENAI_API_KEY}")
                         }
                     }
                 }
@@ -117,24 +106,12 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_EMBED_TEXTUAL_DATA ? '--overwrite' : ''
                         sh("mkdir tmp")
-                        sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'thenlper/gte-large'")
-                        sh("python3 src/embed_textual_data.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en'")
-                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'thenlper/gte-large' --embedding_fields ${params.embedding_fields}")
-                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
-                    }
-                }
-            }
-        }
-        stage('generate-model-embeddings') { 
-            steps {
-                container('python') {
-                    script {
-                        def overwriteArg = params.OVERWRITE_GENERATE_MODEL_EMBEDDINGS ? '--overwrite' : ''
-                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'thenlper/gte-large' --embedding_fields ${params.embedding_fields}")
-                        sh("python3 src/generate_model_embeddings.py ${overwriteArg} --embedding_model 'jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
-                        sh("python3 src/generate_mean_embeddings.py ${overwriteArg} --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/embed_textual_data.py --overwrite --embedding_model 'thenlper/gte-large'")
+                        sh("python3 src/embed_textual_data.py --overwrite --embedding_model 'jinaai/jina-embeddings-v2-base-en'")
+                        sh("python3 src/generate_model_embeddings.py --overwrite --embedding_model 'thenlper/gte-large' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/generate_model_embeddings.py --overwrite --embedding_model 'jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/generate_mean_embeddings.py --overwrite --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
                     }
                 }
             }
@@ -143,8 +120,7 @@ spec:
             steps {
                 container('python') {
                     script {
-                        def overwriteArg = params.OVERWRITE_GENERATE_PRODUCT_SIMILARITY ? '--overwrite' : ''
-                        sh("python3 src/generate_product_similarity.py ${overwriteArg} --embedding_model 'mean/mean'")
+                        sh("python3 src/generate_product_similarity.py --overwrite --embedding_model 'mean/mean' --embedding_fields ${params.embedding_fields}")
                     }
                 }
             }

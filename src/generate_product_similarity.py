@@ -6,6 +6,7 @@ import pandas as pd
 import yaml
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
+from generate_model_embeddings import read_embedding
 
 from mongodb_lib import *
 
@@ -62,24 +63,27 @@ def main():
     parser.add_argument(
         "--embedding_model", type=str, required=True, help="The embedding model."
     )
+    parser.add_argument(
+        "--embedding_fields", type=str, required=True, help="Embedding fields."
+    )
 
     args = parser.parse_args()
 
     embedding_model = args.embedding_model
     model_name = embedding_model.split("/")[-1]
 
-    object_name = f"product_similarities_{model_name}_title_inclexcl_tgdescription"
+    embedding_fields = args.embedding_fields
+
+    object_name = f"product_similarities_{model_name}_{embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
 
     if not existing_file or args.overwrite:
 
         # Load the summarized product textual data from MongoDB.
-        df = read_object(fs, "product_textual_lang_summarized")
+        df = read_object(fs, "product_textual_english_summarized")
         df = pd.DataFrame(df)
 
-        # Load the combined embeddings from MongoDB.
-        combined_embeddings = read_object(fs, f"final_embeddings_{model_name}")
-
+        combined_embeddings = read_embedding(f"tmp/model_embeddings_{model_name}_{embedding_fields}")
         combined_embeddings = np.array(combined_embeddings)
 
         similarity_dict = {}
@@ -101,6 +105,8 @@ def main():
             similarity_dict[df["PRODUCTCODE"].iloc[given_product_index]] = list(
                 zip(similar_products, similarity_scores)
             )
+
+        print(similarity_dict)
 
         # Save the similarity dictionary to MongoDB.
         remove_object(fs=fs, object_name=object_name)

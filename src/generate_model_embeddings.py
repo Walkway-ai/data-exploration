@@ -70,8 +70,6 @@ def main():
 
         final_embeddings = np.concatenate(embeddings,axis=1)
 
-        print(final_embeddings.shape)
-
         with open(f"tmp/{object_name}", "wb") as f:
 
             pickle.dump(final_embeddings, f)
