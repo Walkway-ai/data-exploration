@@ -235,7 +235,7 @@ def main():
 
         if args.average_rating == "similar":
 
-            reviews_table = read_object(fs, "reviews_per_product")
+            reviews_table = read_object(fs, "reviews_product")
             reviews_table = pd.DataFrame(reviews_table)
 
             print(reviews_table.columns)
