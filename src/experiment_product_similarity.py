@@ -613,7 +613,7 @@ def main():
             ]
 
             append_to_google_sheets(
-                args.credentials, results_scores, "WalkwayAI - Product Similarity"
+                args.credentials, results_scores, "Scores - Product Similarity"
             )
 
             time.sleep(20)
