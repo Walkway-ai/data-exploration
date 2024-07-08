@@ -205,6 +205,10 @@ def main():
         # Candidate features
         df = df[df[product_field] != args.product_id]
 
+        print(df_product)
+
+        print(df)
+
         # Sort by scores
         df["score"] = [id_score[p_id] for p_id in list(df[product_field])]
         df = df.sort_values(by="score", ascending=False)
