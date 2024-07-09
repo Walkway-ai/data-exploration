@@ -2,8 +2,9 @@ import argparse
 import ast
 import gc
 import re
-from collections import defaultdict
 import time
+from collections import defaultdict
+
 import gspread
 import numpy as np
 import pandas as pd
@@ -450,9 +451,7 @@ def main():
                 df["TotalReviews"] = [
                     mapping_2_totalreviews[el] for el in df[product_field]
                 ]
-                df = df[
-                    df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 5)
-                ]
+                df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 5)]
 
                 df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
                 df = df.sort_values(by="TotalReviews", ascending=False)
@@ -525,10 +524,12 @@ def main():
                     try:
 
                         df_openai = df
-                        result = query_gpt(args.apikey, text_field, df_openai, df_product)
-                        result = re.findall(r"\[.*?\]", result.choices[0].message.content)[
-                            0
-                        ]
+                        result = query_gpt(
+                            args.apikey, text_field, df_openai, df_product
+                        )
+                        result = re.findall(
+                            r"\[.*?\]", result.choices[0].message.content
+                        )[0]
                         result = ast.literal_eval(result)
 
                         if len(result) > 0:
@@ -561,7 +562,9 @@ def main():
                                     + str(openai_product_categories)
                                 )
 
-                                result_features_w_openai.append(result_features.split("\n"))
+                                result_features_w_openai.append(
+                                    result_features.split("\n")
+                                )
 
                     except Exception as e:
 
@@ -604,21 +607,32 @@ def main():
                     ["*****"],
                 ]
 
-                append_to_google_sheets(
-                    args.credentials, results_out, "WalkwayAI - Product Similarity"
-                )
+                # append_to_google_sheets(
+                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
+                # )
 
-                time.sleep(15)
-                time.sleep(15)
+                # time.sleep(15)
+                # time.sleep(15)
+                # time.sleep(15)
 
                 # Calculate score for this product
                 mandatory_similar_products_original = test_products[args.product_id]
-                mandatory_similar_products_original = mandatory_similar_products_original.split(",")
-                mandatory_similar_products_original = [el.strip() for el in mandatory_similar_products_original]
-                possible_similar_products = [el for el in mandatory_similar_products_original if el in list(df_raw[product_field])]
+                mandatory_similar_products_original = (
+                    mandatory_similar_products_original.split(",")
+                )
+                mandatory_similar_products_original = [
+                    el.strip() for el in mandatory_similar_products_original
+                ]
+                possible_similar_products = [
+                    el
+                    for el in mandatory_similar_products_original
+                    if el in list(df_raw[product_field])
+                ]
                 n_original_mandatory_products = len(mandatory_similar_products_original)
                 n_possible_mandatory_products = len(possible_similar_products)
-                print(f"Out of {n_original_mandatory_products} mandatory matches, {n_possible_mandatory_products} exist in the dataset.")
+                print(
+                    f"Out of {n_original_mandatory_products} mandatory matches, {n_possible_mandatory_products} exist in the dataset."
+                )
                 n = n_possible_mandatory_products
 
                 str_wo_openai = [
