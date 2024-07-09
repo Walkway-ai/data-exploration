@@ -264,6 +264,8 @@ def main():
                 df = df.sort_values(by="score", ascending=False)
                 del df["score"]
 
+                print(f"Selected product: {args.product_id}")
+
                 print(f"Number of initial candidates: {df.shape[0]}")
 
                 ## CITY FILTER
