@@ -448,15 +448,15 @@ def main():
                     ),
                 )
 
+                df = df[:50]
+
                 df["TotalReviews"] = [
                     mapping_2_totalreviews[el] for el in df[product_field]
                 ]
                 df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 20)]
-
-                df = df[:30]
+                df = df.sort_values(by="TotalReviews", ascending=False)
 
                 df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
-                df = df.sort_values(by="TotalReviews", ascending=False)
 
                 print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
