@@ -671,9 +671,9 @@ def main():
                     ]
                 ]
 
-                append_to_google_sheets(
-                    args.credentials, results_scores, "Scores - Product Similarity 24"
-                )
+                # append_to_google_sheets(
+                #     args.credentials, results_scores, "Scores - Product Similarity 24"
+                # )
 
             except Exception as e:
 
@@ -695,9 +695,9 @@ def main():
                     ]
                 ]
 
-                append_to_google_sheets(
-                    args.credentials, results_scores, "Scores - Product Similarity 24"
-                )
+                # append_to_google_sheets(
+                #     args.credentials, results_scores, "Scores - Product Similarity 24"
+                # )
 
 
 if __name__ == "__main__":
