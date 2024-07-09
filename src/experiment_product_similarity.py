@@ -612,6 +612,7 @@ def main():
 
                 # Calculate score for this product
                 mandatory_similar_products = test_products[args.product_id]
+                mandatory_similar_products = [el for el in mandatory_similar_products if el in list(df_raw[product_field])]
                 n = len(mandatory_similar_products)
 
                 str_wo_openai = [
