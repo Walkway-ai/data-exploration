@@ -447,13 +447,11 @@ def main():
                     ),
                 )
 
-                df = df[:50]
                 df["TotalReviews"] = [
                     mapping_2_totalreviews[el] for el in df[product_field]
                 ]
-                df = df[df["TotalReviews"] >= 0]
                 df = df[
-                    df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 70)
+                    df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 5)
                 ]
 
                 df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
@@ -614,10 +612,11 @@ def main():
                 # time.sleep(15)
 
                 # Calculate score for this product
-                mandatory_similar_products = test_products[args.product_id]
-                mandatory_similar_products = mandatory_similar_products.split(",")
-                mandatory_similar_products = [el.strip() for el in mandatory_similar_products]
-                mandatory_similar_products = [el for el in mandatory_similar_products if el in list(df_raw[product_field])]
+                mandatory_similar_products_original = test_products[args.product_id]
+                mandatory_similar_products_original = mandatory_similar_products_original.split(",")
+                mandatory_similar_products_original = [el.strip() for el in mandatory_similar_products_original]
+                mandatory_similar_products = [el for el in mandatory_similar_products_original if el in list(df_raw[product_field])]
+                print(len(mandatory_similar_products_original), len(mandatory_similar_products))
                 n = len(mandatory_similar_products)
 
                 str_wo_openai = [
