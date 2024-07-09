@@ -190,6 +190,8 @@ def main():
     object_name = f"product_similarities_mean_{args.embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
 
+    run_openai = False
+
     if existing_file:
 
         product_ids = [el.strip() for el in args.product_id.split(",")]
@@ -445,6 +447,7 @@ def main():
                     ),
                 )
 
+                df = df[:50]
                 df["TotalReviews"] = [
                     mapping_2_totalreviews[el] for el in df[product_field]
                 ]
@@ -454,6 +457,7 @@ def main():
                 ]
 
                 df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
+                df = df.sort_values(by="TotalReviews", ascending=False)
 
                 print(f"Number of candidates after the reviews filter: {df.shape[0]}")
 
@@ -483,11 +487,6 @@ def main():
                 product_features = (
                     product_features + "\nCategory: " + str(output_product_categories)
                 )
-
-                # Create raw results summary
-
-                df = df[:50]
-                df = df.sort_values(by="TotalReviews", ascending=False)
 
                 df_no_openai = df
 
@@ -523,52 +522,54 @@ def main():
 
                 result_features_w_openai = list()
 
-                try:
+                if run_openai:
 
-                    df_openai = df
-                    result = query_gpt(args.apikey, text_field, df_openai, df_product)
-                    result = re.findall(r"\[.*?\]", result.choices[0].message.content)[
-                        0
-                    ]
-                    result = ast.literal_eval(result)
+                    try:
 
-                    if len(result) > 0:
+                        df_openai = df
+                        result = query_gpt(args.apikey, text_field, df_openai, df_product)
+                        result = re.findall(r"\[.*?\]", result.choices[0].message.content)[
+                            0
+                        ]
+                        result = ast.literal_eval(result)
 
-                        df_openai = df_openai[df_openai[product_field].isin(result)]
+                        if len(result) > 0:
 
-                        for _, row in df_openai.iterrows():
+                            df_openai = df_openai[df_openai[product_field].isin(result)]
 
-                            df_now = pd.DataFrame(row).T
+                            for _, row in df_openai.iterrows():
 
-                            product_id = list(df_now[product_field])[0]
-                            openai_product_categories = list(
-                                set(annotated_data[product_id])
-                            )
+                                df_now = pd.DataFrame(row).T
 
-                            result_features = "\n".join(
-                                [
-                                    f"{col}: {list(df_now[col])[0]}"
-                                    for col in list(df_now.columns)
-                                ]
-                            )
-                            result_features = result_features.replace(
-                                text_field,
-                                "Summarized description",
-                            )
+                                product_id = list(df_now[product_field])[0]
+                                openai_product_categories = list(
+                                    set(annotated_data[product_id])
+                                )
 
-                            result_features = (
-                                result_features
-                                + "\n Category: "
-                                + str(openai_product_categories)
-                            )
+                                result_features = "\n".join(
+                                    [
+                                        f"{col}: {list(df_now[col])[0]}"
+                                        for col in list(df_now.columns)
+                                    ]
+                                )
+                                result_features = result_features.replace(
+                                    text_field,
+                                    "Summarized description",
+                                )
 
-                            result_features_w_openai.append(result_features.split("\n"))
+                                result_features = (
+                                    result_features
+                                    + "\n Category: "
+                                    + str(openai_product_categories)
+                                )
 
-                except Exception as e:
+                                result_features_w_openai.append(result_features.split("\n"))
 
-                    print(e)
+                    except Exception as e:
 
-                    print("No products were found for the combination.")
+                        print(e)
+
+                        print("No products were found for the combination.")
 
                 columns_results = [
                     "Experiment ID",
