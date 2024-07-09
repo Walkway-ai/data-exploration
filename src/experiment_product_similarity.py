@@ -607,7 +607,8 @@ def main():
                     args.credentials, results_out, "WalkwayAI - Product Similarity"
                 )
 
-                time.sleep(30)
+                time.sleep(15)
+                time.sleep(15)
 
                 # Calculate score for this product
                 mandatory_similar_products = test_products[args.product_id]
