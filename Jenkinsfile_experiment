@@ -20,7 +20,7 @@ spec:
 }
 }
     parameters {
-        string(name: 'product_id', defaultValue: '15081P466,16168P1', description: 'List of IDs of the products, separated by a comma.')
+        string(name: 'product_id', defaultValue: '15081P466', description: 'List of IDs of the products, separated by a comma.')
         choice(name: 'embedding_fields', choices: ['Product Description, Product Title', 'Product Title, Incl/Excl Text, Tour Grade Description', 'Product Description, Incl/Excl Text', 'Product Description, Product Title, Incl/Excl Text, Tour Grade Description'], description: 'Fields for the embedding model.')
     }
     stages {
