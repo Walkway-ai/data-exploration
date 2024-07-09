@@ -448,8 +448,6 @@ def main():
                     ),
                 )
 
-                df = df[:50]
-
                 df["TotalReviews"] = [
                     mapping_2_totalreviews[el] for el in df[product_field]
                 ]
