@@ -615,6 +615,8 @@ def main():
                 time.sleep(15)
                 time.sleep(15)
 
+                gc.collect()
+
                 # Calculate score for this product
                 mandatory_similar_products_original = test_products[args.product_id]
                 mandatory_similar_products_original = (
