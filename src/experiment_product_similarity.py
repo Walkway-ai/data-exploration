@@ -604,12 +604,12 @@ def main():
                     ["*****"],
                 ]
 
-                # append_to_google_sheets(
-                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
-                # )
+                append_to_google_sheets(
+                    args.credentials, results_out, "WalkwayAI - Product Similarity"
+                )
 
-                # time.sleep(15)
-                # time.sleep(15)
+                time.sleep(15)
+                time.sleep(15)
 
                 # Calculate score for this product
                 mandatory_similar_products_original = test_products[args.product_id]
@@ -618,7 +618,7 @@ def main():
                 possible_similar_products = [el for el in mandatory_similar_products_original if el in list(df_raw[product_field])]
                 n_original_mandatory_products = len(mandatory_similar_products_original)
                 n_possible_mandatory_products = len(possible_similar_products)
-                print(f"Out of {n_original_mandatory_products} mandatory matches, only {n_possible_mandatory_products} exist in the dataset.")
+                print(f"Out of {n_original_mandatory_products} mandatory matches, {n_possible_mandatory_products} exist in the dataset.")
                 n = n_possible_mandatory_products
 
                 str_wo_openai = [
