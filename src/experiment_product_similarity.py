@@ -486,7 +486,7 @@ def main():
 
                 # Create raw results summary
 
-                df = df[:30]
+                df = df[:50]
                 df = df.sort_values(by="TotalReviews", ascending=False)
 
                 df_no_openai = df
