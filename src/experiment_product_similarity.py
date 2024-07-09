@@ -213,9 +213,9 @@ def main():
             ]
         ]
 
-        append_to_google_sheets(
-            args.credentials, columns_results, "Scores - Product Similarity 24"
-        )
+        # append_to_google_sheets(
+        #     args.credentials, columns_results, "Scores - Product Similarity 24"
+        # )
 
         for product_id in product_ids:
 
