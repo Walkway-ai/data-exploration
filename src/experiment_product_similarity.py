@@ -211,7 +211,7 @@ def main():
         ]
 
         append_to_google_sheets(
-            args.credentials, columns_results, "Scores - Product Similarity"
+            args.credentials, columns_results, "Scores - Product Similarity 24"
         )
 
         for product_id in product_ids:
@@ -650,7 +650,7 @@ def main():
                 ]
 
                 append_to_google_sheets(
-                    args.credentials, results_scores, "Scores - Product Similarity"
+                    args.credentials, results_scores, "Scores - Product Similarity 24"
                 )
 
             except Exception as e:
@@ -672,7 +672,7 @@ def main():
                 ]
 
                 append_to_google_sheets(
-                    args.credentials, results_scores, "Scores - Product Similarity"
+                    args.credentials, results_scores, "Scores - Product Similarity 24"
                 )
 
 
