@@ -607,13 +607,13 @@ def main():
                     ["*****"],
                 ]
 
-                # append_to_google_sheets(
-                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
-                # )
+                append_to_google_sheets(
+                    args.credentials, results_out, "WalkwayAI - Product Similarity"
+                )
 
-                # time.sleep(15)
-                # time.sleep(15)
-                # time.sleep(15)
+                time.sleep(15)
+                time.sleep(15)
+                time.sleep(15)
 
                 # Calculate score for this product
                 mandatory_similar_products_original = test_products[args.product_id]
