@@ -454,7 +454,6 @@ def main():
                     mapping_2_totalreviews[el] for el in df[product_field]
                 ]
                 df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 40)]
-                print(np.percentile(list(df["TotalReviews"]), 40))
                 df = df.sort_values(by="TotalReviews", ascending=False)
 
                 df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
@@ -610,15 +609,15 @@ def main():
                     ["*****"],
                 ]
 
-                # append_to_google_sheets(
-                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
-                # )
+                append_to_google_sheets(
+                    args.credentials, results_out, "WalkwayAI - Product Similarity"
+                )
 
-                # time.sleep(15)
-                # time.sleep(15)
-                # time.sleep(15)
+                time.sleep(15)
+                time.sleep(15)
+                time.sleep(15)
 
-                # gc.collect()
+                gc.collect()
 
                 # Calculate score for this product
                 mandatory_similar_products_original = test_products[args.product_id]
