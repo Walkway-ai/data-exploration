@@ -615,9 +615,11 @@ def main():
                 mandatory_similar_products_original = test_products[args.product_id]
                 mandatory_similar_products_original = mandatory_similar_products_original.split(",")
                 mandatory_similar_products_original = [el.strip() for el in mandatory_similar_products_original]
-                mandatory_similar_products = [el for el in mandatory_similar_products_original if el in list(df_raw[product_field])]
-                print(len(mandatory_similar_products_original), len(mandatory_similar_products))
-                n = len(mandatory_similar_products)
+                possible_similar_products = [el for el in mandatory_similar_products_original if el in list(df_raw[product_field])]
+                n_original_mandatory_products = len(mandatory_similar_products_original)
+                n_possible_mandatory_products = len(possible_similar_products)
+                print(f"Out of {n_original_mandatory_products} mandatory matches, only {n_possible_mandatory_products} exist in the dataset.")
+                n = n_possible_mandatory_products
 
                 str_wo_openai = [
                     el[0].split(":")[1].strip() for el in result_features_wo_openai
@@ -628,7 +630,7 @@ def main():
 
                 c_wo_openai, c_w_openai = 0, 0
 
-                for msp in mandatory_similar_products:
+                for msp in possible_similar_products:
 
                     if msp in str_wo_openai:
 
