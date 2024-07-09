@@ -611,9 +611,7 @@ def main():
                     args.credentials, results_out, "WalkwayAI - Product Similarity"
                 )
 
-                time.sleep(15)
-                time.sleep(15)
-                time.sleep(15)
+                time.sleep(20)
 
                 gc.collect()
 
