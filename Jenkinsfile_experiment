@@ -21,9 +21,6 @@ spec:
 }
     parameters {
         string(name: 'product_id', defaultValue: '10428P6,104357P6,129335P2,13405P16', description: 'List of IDs of the products, separated by a comma.')
-        choice(name: 'landmarks', choices: ['any', 'same'], description: 'If same, only products mentioning the same landmark(s) will be shown. If there are no landmarks in the selected product, this filter will be ignored.')
-        choice(name: 'is_private', choices: ['any', 'same'], description: 'If same, only products with the same tour type (private/public) will be shown.')
-        choice(name: 'categories', choices: ['one', 'any', 'same'], description: 'If same, only products with the same sub-category will be shown. If there are no categories in the selected product, this filter will be ignored.')
         choice(name: 'embedding_fields', choices: ['Product Description, Product Title', 'Product Title, Incl/Excl Text, Tour Grade Description', 'Product Description, Incl/Excl Text', 'Product Description, Product Title, Incl/Excl Text, Tour Grade Description'], description: 'Fields for the embedding model.')
     }
     stages {
@@ -43,9 +40,9 @@ spec:
                                     -supplier_code "different" \
                                     -average_rating "any" \
                                     -start_year "any" \
-                                    -landmarks ${params.landmarks} \
-                                    -is_private ${params.is_private} \
-                                    -categories ${params.categories} \
+                                    -landmarks "any" \
+                                    -is_private "any" \
+                                    -categories "any" \
                                     -embedding_fields '${params.embedding_fields}' \
                                     -apikey ${OPENAI_API_KEY} \
                                     -experiment_id ${customBuildNumber}
