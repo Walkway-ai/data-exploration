@@ -50,7 +50,7 @@ def append_to_google_sheets(credentials_file, results_out, file_name):
 
                 sheet.append_row(line)
 
-            time.sleep(1)
+        time.sleep(10)
 
 
 def query_gpt(
@@ -668,9 +668,9 @@ def main():
                     ["*****"],
                 ]
 
-                append_to_google_sheets(
-                    args.credentials, results_out, "WalkwayAI - Product Similarity"
-                )
+                # append_to_google_sheets(
+                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
+                # )
 
                 file_path = f"experiment_results/{args.product_id}.xlsx"
 
