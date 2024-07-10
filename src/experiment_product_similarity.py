@@ -3,7 +3,7 @@ import ast
 import gc
 import re
 from collections import defaultdict
-
+import time
 import gspread
 import pandas as pd
 import yaml
@@ -49,6 +49,8 @@ def append_to_google_sheets(credentials_file, results_out, file_name):
             else:
 
                 sheet.append_row(line)
+
+            time.sleep(1)
 
 
 def query_gpt(
