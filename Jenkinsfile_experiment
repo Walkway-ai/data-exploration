@@ -21,7 +21,6 @@ spec:
 }
     parameters {
         string(name: 'product_id', defaultValue: '15081P466', description: 'List of IDs of the products, separated by a comma.')
-        choice(name: 'embedding_fields', choices: ['Product Description, Product Title'])
     }
     stages {
         stage('Experiment Results') {
@@ -43,7 +42,7 @@ spec:
                                     -landmarks "any" \
                                     -is_private "any" \
                                     -categories "any" \
-                                    -embedding_fields '${params.embedding_fields}' \
+                                    -embedding_fields 'Product Description, Product Title' \
                                     -apikey ${OPENAI_API_KEY} \
                                     -experiment_id ${customBuildNumber}
                                 """
