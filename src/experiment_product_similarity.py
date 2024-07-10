@@ -2,11 +2,9 @@ import argparse
 import ast
 import gc
 import re
-import time
 from collections import defaultdict
 
 import gspread
-import numpy as np
 import pandas as pd
 import yaml
 from oauth2client.service_account import ServiceAccountCredentials
@@ -185,6 +183,7 @@ def main():
     private_feature = "pdt_product_level_ISPRIVATETOUR"
     text_field = "pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"
     product_field = "PRODUCTCODE"
+    title_field = "pdt_product_detail_PRODUCTTITLE_translated"
 
     test_products = yaml.load(open("test_products.yaml"), Loader=yaml.FullLoader)
 
@@ -252,6 +251,7 @@ def main():
                         supplier_code_feature,
                         time_feature,
                         private_feature,
+                        title_field,
                     ]
                 ]
 
@@ -269,7 +269,7 @@ def main():
 
                 print(f"Selected product: {args.product_id}")
 
-                print(f"Number of initial candidates: {df.shape[0]}")
+                # print(f"Number of initial candidates: {df.shape[0]}")
 
                 ## CITY FILTER
 
@@ -277,7 +277,7 @@ def main():
 
                     df = df[df[city_feature] == str(list(df_product[city_feature])[0])]
 
-                print(f"Number of candidates after the city filter: {df.shape[0]}")
+                # print(f"Number of candidates after the city filter: {df.shape[0]}")
 
                 ## SUPPLIER CODE FILTER
 
@@ -288,9 +288,7 @@ def main():
                         != str(list(df_product[supplier_code_feature])[0])
                     ]
 
-                print(
-                    f"Number of candidates after the supplier code filter: {df.shape[0]}"
-                )
+                # print(f"Number of candidates after the supplier code filter: {df.shape[0]}")
 
                 ## AVERAGE RATING FILTER
 
@@ -321,9 +319,7 @@ def main():
                     df = df[avg_bool]
                     del df[avg_rating_feature]
 
-                print(
-                    f"Number of candidates after the average rating filter: {df.shape[0]}"
-                )
+                # print(f"Number of candidates after the average rating filter: {df.shape[0]}")
 
                 ## START YEAR FILTER
 
@@ -335,7 +331,7 @@ def main():
                     df = df[df["year"] >= int(args.start_year)]
                     del df["year"]
 
-                print(f"Number of candidates after the year filter: {df.shape[0]}")
+                # print(f"Number of candidates after the year filter: {df.shape[0]}")
 
                 ## LANDMARKS FILTER
 
@@ -381,7 +377,7 @@ def main():
 
                         df = df[df[product_field].isin(final_candidates)]
 
-                print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
+                # print(f"Number of candidates after the landmarks filter: {df.shape[0]}")
 
                 ## PRIVATE OPTION FILTER
 
@@ -391,7 +387,7 @@ def main():
                         df[private_feature] == str(list(df_product[private_feature])[0])
                     ]
 
-                print(f"Number of candidates after the private filter: {df.shape[0]}")
+                # print(f"Number of candidates after the private filter: {df.shape[0]}")
 
                 ## CATEGORY FILTER
 
@@ -433,7 +429,7 @@ def main():
 
                         df = df[df[product_field].isin(l_pd)]
 
-                print(f"Number of candidates after the category filter: {df.shape[0]}")
+                # print(f"Number of candidates after the category filter: {df.shape[0]}")
 
                 ## REVIEWS FILTER (sorted)
 
@@ -451,12 +447,11 @@ def main():
                 df["TotalReviews"] = [
                     mapping_2_totalreviews[el] for el in df[product_field]
                 ]
-                df = df[df["TotalReviews"] > np.percentile(list(df["TotalReviews"]), 70)]
                 df = df.sort_values(by="TotalReviews", ascending=False)
 
                 df_product["TotalReviews"] = [mapping_2_totalreviews[args.product_id]]
 
-                print(f"Number of candidates after the reviews filter: {df.shape[0]}")
+                print(f"Final number of candidates: {df.shape[0]}")
 
                 del df[city_feature]
                 del df[supplier_code_feature]
@@ -481,9 +476,12 @@ def main():
                 product_features = product_features.replace(
                     text_field, "Summarized description"
                 )
+                product_features = product_features.replace(title_field, "Title")
                 product_features = (
                     product_features + "\nCategory: " + str(output_product_categories)
                 )
+
+                # Raw results
 
                 df_no_openai = df
 
@@ -506,10 +504,13 @@ def main():
                         text_field,
                         "Summarized description",
                     )
-
+                    result_features = result_features.replace(
+                        title_field,
+                        "Title",
+                    )
                     result_features = (
                         result_features
-                        + "\n Category: "
+                        + "\nCategory: "
                         + str(no_openai_product_categories)
                     )
 
@@ -607,9 +608,62 @@ def main():
                     ["*****"],
                 ]
 
-                append_to_google_sheets(
-                    args.credentials, results_out, "WalkwayAI - Product Similarity"
+                # append_to_google_sheets(
+                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
+                # )
+
+                file_path = f"experiment_results/{args.product_id}.xlsx"
+
+                df_result_out = pd.DataFrame(columns=columns_results)
+
+                df_result_out.loc[0] = exp_params
+
+                def pad_row(row, length):
+                    return row + [None] * (length - len(row))
+
+                row_index = 1
+
+                for feature in product_features.split("\n"):
+                    df_result_out.loc[row_index] = pad_row(
+                        [feature], len(columns_results)
+                    )
+                    row_index += 1
+
+                df_result_out.loc[row_index] = pad_row(["\n"], len(columns_results))
+                row_index += 1
+
+                df_result_out.loc[row_index] = pad_row(
+                    ["SIMILAR PRODUCTS WITHOUT OPENAI"], len(columns_results)
                 )
+                row_index += 1
+
+                for feature in result_features_wo_openai:
+                    for ff in feature:
+                        df_result_out.loc[row_index] = pad_row(
+                            [ff], len(columns_results)
+                        )
+                        row_index += 1
+
+                df_result_out.loc[row_index] = pad_row(["\n"], len(columns_results))
+                row_index += 1
+
+                df_result_out.loc[row_index] = pad_row(
+                    ["SIMILAR PRODUCTS WITH OPENAI"], len(columns_results)
+                )
+                row_index += 1
+
+                for feature in result_features_w_openai:
+                    for ff in feature:
+                        df_result_out.loc[row_index] = pad_row(
+                            [ff], len(columns_results)
+                        )
+                        row_index += 1
+
+                df_result_out.loc[row_index] = pad_row(["*****"], len(columns_results))
+
+                df_result_out.to_excel(file_path, index=False)
+
+                print(f"Data successfully saved to {file_path}")
 
                 gc.collect()
 
