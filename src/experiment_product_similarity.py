@@ -32,7 +32,7 @@ def append_to_google_sheets(credentials_file, results_out, file_name):
     client = gspread.authorize(creds)
 
     # Open the Google Sheet
-    sheet = client.open(file_name).worksheet("OpenAI")
+    sheet = client.open(file_name).worksheet("Sheet1")
 
     # Append data
 
