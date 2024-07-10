@@ -7,4 +7,3 @@ ww-da-ingestion-*
 *.pickle
 .ipynb_checkpoints
 tour_grade_time_series
-deleteme.sh

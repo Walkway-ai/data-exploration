@@ -9,6 +9,7 @@ import pandas as pd
 import yaml
 from oauth2client.service_account import ServiceAccountCredentials
 from openai import OpenAI
+from tqdm import tqdm
 
 from mongodb_lib import *
 
@@ -31,7 +32,7 @@ def append_to_google_sheets(credentials_file, results_out, file_name):
     client = gspread.authorize(creds)
 
     # Open the Google Sheet
-    sheet = client.open(file_name).sheet1
+    sheet = client.open(file_name).worksheet("OpenAI")
 
     # Append data
 
@@ -50,12 +51,32 @@ def append_to_google_sheets(credentials_file, results_out, file_name):
                 sheet.append_row(line)
 
 
-def query_gpt(apikey, text_field, df, df_product):
+def query_gpt(
+    apikey, text_field, title_field, openai_model, fields_openai, df, df_product
+):
 
     df = df.astype(str)
     del df["TotalReviews"]
     df_product = df_product.astype(str)
     del df_product["TotalReviews"]
+
+    if fields_openai == "title":
+
+        del df[text_field]
+        del df_product[text_field]
+
+        subtext = title_field
+
+    if fields_openai == "text":
+
+        del df[title_field]
+        del df_product[title_field]
+
+        subtext = text_field
+
+    if fields_openai == "both":
+
+        subtext = f"{text_field} and {title_field}"
 
     product_features = "\n".join(
         [f"{col}: {list(df_product[col])[0]}" for col in list(df_product.columns)]
@@ -73,12 +94,20 @@ def query_gpt(apikey, text_field, df, df_product):
 
         candidates_str += "\n \n" + candidates_str_now
 
-    prompt = f"Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are extremely similar to it. Similarity should be determined based on the content of {text_field}, and similar products include the same activities (e.g. a tour in the same place, or the same activity). \nREFERENCE PRODUCT: \n \n{product_features} \n \nPOSSIBILITY PRODUCTS: {candidates_str} \n \nYour answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([])."
+    prompt = f"""
+    Given the following REFERENCE PRODUCT, identify the PRODUCTCODEs of any POSSIBILITY PRODUCTS that are similar to it. Similarity should be determined based on the content of {subtext}. In real life, a similar product is a product that someone could book online that could be a good replacement to the REFERENCE PRODUCT, meaning very little changes. Specifically, prioritize products that:
+    1. Visit the same or very similar destinations or landmarks.
+    2. Offer an almost identical type of experience (e.g., same tour route, same type of visit, same level of access, if it includes food, private transportation, etc).
+    The idea is that the POSSIBILITY PRODUCTS are alternatives to the REFERENCE PRODUCT, meaning that if the REFERENFE PRODUCT is not available, the POSSIBILITY PRODUCTS could be offered instead.
+    REFERENCE PRODUCT: \n \n{product_features}
+    POSSIBILITY PRODUCTS: \n \n{candidates_str}
+    Your answer should contain ONLY a Python list of the PRODUCTCODEs of the similar products (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([]).
+    """
 
     client = OpenAI(api_key=apikey)
 
     result = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model=openai_model,
         messages=[
             {"role": "system", "content": system_role},
             {"role": "user", "content": prompt},
@@ -190,7 +219,11 @@ def main():
     object_name = f"product_similarities_mean_{args.embedding_fields}"
     existing_file = fs.find_one({"filename": object_name})
 
-    run_openai = False
+    run_openai = True
+    chunk_size = 10
+    openai_model = "gpt-4o"
+    # openai_model="gpt-3.5-turbo"
+    fields_openai = "title"
 
     if existing_file:
 
@@ -198,17 +231,15 @@ def main():
 
         columns_results = [
             [
-                "Product ID",
-                "City",
-                "Supplier Code",
-                "Average Rating",
-                "Start Year",
-                "Landmarks",
-                "Private",
-                "Categories",
-                "Embedding fields",
+                "Chunk size",
+                "Open AI Model",
+                "Fields Open AI",
                 "% wo OpenAI",
                 "% w OpenAI",
+                "N. wo OpenAI",
+                "N. w OpenAI",
+                "OpenAI Score",
+                "N. Mandatory Matches",
             ]
         ]
 
@@ -522,56 +553,83 @@ def main():
 
                 if run_openai:
 
-                    try:
+                    df_openai = df
+                    chunks = [
+                        df_openai.iloc[i : i + chunk_size]
+                        for i in range(0, len(df_openai), chunk_size)
+                    ]
 
-                        df_openai = df
-                        result = query_gpt(
-                            args.apikey, text_field, df_openai, df_product
-                        )
-                        result = re.findall(
-                            r"\[.*?\]", result.choices[0].message.content
-                        )[0]
-                        result = ast.literal_eval(result)
+                    result_all_chunks = list()
 
-                        if len(result) > 0:
+                    for chunk in tqdm(chunks, total=len(chunks)):
 
-                            df_openai = df_openai[df_openai[product_field].isin(result)]
+                        finished_check = True
 
-                            for _, row in df_openai.iterrows():
+                        while finished_check:
 
-                                df_now = pd.DataFrame(row).T
+                            try:
 
-                                product_id = list(df_now[product_field])[0]
-                                openai_product_categories = list(
-                                    set(annotated_data[product_id])
-                                )
-
-                                result_features = "\n".join(
-                                    [
-                                        f"{col}: {list(df_now[col])[0]}"
-                                        for col in list(df_now.columns)
-                                    ]
-                                )
-                                result_features = result_features.replace(
+                                result = query_gpt(
+                                    args.apikey,
                                     text_field,
-                                    "Summarized description",
+                                    title_field,
+                                    openai_model,
+                                    fields_openai,
+                                    chunk,
+                                    df_product,
                                 )
+                                result = re.findall(
+                                    r"\[.*?\]", result.choices[0].message.content
+                                )[0]
+                                result = ast.literal_eval(result)
+                                result_all_chunks.append(result)
+                                finished_check = False
 
-                                result_features = (
-                                    result_features
-                                    + "\n Category: "
-                                    + str(openai_product_categories)
-                                )
+                            except Exception as e:
 
-                                result_features_w_openai.append(
-                                    result_features.split("\n")
-                                )
+                                print(e)
 
-                    except Exception as e:
+                    result_all_chunks = [
+                        item for sublist in result_all_chunks for item in sublist
+                    ]
 
-                        print(e)
+                    if len(result_all_chunks) > 0:
 
-                        print("No products were found for the combination.")
+                        df_openai = df_openai[
+                            df_openai[product_field].isin(result_all_chunks)
+                        ]
+
+                        for _, row in df_openai.iterrows():
+
+                            df_now = pd.DataFrame(row).T
+
+                            product_id = list(df_now[product_field])[0]
+                            openai_product_categories = list(
+                                set(annotated_data[product_id])
+                            )
+
+                            result_features = "\n".join(
+                                [
+                                    f"{col}: {list(df_now[col])[0]}"
+                                    for col in list(df_now.columns)
+                                ]
+                            )
+                            result_features = result_features.replace(
+                                text_field,
+                                "Summarized description",
+                            )
+                            result_features = result_features.replace(
+                                title_field,
+                                "Title",
+                            )
+
+                            result_features = (
+                                result_features
+                                + "\nCategory: "
+                                + str(openai_product_categories)
+                            )
+
+                            result_features_w_openai.append(result_features.split("\n"))
 
                 columns_results = [
                     "Experiment ID",
@@ -608,9 +666,9 @@ def main():
                     ["*****"],
                 ]
 
-                # append_to_google_sheets(
-                #     args.credentials, results_out, "WalkwayAI - Product Similarity"
-                # )
+                append_to_google_sheets(
+                    args.credentials, results_out, "WalkwayAI - Product Similarity"
+                )
 
                 file_path = f"experiment_results/{args.product_id}.xlsx"
 
@@ -663,8 +721,6 @@ def main():
 
                 df_result_out.to_excel(file_path, index=False)
 
-                print(f"Data successfully saved to {file_path}")
-
                 gc.collect()
 
                 # Calculate score for this product
@@ -708,20 +764,21 @@ def main():
 
                 pctg_wo_openai = c_wo_openai * 100 / n
                 pctg_w_openai = c_w_openai * 100 / n
+                n_candidates_raw = len(df_no_openai)
+                n_candidates_openai = len(df_openai)
+                openai_score = pctg_w_openai / n_candidates_openai
 
                 results_scores = [
                     [
-                        args.product_id,
-                        args.city_name,
-                        args.supplier_code,
-                        args.average_rating,
-                        args.start_year,
-                        args.landmarks,
-                        args.is_private,
-                        args.categories,
-                        args.embedding_fields,
+                        chunk_size,
+                        openai_model,
+                        fields_openai,
                         pctg_wo_openai,
                         pctg_w_openai,
+                        n_candidates_raw,
+                        n_candidates_openai,
+                        openai_score,
+                        n,
                     ]
                 ]
 
