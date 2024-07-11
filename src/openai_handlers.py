@@ -31,7 +31,7 @@ def query_gpt_with_history(apikey, prompt, model_name, conversation_history):
         + [
             {"role": "user", "content": prompt},
         ],
-        temperature=0.1
+        temperature=0.1,
     )
 
     return result

@@ -4,7 +4,7 @@ import gc
 import re
 import time
 from collections import defaultdict
-from openai_handlers import query_gpt_with_history
+
 import gspread
 import pandas as pd
 import yaml
@@ -13,6 +13,7 @@ from openai import OpenAI
 from tqdm import tqdm
 
 from mongodb_lib import *
+from openai_handlers import query_gpt_with_history
 
 # Load configuration from yaml file for MongoDB connection.
 config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
@@ -22,6 +23,7 @@ db, fs, client = connect_to_mongodb(config)
 gc.collect()
 
 system_role = "You are an expert in online bookings and product matching in the tourism and entertainment industry. Your expertise includes comparing product descriptions to identify highly similar products."
+
 
 def preprocess_chunk_openai(df_product, chunk, fields_openai, text_field, title_field):
 
@@ -57,7 +59,8 @@ def preprocess_chunk_openai(df_product, chunk, fields_openai, text_field, title_
         candidates_str += "\n \n" + candidates_str_now
 
     return product_features, candidates_str
-        
+
+
 def append_to_google_sheets(credentials_file, results_out, file_name):
     scope = [
         "https://spreadsheets.google.com/feeds",
@@ -147,6 +150,13 @@ def main():
     )
     parser.add_argument("-apikey", type=str, required=True, help="OpenAI API key.")
     parser.add_argument("-experiment_id", type=str, required=True, help="Experiment ID")
+    parser.add_argument("-chunk_size", type=str, required=True, help="chunk_size")
+    parser.add_argument("-openai_model", type=str, required=True, help="openai_model")
+    parser.add_argument("-fields_openai", type=str, required=True, help="fields_openai")
+
+    chunk_size = args.chunk_size
+    openai_model = args.openai_model
+    fields_openai = args.fields_openai
 
     args = parser.parse_args()
 
@@ -190,10 +200,6 @@ def main():
     existing_file = fs.find_one({"filename": object_name})
 
     run_openai = True
-    chunk_size = 50
-    # openai_model = "gpt-4o"
-    openai_model = "gpt-3.5-turbo"
-    fields_openai = "title"
 
     if existing_file:
 
@@ -421,8 +427,7 @@ def main():
                         if args.categories == "one":
 
                             if any(
-                                ct in annotated_data[prd_]
-                                for ct in product_categories
+                                ct in annotated_data[prd_] for ct in product_categories
                             ):
 
                                 l_pd.append(prd_)
@@ -495,10 +500,7 @@ def main():
                 no_openai_product_categories = list(set(annotated_data[product_id]))
 
                 result_features = "\n".join(
-                    [
-                        f"{col}: {list(df_now[col])[0]}"
-                        for col in list(df_now.columns)
-                    ]
+                    [f"{col}: {list(df_now[col])[0]}" for col in list(df_now.columns)]
                 )
                 result_features = result_features.replace(
                     text_field,
@@ -509,9 +511,7 @@ def main():
                     "Title",
                 )
                 result_features = (
-                    result_features
-                    + "\nCategory: "
-                    + str(no_openai_product_categories)
+                    result_features + "\nCategory: " + str(no_openai_product_categories)
                 )
 
                 result_features_wo_openai.append(result_features.split("\n"))
@@ -567,10 +567,15 @@ def main():
 
                     finished_check = True
 
-                    product_features, candidates_str = preprocess_chunk_openai(df_product, chunk, fields_openai, text_field, title_field)
-                    product_features = product_features.replace("PRODUCTCODE: ", "REFERENCE PRODUCT: ")
-                    candidates_str = candidates_str.replace("PRODUCTCODE: ", "CANDIDATE PRODUCT: ")
-
+                    product_features, candidates_str = preprocess_chunk_openai(
+                        df_product, chunk, fields_openai, text_field, title_field
+                    )
+                    product_features = product_features.replace(
+                        "PRODUCTCODE: ", "REFERENCE PRODUCT: "
+                    )
+                    candidates_str = candidates_str.replace(
+                        "PRODUCTCODE: ", "CANDIDATE PRODUCT: "
+                    )
                     prompt_now = product_features + "\n" + candidates_str
 
                     while finished_check:
@@ -589,7 +594,7 @@ def main():
                             finished_check = False
 
                         except Exception as e:
-                            
+
                             print(result)
                             print(e)
 
@@ -686,9 +691,7 @@ def main():
             row_index = 1
 
             for feature in product_features.split("\n"):
-                df_result_out.loc[row_index] = pad_row(
-                    [feature], len(columns_results)
-                )
+                df_result_out.loc[row_index] = pad_row([feature], len(columns_results))
                 row_index += 1
 
             df_result_out.loc[row_index] = pad_row(["\n"], len(columns_results))
@@ -701,9 +704,7 @@ def main():
 
             for feature in result_features_wo_openai:
                 for ff in feature:
-                    df_result_out.loc[row_index] = pad_row(
-                        [ff], len(columns_results)
-                    )
+                    df_result_out.loc[row_index] = pad_row([ff], len(columns_results))
                     row_index += 1
 
             df_result_out.loc[row_index] = pad_row(["\n"], len(columns_results))
@@ -716,9 +717,7 @@ def main():
 
             for feature in result_features_w_openai:
                 for ff in feature:
-                    df_result_out.loc[row_index] = pad_row(
-                        [ff], len(columns_results)
-                    )
+                    df_result_out.loc[row_index] = pad_row([ff], len(columns_results))
                     row_index += 1
 
             df_result_out.loc[row_index] = pad_row(["*****"], len(columns_results))
@@ -796,6 +795,7 @@ def main():
             append_to_google_sheets(
                 args.credentials, results_scores, "Scores - Product Similarity 24"
             )
+
 
 if __name__ == "__main__":
     main()
