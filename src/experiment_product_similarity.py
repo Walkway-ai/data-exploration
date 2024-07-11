@@ -154,11 +154,11 @@ def main():
     parser.add_argument("-openai_model", type=str, required=True, help="openai_model")
     parser.add_argument("-fields_openai", type=str, required=True, help="fields_openai")
 
+    args = parser.parse_args()
+
     chunk_size = args.chunk_size
     openai_model = args.openai_model
     fields_openai = args.fields_openai
-
-    args = parser.parse_args()
 
     if args.embedding_fields == "Product Description, Product Title":
 
