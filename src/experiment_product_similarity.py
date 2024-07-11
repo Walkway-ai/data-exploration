@@ -794,17 +794,15 @@ def main():
 
                 results_scores = [
                     [
-                        args.product_id,
-                        args.city_name,
-                        args.supplier_code,
-                        args.average_rating,
-                        args.start_year,
-                        args.landmarks,
-                        args.is_private,
-                        args.categories,
-                        args.embedding_fields,
+                        chunk_size,
+                        openai_model,
+                        fields_openai,
                         0,
                         0,
+                        n_candidates_raw,
+                        n_candidates_openai,
+                        openai_score,
+                        n,
                     ]
                 ]
 
