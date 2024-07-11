@@ -156,7 +156,7 @@ def main():
 
     args = parser.parse_args()
 
-    chunk_size = args.chunk_size
+    chunk_size = int(args.chunk_size)
     openai_model = args.openai_model
     fields_openai = args.fields_openai
 
