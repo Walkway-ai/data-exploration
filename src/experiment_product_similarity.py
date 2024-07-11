@@ -32,7 +32,7 @@ def append_to_google_sheets(credentials_file, results_out, file_name):
     client = gspread.authorize(creds)
 
     # Open the Google Sheet
-    sheet = client.open(file_name).worksheet("Sheet1")
+    sheet = client.open(file_name).worksheet("OpenAI2")
 
     # Append data
 
@@ -245,9 +245,9 @@ def main():
             ]
         ]
 
-        # append_to_google_sheets(
-        #     args.credentials, columns_results, "Scores - Product Similarity 24"
-        # )
+        append_to_google_sheets(
+            args.credentials, columns_results, "Scores - Product Similarity 24"
+        )
 
         for product_id in product_ids:
 
@@ -784,9 +784,9 @@ def main():
                     ]
                 ]
 
-                # append_to_google_sheets(
-                #     args.credentials, results_scores, "Scores - Product Similarity 24"
-                # )
+                append_to_google_sheets(
+                    args.credentials, results_scores, "Scores - Product Similarity 24"
+                )
 
             except Exception as e:
 
@@ -808,9 +808,9 @@ def main():
                     ]
                 ]
 
-                # append_to_google_sheets(
-                #     args.credentials, results_scores, "Scores - Product Similarity 24"
-                # )
+                append_to_google_sheets(
+                    args.credentials, results_scores, "Scores - Product Similarity 24"
+                )
 
 
 if __name__ == "__main__":
