@@ -733,16 +733,16 @@ def main():
                 mandatory_similar_products_original = [
                     el.strip() for el in mandatory_similar_products_original
                 ]
-                possible_similar_products = [
+                possible_similar_products = list(set([
                     el
                     for el in mandatory_similar_products_original
                     if el in list(df_raw[product_field])
-                ]
+                ]))
                 n_original_mandatory_products = len(mandatory_similar_products_original)
                 n_possible_mandatory_products = len(possible_similar_products)
-                print(
-                    f"Out of {n_original_mandatory_products} mandatory matches, {n_possible_mandatory_products} exist in the dataset."
-                )
+                # print(
+                #     f"Out of {n_original_mandatory_products} mandatory matches, {n_possible_mandatory_products} exist in the dataset."
+                # )
                 n = n_possible_mandatory_products
 
                 str_wo_openai = [
