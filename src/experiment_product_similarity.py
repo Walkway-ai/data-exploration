@@ -789,7 +789,7 @@ def main():
                         n_candidates_openai,
                         openai_score,
                         n,
-                        l_missing_openai,
+                        str(l_missing_openai),
                     ]
                 ]
 
