@@ -243,6 +243,7 @@ def main():
                 "N. w OpenAI",
                 "OpenAI Score",
                 "N. Mandatory Matches",
+                "Missing after OpenAI",
             ]
         ]
 
@@ -743,11 +744,7 @@ def main():
                         ]
                     )
                 )
-                n_original_mandatory_products = len(mandatory_similar_products_original)
                 n_possible_mandatory_products = len(possible_similar_products)
-                # print(
-                #     f"Out of {n_original_mandatory_products} mandatory matches, {n_possible_mandatory_products} exist in the dataset."
-                # )
                 n = n_possible_mandatory_products
 
                 str_wo_openai = [
@@ -759,6 +756,8 @@ def main():
 
                 c_wo_openai, c_w_openai = 0, 0
 
+                l_missing_openai = list()
+
                 for msp in possible_similar_products:
 
                     if msp in str_wo_openai:
@@ -768,6 +767,10 @@ def main():
                     if msp in str_w_openai:
 
                         c_w_openai += 1
+
+                    else:
+
+                        l_missing_openai.append(msp)
 
                 pctg_wo_openai = c_wo_openai * 100 / n
                 pctg_w_openai = c_w_openai * 100 / n
@@ -786,6 +789,7 @@ def main():
                         n_candidates_openai,
                         openai_score,
                         n,
+                        l_missing_openai,
                     ]
                 ]
 
@@ -808,6 +812,7 @@ def main():
                         n_candidates_openai,
                         openai_score,
                         n,
+                        l_missing_openai,
                     ]
                 ]
 
