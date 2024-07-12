@@ -9,7 +9,6 @@ import gspread
 import pandas as pd
 import yaml
 from oauth2client.service_account import ServiceAccountCredentials
-from openai import OpenAI
 from tqdm import tqdm
 
 from mongodb_lib import *
