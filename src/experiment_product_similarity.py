@@ -220,9 +220,9 @@ def main():
             ]
         ]
 
-        append_to_google_sheets(
-            args.credentials, columns_results, "Scores - Product Similarity 24"
-        )
+        # append_to_google_sheets(
+        #     args.credentials, columns_results, "Scores - Product Similarity 24"
+        # )
 
         for product_id in product_ids:
 
@@ -482,6 +482,8 @@ def main():
                 text_field, "Summarized description"
             )
             product_features = product_features.replace(title_field, "Title")
+
+            product_features = product_features.replace(title_field, "Title")
             product_features = (
                 product_features + "\nCategory: " + str(output_product_categories)
             )
@@ -546,6 +548,8 @@ def main():
                 In your answer, return ONLY a Python list of the CANDIDATE PRODUCTS that you consider similar to the REFERENCE PRODUCT (e.g., ['18745FBP', 'H73TOUR2']). If there are no similar products, return an empty list ([]).
                 Are you ready to start?
                 """
+
+                # NEXT: add logic where we have several levels of similarity (high/medium/low)
 
                 result = query_gpt_with_history(
                     args.apikey, initial_prompt, openai_model, conversation_history
@@ -675,9 +679,9 @@ def main():
                 ["*****"],
             ]
 
-            # append_to_google_sheets(
-            #     args.credentials, results_out, "WalkwayAI - Product Similarity"
-            # )
+            append_to_google_sheets(
+                args.credentials, results_out, "WalkwayAI - Product Similarity"
+            )
 
             file_path = f"experiment_results/{args.product_id}.xlsx"
 
@@ -792,9 +796,9 @@ def main():
                 ]
             ]
 
-            append_to_google_sheets(
-                args.credentials, results_scores, "Scores - Product Similarity 24"
-            )
+            # append_to_google_sheets(
+            #     args.credentials, results_scores, "Scores - Product Similarity 24"
+            # )
 
 
 if __name__ == "__main__":
