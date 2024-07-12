@@ -1,4 +1,5 @@
 import base64
+import gc
 import json
 import logging
 
@@ -7,8 +8,20 @@ from pymongo import MongoClient
 
 logging.basicConfig(level=logging.INFO)
 
+# Run garbage collection to free up memory.
+gc.collect()
+
 
 def connect_to_mongodb(config):
+    """
+    Connect to MongoDB using the provided configuration.
+
+    Parameters:
+    config (dict): Configuration dictionary containing MongoDB credentials and connection details.
+
+    Returns:
+    tuple: A tuple containing the database object, GridFS object, and MongoClient object.
+    """
     try:
         # Decoding base64 encoded credentials
         mongodb_username = base64.b64decode(
@@ -35,6 +48,17 @@ def connect_to_mongodb(config):
 
 
 def save_object(fs, object, object_name):
+    """
+    Save an object to MongoDB GridFS.
+
+    Parameters:
+    fs (GridFS): The GridFS object.
+    object (any): The object to save.
+    object_name (str): The name of the object.
+
+    Returns:
+    None
+    """
     try:
         # Serializing object to JSON
         if "embeddings" in object_name and "product_similarities" not in object_name:
@@ -55,6 +79,16 @@ def save_object(fs, object, object_name):
 
 
 def read_object(fs, object_name):
+    """
+    Read an object from MongoDB GridFS.
+
+    Parameters:
+    fs (GridFS): The GridFS object.
+    object_name (str): The name of the object to read.
+
+    Returns:
+    any: The deserialized object if found, None otherwise.
+    """
     try:
         # Finding object by name
         file_cursor = fs.find_one({"filename": object_name})
@@ -75,6 +109,16 @@ def read_object(fs, object_name):
 
 
 def remove_object(fs, object_name):
+    """
+    Remove an object from MongoDB GridFS.
+
+    Parameters:
+    fs (GridFS): The GridFS object.
+    object_name (str): The name of the object to remove.
+
+    Returns:
+    None
+    """
     try:
         # Finding and deleting object by name
         file = fs.find_one({"filename": object_name})
@@ -106,7 +150,7 @@ def copy_object(fs, source_name, destination_name):
         # Find the source file
         source_file = fs.find_one({"filename": source_name})
         if not source_file:
-            print(f"Source file '{source_name}' not found.")
+            logging.error(f"Source file '{source_name}' not found.")
             return False
 
         # Read the source file's content
@@ -114,11 +158,11 @@ def copy_object(fs, source_name, destination_name):
 
         # Write the content to the destination file
         fs.put(source_content, filename=destination_name)
-        print(f"Object copied from '{source_name}' to '{destination_name}'")
+        logging.info(f"Object copied from '{source_name}' to '{destination_name}'")
         return True
 
     except Exception as e:
-        print(
+        logging.error(
             f"Failed to copy object from '{source_name}' to '{destination_name}': {e}"
         )
         return False

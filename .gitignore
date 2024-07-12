@@ -1,12 +1,23 @@
-venv
-venvtaxonomy
-__pycache__
-tmp
+# Python specific
+venv/
+venvtaxonomy/
+__pycache__/
+
+# Temporary files
+tmp/
 run.log
+
+# Files related to specific tasks or scripts
 ww-da-ingestion-*
 *.pickle
-.ipynb_checkpoints
-tour_grade_time_series
+.ipynb_checkpoints/
+tour_grade_time_series/
 experiments.sh
 deleteme.sh
-experiment_results
+experiment_results/
+
+# Other system or generated files
+.DS_Store
+
+# Environment specific files
+.env

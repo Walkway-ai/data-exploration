@@ -19,9 +19,6 @@ spec:
 """
         }
     }
-    parameters {
-        choice(name: 'embedding_fields', choices: ['description_inclexcl', 'description_title', 'title_inclexcl_tgdescription', 'title_inclexcl_tgdescription_description'], description: 'Fields for the embedding model.')
-    }
     stages {
         stage('retrieve-bigquery-data') {
             steps {
@@ -109,9 +106,9 @@ spec:
                         sh("mkdir tmp")
                         sh("python3 src/embed_textual_data.py --overwrite --embedding_model 'thenlper/gte-large'")
                         sh("python3 src/embed_textual_data.py --overwrite --embedding_model 'jinaai/jina-embeddings-v2-base-en'")
-                        sh("python3 src/generate_model_embeddings.py --overwrite --embedding_model 'thenlper/gte-large' --embedding_fields ${params.embedding_fields}")
-                        sh("python3 src/generate_model_embeddings.py --overwrite --embedding_model 'jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
-                        sh("python3 src/generate_mean_embeddings.py --overwrite --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/generate_model_embeddings.py --overwrite --embedding_model 'thenlper/gte-large' --embedding_fields 'description_title'")
+                        sh("python3 src/generate_model_embeddings.py --overwrite --embedding_model 'jinaai/jina-embeddings-v2-base-en' --embedding_fields 'description_title'")
+                        sh("python3 src/generate_mean_embeddings.py --overwrite --embedding_models 'thenlper/gte-large,jinaai/jina-embeddings-v2-base-en' --embedding_fields 'description_title'")
                     }
                 }
             }
@@ -120,7 +117,7 @@ spec:
             steps {
                 container('python') {
                     script {
-                        sh("python3 src/generate_product_similarity.py --overwrite --embedding_model 'mean/mean' --embedding_fields ${params.embedding_fields}")
+                        sh("python3 src/generate_product_similarity.py --overwrite --embedding_model 'mean/mean' --embedding_fields 'description_title'")
                     }
                 }
             }

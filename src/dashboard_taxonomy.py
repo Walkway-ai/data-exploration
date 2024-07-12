@@ -11,6 +11,7 @@ from dash.dependencies import Input, Output
 
 from mongodb_lib import *
 
+# Load MongoDB configuration from YAML file
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 

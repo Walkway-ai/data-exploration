@@ -18,10 +18,11 @@ bigquery_config = config["bigquery-to-retrieve"]
 key_field = bigquery_config["key-field"]
 tables = bigquery_config["tables"]
 
+# Load MongoDB configuration from YAML file
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
-# Run garbage collection to free up memory
+# Run garbage collection to free up memory.
 gc.collect()
 
 
@@ -69,13 +70,8 @@ def main():
             # Retrieve table elements from the configuration
             table_elements = tables[bigquery_table]
 
-            if bigquery_table == "bookings":
-
-                time_feature = True
-
-            else:
-
-                time_feature = False
+            # Determine if time feature is required based on the table
+            time_feature = bigquery_table == "bookings"
 
             # Create a BigQueryDataProcessor instance to handle data retrieval
             bqdp = BigQueryDataProcessor(

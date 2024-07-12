@@ -14,9 +14,9 @@ from tqdm import tqdm
 from mongodb_lib import *
 from openai_handlers import query_gpt_with_history
 
-# Load configuration from yaml file for MongoDB connection.
-config = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
-db, fs, client = connect_to_mongodb(config)
+# Load MongoDB configuration from YAML file
+config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
+db, fs, client = connect_to_mongodb(config_infra)
 
 # Run garbage collection to free up memory.
 gc.collect()

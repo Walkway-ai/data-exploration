@@ -7,15 +7,22 @@ import pickle
 
 import numpy as np
 
+# Run garbage collection to free up memory.
 gc.collect()
 
 
 def read_embedding(path):
+    """
+    Read embeddings from a pickle file.
 
+    Parameters:
+    path (str): Path to the pickle file containing embeddings.
+
+    Returns:
+    object: Loaded embeddings object.
+    """
     with open(path, "rb") as file:
-
         data = pickle.load(file)
-
     return data
 
 
@@ -53,14 +60,13 @@ def main():
 
     if args.overwrite:
 
-        embeddings = list()
+        embeddings = []
 
         if embedding_fields in [
             "description_title",
             "description_inclexcl",
             "title_inclexcl_tgdescription_description",
         ]:
-
             embeddings.append(
                 np.array(
                     read_embedding(
@@ -74,7 +80,6 @@ def main():
             "description_inclexcl",
             "title_inclexcl_tgdescription_description",
         ]:
-
             embeddings.append(
                 np.array(
                     read_embedding(
@@ -88,7 +93,6 @@ def main():
             "description_title",
             "title_inclexcl_tgdescription_description",
         ]:
-
             embeddings.append(
                 np.array(
                     read_embedding(
@@ -101,7 +105,6 @@ def main():
             "title_inclexcl_tgdescription",
             "title_inclexcl_tgdescription_description",
         ]:
-
             embeddings.append(
                 np.array(
                     read_embedding(
@@ -113,7 +116,6 @@ def main():
         final_embeddings = np.concatenate(embeddings, axis=1)
 
         with open(f"tmp/{object_name}", "wb") as f:
-
             pickle.dump(final_embeddings, f)
 
     else:

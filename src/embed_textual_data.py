@@ -11,11 +11,11 @@ import pandas as pd
 import torch
 import yaml
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
 from transformers import AutoModel
 
 from mongodb_lib import *
 
+# Load MongoDB configuration from YAML file
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
@@ -24,31 +24,38 @@ gc.collect()
 
 
 def calculate_embeddings(embeddings, model, text):
+    """
+    Calculate embeddings for a single text using the provided model.
 
+    Parameters:
+    embeddings (list): List of embeddings to append to.
+    model (object): Embedding model instance.
+    text (str): Input text to generate embeddings for.
+
+    Returns:
+    list: Updated list of embeddings.
+    """
     try:
-
         embedding = model.encode([text], show_progress_bar=False)
-
     except Exception as e:
-
         print(text, e)
-
         text = ""
         embedding = model.encode([text], show_progress_bar=False)
 
     embeddings.append(embedding[0])
-
     return embeddings
 
 
 def get_embeddings(texts, field_name, embedding_model, model_name, average=False):
     """
-    Generate embeddings for a specified text field in the DataFrame.
+    Generate embeddings for a specified text field using the specified embedding model.
 
     Parameters:
-    df (pd.DataFrame): The DataFrame containing the text data.
-    text_field (str): The column name of the text data to embed.
-    average (bool): If True, means of embeddings are taken for multiple values in the same row.
+    texts (list): List of texts to generate embeddings for.
+    field_name (str): Name of the text field.
+    embedding_model (str): Name of the embedding model to use.
+    model_name (str): Name of the model.
+    average (bool): If True, compute average embeddings for multiple values in the same row.
 
     Saves:
     Torch tensor file containing the embeddings for the specified text field.
@@ -65,25 +72,18 @@ def get_embeddings(texts, field_name, embedding_model, model_name, average=False
 
     # Generate embeddings for each text entry in the specified column.
     if average:
-
         for text in tqdm(texts):
-
             cleaned_text = ast.literal_eval(text)
             cleaned_text = list(set(cleaned_text))
-
-            intermediary_r = list()
+            intermediary_r = []
 
             for el in cleaned_text:
-
                 intermediary_r = calculate_embeddings(intermediary_r, model, el)
 
             avg_intermediary = np.mean(np.array(intermediary_r), axis=0)
             embeddings.append(avg_intermediary)
-
     else:
-
         for text in tqdm(texts):
-
             embeddings = calculate_embeddings(embeddings, model, text)
 
     # Convert embeddings to a torch tensor and save to file.
@@ -91,7 +91,6 @@ def get_embeddings(texts, field_name, embedding_model, model_name, average=False
     object_name = f"embeddings_{field_name}_{model_name}"
 
     with open(f"tmp/{object_name}", "wb") as f:
-
         pickle.dump(embeddings, f)
 
 
@@ -101,8 +100,7 @@ def main():
 
     Steps:
     1. Load the summarized product textual data from a pickle file.
-    2. Generate embeddings for the 'pdt_inclexcl_ENG_CONTENT' field if not already present.
-    3. Generate embeddings for the 'pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED' field if not already present.
+    2. Generate embeddings for specific fields if not already present.
     """
 
     parser = argparse.ArgumentParser()

@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 from mongodb_lib import *
 
-# Load configuration from yaml file for MongoDB connection.
+# Load MongoDB configuration from YAML file
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
@@ -22,7 +22,7 @@ gc.collect()
 
 def detect_language(text):
     """
-    Detect the language of a given text.
+    Detects the language of a given text.
 
     Parameters:
     text (str): The text to detect the language of.
@@ -39,7 +39,7 @@ def detect_language(text):
 
 def translate_text(text):
     """
-    Translate a given text to English.
+    Translates a given text to English.
 
     Parameters:
     text (str): The text to translate.
@@ -74,6 +74,7 @@ def main():
 
     args = parser.parse_args()
 
+    # Specify the name for the processed textual data in English.
     object_name = "product_textual_english"
     existing_file = fs.find_one({"filename": object_name})
 
@@ -92,6 +93,7 @@ def main():
             for text in tqdm(df["pdt_product_detail_PRODUCTDESCRIPTION"])
         ]
 
+        # Translate non-English content to English for specific columns.
         for col in tqdm(
             [
                 "pdt_inclexcl_ENG_CONTENT",
@@ -99,8 +101,6 @@ def main():
                 "pdt_product_detail_PRODUCTTITLE",
             ]
         ):
-
-            # Translate non-English content to English.
             df[f"{col}_translated"] = df.apply(
                 lambda row: translate_text(row[col])
                 if row["language"] != "en"
@@ -108,8 +108,10 @@ def main():
                 axis=1,
             )
 
+            # Remove the original column after translation.
             del df[col]
 
+        # Remove the 'language' column after translation tasks.
         del df["language"]
 
         # Save the processed DataFrame to MongoDB.

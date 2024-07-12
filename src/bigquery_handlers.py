@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import gc
 import re
 from collections import OrderedDict
 
 from google.cloud import bigquery
 from pandas_gbq import to_gbq
+
+# Run garbage collection to free up memory.
+gc.collect()
 
 
 class BigQueryDataProcessor:
@@ -16,11 +20,12 @@ class BigQueryDataProcessor:
         Initialize the BigQueryDataProcessor with the given parameters.
 
         Parameters:
-        config (str): The path to the configuration file.
+        config (str): The configuration dictionary.
         dataset_id (str): The dataset ID in BigQuery.
         table_id (str): The table ID in BigQuery.
         table_fields (list of str): The fields to be collected.
         key_field (str): The column name to group by.
+        time_feature (bool): Flag indicating if time-based aggregation is needed.
         """
         self.config = config
         self.dataset_id = dataset_id
@@ -46,11 +51,8 @@ class BigQueryDataProcessor:
         table = self.client.get_table(table_ref)
 
         if self.time_feature:
-
             query = f"SELECT ProductCode, MAX(OrderDate) AS MostRecentOrderDate FROM `{table.project}.{table.dataset_id}.{table.table_id}` WHERE OrderDate IS NOT NULL GROUP BY ProductCode"
-
         else:
-
             query = f"SELECT {self.selected_fields} FROM `{table.project}.{table.dataset_id}.{table.table_id}`"
 
         query_job = self.client.query(query)

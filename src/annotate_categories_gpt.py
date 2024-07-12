@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import argparse
-import ast
 import gc
 import os
 import pickle
@@ -14,6 +13,7 @@ from tqdm import tqdm
 from mongodb_lib import *
 from openai_handlers import query_gpt_with_history
 
+# Load MongoDB configuration from YAML file
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
@@ -22,7 +22,9 @@ gc.collect()
 
 
 def main():
-
+    """
+    Main function to classify product descriptions using GPT-4 OpenAI model and save results to MongoDB.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--overwrite", action="store_true", help="Enable overwrite mode"
@@ -41,23 +43,18 @@ def main():
     if not existing_file or args.overwrite:
 
         # Import taxonomy
-
         taxonomy = pd.read_excel("Categories.xlsx")
-
         df_categories = taxonomy[
             ["Category", "Description & Keywords"]
         ].drop_duplicates()
-
         categories = [el.split(": ")[1] for el in df_categories["Category"]]
         categories_descriptions = [
             el.split("\n")[0].replace("- Description: ", "")
             for el in df_categories["Description & Keywords"]
         ]
-
         d = dict(zip(categories, categories_descriptions))
 
         # Import summarized texts
-
         data = read_object(fs, "product_textual_english_summarized")
         data = pd.DataFrame(data)
         data.fillna("", inplace=True)
@@ -108,7 +105,6 @@ def main():
             r = result.choices[0].message.content
 
             with open(f"{tmp_dir}/batch_{batch_idx}_categories_gpt4o.pkl", "wb") as f:
-
                 pickle.dump(r, f)
 
         final_d = {}
@@ -118,27 +114,20 @@ def main():
             file_path = os.path.join(tmp_dir, file_name)
 
             with open(file_path, "rb") as f:
-
                 annotations = pickle.load(f)
                 s = annotations.find("{")
                 e = annotations.rfind("}")
-
                 annotations = annotations[s : e + 1]
                 annotations = annotations.replace("Valentine's Day", "Valentines Day")
                 annotations_dict = ast.literal_eval(annotations)
-
                 final_d.update(annotations_dict)
 
-        l = list()
+        l = []
 
         for pc in tqdm(data["PRODUCTCODE"].tolist()):
-
             if pc in list(final_d.keys()):
-
                 l.append(final_d[pc])
-
             else:
-
                 l.append([])
 
         data["categories_gpt4o"] = l

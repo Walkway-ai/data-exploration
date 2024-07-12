@@ -1,4 +1,5 @@
 import argparse
+import gc
 import re
 import unicodedata
 from collections import defaultdict
@@ -10,12 +11,25 @@ from tqdm import tqdm
 
 from mongodb_lib import *
 
+# Load MongoDB configuration from YAML file
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
-_, fs, _ = connect_to_mongodb(config_infra)
+db, fs, client = connect_to_mongodb(config_infra)
+
+# Run garbage collection to free up memory.
+gc.collect()
 
 
 def find_mentioned_landmarks(description, candidates):
+    """
+    Finds landmarks mentioned in the description based on given candidates.
 
+    Args:
+        description (str): The text description to search.
+        candidates (dict): Dictionary of variations of landmarks to search for.
+
+    Returns:
+        list: List of mentioned landmarks found in the description.
+    """
     description = remove_accents(description).lower()
 
     mentioned_landmarks = []
@@ -32,11 +46,29 @@ def find_mentioned_landmarks(description, candidates):
 
 
 def remove_accents(input_str):
+    """
+    Removes accents from characters in the input string.
+
+    Args:
+        input_str (str): The input string containing accented characters.
+
+    Returns:
+        str: String without accents.
+    """
     nfkd_form = unicodedata.normalize("NFKD", input_str)
     return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
 def generate_variations(keyword):
+    """
+    Generates variations of a keyword including its alternative names in parentheses.
+
+    Args:
+        keyword (str): The original keyword possibly containing alternative names.
+
+    Returns:
+        set: Set of variations (lowercase) of the keyword.
+    """
     variations = set()
 
     # Original keyword
@@ -58,19 +90,28 @@ def generate_variations(keyword):
 
 
 def flatten_dict(d):
+    """
+    Flattens a nested dictionary into a list of sorted unique values.
 
-    flattened_keys = list()
+    Args:
+        d (dict): The nested dictionary to flatten.
+
+    Returns:
+        list: List of sorted unique values from the dictionary.
+    """
+    flattened_keys = []
 
     for city in d.keys():
-
         for name in list(d[city].values()):
-
             flattened_keys.append(name)
 
     return list(sorted(set(flattened_keys)))
 
 
 def main():
+    """
+    Main function to perform landmark detection and save results to MongoDB.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--overwrite", action="store_true", help="Enable overwrite mode"
@@ -107,16 +148,12 @@ def main():
         variations_dict = defaultdict(lambda: defaultdict(list))
 
         for city in landmarks["destinations"]:
-
             candidates = landmarks["destinations"].get(city, {}).get("landmarks", [])
 
             # Generate variations for each place and populate the dictionary
             for place in candidates:
-
                 variations = generate_variations(place)
-
                 for variation in variations:
-
                     variations_dict[city][variation] = place
 
         all_landmarks = flatten_dict(variations_dict)

@@ -11,6 +11,7 @@ import yaml
 from mongodb_lib import *
 from openai_handlers import query_gpt_with_history
 
+# Load MongoDB configuration from YAML file
 config_infra = yaml.load(open("infra-config-pipeline.yaml"), Loader=yaml.FullLoader)
 db, fs, client = connect_to_mongodb(config_infra)
 
@@ -19,7 +20,10 @@ gc.collect()
 
 
 def main():
-
+    """
+    Main function to map categories between internal and external taxonomies using GPT-4 OpenAI model
+    and save results to MongoDB.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--overwrite", action="store_true", help="Enable overwrite mode"
