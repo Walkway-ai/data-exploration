@@ -111,6 +111,7 @@ def main():
         df["pdt_product_detail_PRODUCTDESCRIPTION_SUMMARIZED"] = descriptions_summarized
 
         # Save the processed DataFrame to MongoDB.
+
         remove_object(fs=fs, object_name=object_name)
         save_object(fs=fs, object=df, object_name=object_name)
         print("Saved final results")

@@ -11,6 +11,7 @@ import pandas as pd
 import torch
 import yaml
 from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
 from transformers import AutoModel
 
 from mongodb_lib import *

@@ -185,6 +185,7 @@ def main():
             one_hot_encoding.append(one_hot_encoding_now)
 
         one_hot_encoding = np.array(one_hot_encoding)
+
         remove_object(fs=fs, object_name=object_name_one_hot_encoding)
         save_object(
             fs=fs, object=one_hot_encoding, object_name=object_name_one_hot_encoding

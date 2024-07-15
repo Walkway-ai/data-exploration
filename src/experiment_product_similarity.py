@@ -60,7 +60,7 @@ def preprocess_chunk_openai(df_product, chunk, fields_openai, text_field, title_
     return product_features, candidates_str
 
 
-def append_to_google_sheets(credentials_file, results_out, file_name):
+def append_to_google_sheets(credentials_file, results_out, file_name, sheet_name):
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive",
@@ -69,7 +69,7 @@ def append_to_google_sheets(credentials_file, results_out, file_name):
     client = gspread.authorize(creds)
 
     # Open the Google Sheet
-    sheet = client.open(file_name).worksheet("OpenAI2")
+    sheet = client.open(file_name).worksheet(sheet_name)
 
     # Append data
 
@@ -219,9 +219,12 @@ def main():
             ]
         ]
 
-        # append_to_google_sheets(
-        #     args.credentials, columns_results, "Scores - Product Similarity 24"
-        # )
+        append_to_google_sheets(
+            args.credentials,
+            columns_results,
+            "Scores - Product Similarity 24",
+            "OpenAI",
+        )
 
         for product_id in product_ids:
 
@@ -679,7 +682,10 @@ def main():
             ]
 
             append_to_google_sheets(
-                args.credentials, results_out, "WalkwayAI - Product Similarity"
+                args.credentials,
+                results_out,
+                "WalkwayAI - Product Similarity",
+                "Sheet1",
             )
 
             file_path = f"experiment_results/{args.product_id}.xlsx"
@@ -795,9 +801,12 @@ def main():
                 ]
             ]
 
-            # append_to_google_sheets(
-            #     args.credentials, results_scores, "Scores - Product Similarity 24"
-            # )
+            append_to_google_sheets(
+                args.credentials,
+                results_scores,
+                "Scores - Product Similarity 24",
+                "OpenAI",
+            )
 
 
 if __name__ == "__main__":
